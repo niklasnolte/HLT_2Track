@@ -127,3 +127,12 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# project specific
+.idea
+.DS_Store
+.vscode
+
+# feynman
+*dat
+results
