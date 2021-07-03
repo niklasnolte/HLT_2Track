@@ -9,4 +9,8 @@ setup(
     author="",
     author_email="",
     description="",
+    install_requires=[
+        # Github Private Repository
+        'InfinityNorm @ git+ssh://git@github.com/niklasnolte/InfinityNorm.git'
+    ]
 )
