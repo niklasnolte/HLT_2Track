@@ -4,8 +4,8 @@ import torch
 from torch import nn
 
 from hlt2trk.data.meta_info import features, sigma_net
-from hlt2trk.models.utils import infnorm
-from hlt2trk.models.SigmaNet import SigmaNet
+from InfinityNorm import infnorm
+from InfinityNorm import SigmaNet
 
 nfeatures = len(features)
 
