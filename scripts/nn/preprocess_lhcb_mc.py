@@ -3,13 +3,21 @@ import uproot3 as u
 import numpy as np
 from hlt2trk.data import meta_info as meta
 from os.path import join
+from sys import argv
 
+try:
+    prefix = argv[1]
+except IndexError:
+    prefix = "/home/nnolte/ntuples"
 
-prefix = "~/ntuples/"
+print(
+    f"preprocessing data in {prefix}.\nYou can "
+    "change the path via sys.argv[1] if the data lies somewhere else"
+)
 
 
 def from_root(path: str, columns="*") -> pd.DataFrame:
-    return u.open(prefix + path)["DecayTreeTuple#1/N2Trk"].pandas.df(columns)
+    return u.open(join(prefix, path))["DecayTreeTuple#1/N2Trk"].pandas.df(columns)
 
 
 columns = [
