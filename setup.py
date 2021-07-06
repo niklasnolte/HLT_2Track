@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(
-    name="hlt2_track",
+    name="hlt_2track",
     version="0.1.0",
     packages=["hlt2trk"],
     url="",

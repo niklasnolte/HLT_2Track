@@ -17,6 +17,7 @@ print(
 x_train, y_train, x_val, y_val = meta.get_data_for_training()
 
 print(f"mean label: {y_train.mean()}")
+print(f"size of data: {len(x_train)}")
 
 x_train: torch.Tensor = torch.from_numpy(x_train).float()
 y_train: torch.Tensor = torch.from_numpy(y_train).float()[:, None]
