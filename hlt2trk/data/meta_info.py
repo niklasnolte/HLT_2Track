@@ -27,11 +27,11 @@ else:
     path_suffix = "regular"
 
 if two_dim:
-    features = ["fdchi2", "sumpt"]
+    features = ["minipchi2", "sumpt"]
 else:
     features = ["fdchi2", "sumpt", "vchi2", "minipchi2"]
 
-path_suffix += f"_{len(features)}d"
+path_suffix += "_" + "_".join(features)
 
 if lhcb_sim:
     path_suffix += "_lhcb"
