@@ -50,9 +50,25 @@ def presel(df: pd.DataFrame) -> pd.DataFrame:
     sel = df.sv_PT > 2000
     sel &= df.trk1_PT > 500
     sel &= df.trk2_PT > 500
-    df = df[sel].copy()
 
-    return df
+    selt = df[sel].copy()
+    # calculate efficiency
+    n_events_before = {
+        et: df[df.eventtype == et].EventInSequence.nunique()
+        for et in df.eventtype.unique()
+    }
+    n_events_after = {
+        et: selt[selt.eventtype == et].EventInSequence.nunique()
+        for et in selt.eventtype.unique()
+    }
+
+    for et in n_events_after:
+        print(
+            f"preselection efficiency for {tupleTrees[et]}: "
+            f"{100*n_events_after[et]/n_events_before[et]:.2f}%"
+        )
+
+    return selt
 
 
 def preprocess(df: pd.DataFrame) -> pd.DataFrame:
