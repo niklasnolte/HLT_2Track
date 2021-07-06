@@ -27,7 +27,7 @@ else:
     path_suffix = "regular"
 
 if two_dim:
-    features = ["vchi2", "minipchi2"]
+    features = ["fdchi2", "sumpt"]
 else:
     features = ["fdchi2", "sumpt", "vchi2", "minipchi2"]
 
@@ -67,8 +67,6 @@ def get_data_for_training(normalize=False):
     if lhcb_sim:
         bkg = bkg[bkg.eventtype == 0]  # only take minbias as bkg for now
         sig = sig[sig.eventtype != 0]  # why is there signal in minbias?
-        # so many of eventtype 1, lets cut it a bit
-        sig.drop(sig[sig.eventtype == 1].sample(frac=4 / 5).index, inplace=True)
 
     to_np = lambda x: x[features].values
 

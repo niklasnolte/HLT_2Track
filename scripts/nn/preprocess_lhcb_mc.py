@@ -3,13 +3,21 @@ import uproot3 as u
 import numpy as np
 from hlt2trk.data import meta_info as meta
 from os.path import join
+from sys import argv
 
+try:
+    prefix = argv[1]
+except IndexError:
+    prefix = "/home/nnolte/ntuples"
 
-prefix = "~/hlt_twotrack/data/"
+print(
+    f"preprocessing data in {prefix}.\nYou can "
+    "change the path via sys.argv[1] if the data lies somewhere else"
+)
 
 
 def from_root(path: str, columns="*") -> pd.DataFrame:
-    return u.open(prefix + path)["DecayTreeTuple#1/N2Trk"].pandas.df(columns)
+    return u.open(join(prefix, path))["DecayTreeTuple#1/N2Trk"].pandas.df(columns)
 
 
 columns = [
@@ -32,22 +40,52 @@ columns = [
 ]
 
 tupleTrees = [
+    # "upgrade_magdown_sim10_up08_30000000_digi_MVATuple.root",
     "2018MinBias_MVATuple.root",
-    "Bs2JPsiPhiMD_MVATuple.root",
-    "BsPhiPhiMD_MVATuple.root",
-    "Ds2KKPiMD_MVATuple.root",
-    "Dst2D0piMD_MVATuple.root",
-    "KstEEMD_MVATuple.root",
-    "KstMuMuMD_MVATuple.root",
+    "upgrade_magdown_sim10_up08_11102202_digi_MVATuple.root",
+    "upgrade_magdown_sim10_up08_11124001_digi_MVATuple.root",
+    "upgrade_magdown_sim10_up08_21103100_digi_MVATuple.root",
+    "upgrade_magdown_sim10_up08_11874004_digi_MVATuple.root",
+    "upgrade_magdown_sim10_up08_27163003_digi_MVATuple.root",
+    "upgrade_magdown_sim10_up08_13104012_digi_MVATuple.root",
 ]
+
 
 dfs = [from_root(x, columns) for x in tupleTrees]
 
 
-def preprocess(df: pd.DataFrame) -> None:
+def presel(df: pd.DataFrame) -> pd.DataFrame:
+    sel = df.sv_PT > 2000
+    sel &= df.trk1_PT > 500
+    sel &= df.trk2_PT > 500
+
+    selt = df[sel].copy()
+    # calculate efficiency
+    n_events_before = {
+        et: df[df.eventtype == et].EventInSequence.nunique()
+        for et in df.eventtype.unique()
+    }
+    n_events_after = {
+        et: selt[selt.eventtype == et].EventInSequence.nunique()
+        for et in selt.eventtype.unique()
+    }
+
+    for et in n_events_after:
+        print(
+            f"preselection efficiency for {tupleTrees[et]}: "
+            f"{100*n_events_after[et]/n_events_before[et]:.2f}%"
+        )
+
+    return selt
+
+
+def preprocess(df: pd.DataFrame) -> pd.DataFrame:
     df["sumpt"] = df[["trk1_PT", "trk2_PT"]].sum(axis=1)
     df["minipchi2"] = df[["trk1_IPCHI2_OWNPV", "trk2_IPCHI2_OWNPV"]].min(axis=1)
-    df["label"] = (df[["trk1_signal_type", "trk2_signal_type"]].min(axis=1) > 0).astype(int)
+    df["label"] = (df[["trk1_signal_type", "trk2_signal_type"]].min(axis=1) > 0).astype(
+        int
+    )
+    df = presel(df)
     df.rename(
         columns={"sv_FDCHI2_OWNPV": "fdchi2", "sv_ENDVERTEX_CHI2": "vchi2"},
         inplace=True,
@@ -75,13 +113,13 @@ def preprocess(df: pd.DataFrame) -> None:
     df[to_log] = df[to_log].apply(np.log)
     df[to_scale] = df[to_scale].clip(lower_bound, 1e5)
     df[to_scale] = df[to_scale] / 1000  # to GeV
+    return df
 
 
 for i, df in enumerate(dfs):
     df["eventtype"] = i
 
-
 df = pd.concat(dfs)
-preprocess(df)
+df = preprocess(df)
 df.to_pickle(join(meta.locations.project_root, "data/MC.pkl"))
 df.to_hdf(join(meta.locations.project_root, "data/MC.h5"), "MC", mode="w")
