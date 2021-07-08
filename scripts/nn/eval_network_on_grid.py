@@ -16,7 +16,6 @@ nfeats = len(meta.features)
 torch.manual_seed(2)
 
 model = meta.load_model()
-outloc = meta.locations.grid_Y
 
 to_np = lambda x: x[meta.features].values
 X: torch.Tensor = torch.from_numpy(np.concatenate([to_np(sig), to_np(bkg)])).float()
@@ -38,4 +37,4 @@ with torch.no_grad():
 
 # persist the numbers
 torch.save(X, meta.locations.grid_X)
-torch.save(Y, outloc)
+torch.save(Y, meta.locations.grid_Y)

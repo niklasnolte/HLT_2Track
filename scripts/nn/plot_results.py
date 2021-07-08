@@ -31,7 +31,7 @@ def plot_feat_vs_output(x: np.ndarray, y: np.ndarray, params: t.Optional[dict] =
         plt.xlabel(meta.features[i])
         plt.ylabel("output")
         plt.title("sigma" if meta.sigma_net else "regular")
-        plt.savefig(join(meta.locations.project_root, f"plots/{meta.features[i]}_{meta.path_suffix}.pdf"))
+        plt.savefig(join(meta.locations.project_root, f"plots/{meta.features[i]}_vs_output_{meta.path_suffix}.pdf"))
         plt.show()
 
 
@@ -51,7 +51,7 @@ def plot_2d_vs_output(
     ax.set_zlabel("output")
     ax.set_title("sigma" if meta.sigma_net else "regular")
     plt.savefig(join(meta.locations.project_root,
-                      f"plots/{meta.features[0]}_{meta.features[1]}_vs_output_{meta.path_suffix}.pdf"))
+                      f"plots/{meta.features[0]}_and_{meta.features[1]}_vs_output_{meta.path_suffix}.pdf"))
     plt.show()
 
 def plot_2d_vs_output_heatmap(
@@ -64,13 +64,13 @@ def plot_2d_vs_output_heatmap(
     x1 = x[:, 1]
     fig = plt.figure()
     ax: plt.Axes = fig.add_subplot()
-    sc = ax.scatter(x0, x1, c=y, cmap=plt.cm.RdBu, **(params or {}))
+    sc = ax.scatter(x0, x1, c=y, cmap=plt.cm.RdBu, s=150, marker="s", **(params or {}))
     ax.set_xlabel(meta.features[0])
     ax.set_ylabel(meta.features[1])
     ax.set_title("sigma" if meta.sigma_net else "regular")
     plt.colorbar(sc)
     plt.savefig(join(meta.locations.project_root,
-                      f"plots/{meta.features[0]}_{meta.features[1]}_vs_output_{meta.path_suffix}_heatmap.pdf"))
+                      f"plots/{meta.features[0]}_and_{meta.features[1]}_vs_output_{meta.path_suffix}_heatmap.pdf"))
     plt.show()
 
 
