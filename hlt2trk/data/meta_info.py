@@ -1,8 +1,9 @@
-from os.path import dirname
+from os.path import dirname, join, abspath
 from sys import argv
 
 import numpy as np
 import pandas as pd
+from .utils import to_np
 
 __all__ = [
     'lhcb_sim',
@@ -36,18 +37,27 @@ path_suffix += "_" + "_".join(features)
 if lhcb_sim:
     path_suffix += "_lhcb"
 
+model_names = [
+    "LinearDiscriminantAnalysis",
+    "QuadraticDiscriminantAnalysis",
+    "GaussianNB"]
+
 
 class locations:
-    project_root = dirname(__file__) + "/../.."
+    project_root = abspath(dirname(__file__) + "/../..")
     grid_X = f"{project_root}/savepoints/gridX_{path_suffix}.pkl"
     grid_Y = f"{project_root}/savepoints/gridY_{path_suffix}.pkl"
     sig_pkl = f"{project_root}/data/beauty.pkl"
     bkg_pkl = f"{project_root}/data/bkgd.pkl"
     sim_pkl = f"{project_root}/data/MC.pkl"
-    model = f"{project_root}/models/{path_suffix}.torch"
+    model_dir = f"{project_root}/models/"
+    model = join(model_dir, f"{path_suffix}.torch")
+    # TODO fix this to import from config
     # dont like this hack
-    sigma_model = f"{project_root}/models/{path_suffix.replace('regular', 'sigma')}.torch"
-    regular_model = f"{project_root}/models/{path_suffix.replace('sigma', 'regular')}.torch"
+    sigma_model = join(
+        model, f"{path_suffix.replace('regular', 'sigma')}.torch")
+    regular_model = join(
+        model, f"{path_suffix.replace('sigma', 'regular')}.torch")
 
 
 def get_data():
@@ -68,9 +78,8 @@ def get_data_for_training(normalize=False):
         bkg = bkg[bkg.eventtype == 0]  # only take minbias as bkg for now
         sig = sig[sig.eventtype != 0]  # why is there signal in minbias?
 
-    to_np = lambda x: x[features].values
-
-    X: np.ndarray = np.concatenate([to_np(sig), to_np(bkg)])
+    X: np.ndarray = np.concatenate([to_np(sig, features),
+                                    to_np(bkg, features)])
 
     if normalize:
         X = (X - X.min(axis=0)) / (X.max(axis=0) - X.min(axis=0))
@@ -105,5 +114,7 @@ def load_model(model=None):
 
         m.load_state_dict(torch.load(locations.regular_model))
     else:
-        raise ValueError("model should either be 'regular' or 'sigma' or None to get the default model")
+        raise ValueError(
+            "model should either be 'regular' or 'sigma' or None\
+                to get the default model")
     return m
