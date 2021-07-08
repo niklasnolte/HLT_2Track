@@ -9,9 +9,11 @@ from sklearn.metrics import roc_auc_score, balanced_accuracy_score
 from matplotlib import pyplot as plt
 plt.style.use("seaborn")
 
-
+# TODO change if else statements to network as imported from config.
 print(
-    f"training {'sigma' if meta.sigma_net else 'regular'} network in {len(meta.features)} dimensions {'on LHCb sim' if meta.lhcb_sim else 'on standalone sim'}"
+    f"training {'sigma' if meta.sigma_net else 'regular'} network in\
+    {len(meta.features)} dimensions \
+    {'on LHCb sim' if meta.lhcb_sim else 'on standalone sim'}"
 )
 
 x_train, y_train, x_val, y_val = meta.get_data_for_training()
@@ -28,7 +30,8 @@ data = TensorDataset(x_train, y_train)
 loader = DataLoader(data, batch_size=512, shuffle=False)
 
 
-def train(model, optimizer, scheduler, filename=None, loss_fun=F.binary_cross_entropy):
+def train(model, optimizer, scheduler, filename=None,
+          loss_fun=F.binary_cross_entropy):
     device = torch.device("cpu" if not torch.cuda.is_available() else "cuda:0")
     print(f"training on {device}")
 
@@ -78,14 +81,15 @@ def train(model, optimizer, scheduler, filename=None, loss_fun=F.binary_cross_en
                 range=range_,
             )
             auc = roc_auc_score(val, pred)
-            acc = max(
-                [balanced_accuracy_score(val, pred > x) for x in np.linspace(0, 1, 20)]
-            )
+            acc = max([balanced_accuracy_score(val, pred > x)
+                       for x in np.linspace(0, 1, 20)])
             print(f"epoch {i}, auc: {auc:.4f}, acc: {acc:.4f}", end="\r")
             ax.text(
                 0,
                 0.965,
-                f"Epoch {i + 1}/{EPOCHS}, loss {loss.item():.3f}, auc {auc:.3f}",
+                f"Epoch {i + 1}/{EPOCHS},\
+                loss {loss.item():.3f},\
+                auc {auc:.3f}",
                 transform=ax.transAxes,
                 fontsize=20,
             )
@@ -114,9 +118,12 @@ LR = 1e-2
 torch.manual_seed(2)
 from hlt2trk.models import default_model as model
 
-print(f"model has {sum([x.view(-1).shape[0] for x in model.parameters()])} parameters")
+nparams = sum([x.view(-1).shape[0] for x in model.parameters()])
+print(
+    f"model has {nparams} parameters")
 optimizer = torch.optim.Adam(model.parameters(), lr=LR)
-scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer=optimizer, gamma=0.99)
+scheduler = torch.optim.lr_scheduler.ExponentialLR(
+    optimizer=optimizer, gamma=0.99)
 
 train(
     model,
@@ -131,5 +138,6 @@ torch.save(model.state_dict(), meta.locations.model)
 with torch.no_grad():
     preds = model.to(torch.device("cpu"))(x_val)
 auc = roc_auc_score(y_val, preds)
-acc = max(balanced_accuracy_score(y_val, preds > i) for i in np.linspace(0, 1, 100))
+acc = max(balanced_accuracy_score(y_val, preds > i)
+          for i in np.linspace(0, 1, 100))
 print(f"\nroc: {auc:.6f}, acc: {acc:.6f}")

@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import pickle
 from hlt2trk.data.meta_info import get_data_for_training
+from hlt2trk.data import meta_info as meta
 from sklearn.decomposition import PCA
 from sklearn.metrics import (
     balanced_accuracy_score,
@@ -38,7 +39,7 @@ def get_metrics(x_train, x_val, method):
     return acc, auc
 
 
-def main(save_path: str = None, latex: bool = False):
+def main(save_model: bool = True, save_path: str = None, latex: bool = False):
     """Generate LDA, QDA, and GNB models and train them on 3 subsets of the
     features in the data (experiments).
     Exp1: uses "fdchi2", "sumpt"
@@ -47,17 +48,17 @@ def main(save_path: str = None, latex: bool = False):
     The models can be saved and a latex table could be printed.
 
     Args:
+        save_model (bool, optional): Whether to save trained models.
+        If no save_path is specified saves to meta.locations.model_dir.
+        Defaults to True.
         save_path (str, optional): Directory where to save models. If nothing
         is passed no model is saved. Defaults to None.
         latex (bool, optional): Whether to print a latex table to console.
          Defaults to False.
     """
     model_results = DefaultDict(list)
-    for model_name in [
-        "LinearDiscriminantAnalysis",
-        "QuadraticDiscriminantAnalysis",
-        "GaussianNB",
-    ]:
+    for model_name in meta.model_names:
+        # ["LinearDiscriminantAnalysis","QuadraticDiscriminantAnalysis","GaussianNB",]
         model = eval(model_name + "()")
         print(model_name)
         for i, (train, val) in enumerate(
@@ -71,10 +72,13 @@ def main(save_path: str = None, latex: bool = False):
             print(f"{acc:.3f}")
             print(f"{auc:.3f}")
             model_results[model_name].append([acc, auc])
-            if save_path is not None:
+            if save_model:
+                if save_path is None:
+                    save_path = meta.locations.model_dir
                 file_name = join(save_path, model_name + f"_{i}.pkl")
                 with open(file_name, "wb") as f:
                     pickle.dump(model, f)
+                    print(f"saved to {file_name}")
 
     print("\nDone training and evaluating!\n")
     df = pd.DataFrame(np.stack(list(model_results.values())).reshape(3, -1))

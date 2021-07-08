@@ -8,7 +8,7 @@ from sys import argv
 try:
     prefix = argv[1]
 except IndexError:
-    prefix = "/home/nnolte/ntuples"
+    prefix = "/home/kitouni/projects/HLT_2Track/data/ntuples"
 
 print(
     f"preprocessing data in {prefix}.\nYou can "
@@ -17,7 +17,8 @@ print(
 
 
 def from_root(path: str, columns="*") -> pd.DataFrame:
-    return u.open(join(prefix, path))["DecayTreeTuple#1/N2Trk"].pandas.df(columns)
+    ttree = u.open(join(prefix, path))
+    return ttree["DecayTreeTuple#1/N2Trk"].pandas.df(columns)
 
 
 columns = [
@@ -81,10 +82,10 @@ def presel(df: pd.DataFrame) -> pd.DataFrame:
 
 def preprocess(df: pd.DataFrame) -> pd.DataFrame:
     df["sumpt"] = df[["trk1_PT", "trk2_PT"]].sum(axis=1)
-    df["minipchi2"] = df[["trk1_IPCHI2_OWNPV", "trk2_IPCHI2_OWNPV"]].min(axis=1)
-    df["label"] = (df[["trk1_signal_type", "trk2_signal_type"]].min(axis=1) > 0).astype(
-        int
-    )
+    df["minipchi2"] = df[["trk1_IPCHI2_OWNPV",
+                          "trk2_IPCHI2_OWNPV"]].min(axis=1)
+    df["label"] = (df[["trk1_signal_type",
+                       "trk2_signal_type"]].min(axis=1) > 0).astype(int)
     df = presel(df)
     df.rename(
         columns={"sv_FDCHI2_OWNPV": "fdchi2", "sv_ENDVERTEX_CHI2": "vchi2"},
@@ -121,5 +122,7 @@ for i, df in enumerate(dfs):
 
 df = pd.concat(dfs)
 df = preprocess(df)
-df.to_pickle(join(meta.locations.project_root, "data/MC.pkl"))
-df.to_hdf(join(meta.locations.project_root, "data/MC.h5"), "MC", mode="w")
+save_file = join(meta.locations.project_root, "data/MC.pkl")
+df.to_pickle(save_file)
+print('data saved to:')
+print(save_file)

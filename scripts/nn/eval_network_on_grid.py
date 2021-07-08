@@ -3,7 +3,9 @@ from sys import argv
 import numpy as np
 from torch.utils.data import DataLoader, TensorDataset
 from itertools import product
+from hlt2trk.data.utils import to_np
 
+# TODO import from config
 two_dim: bool = "2d" in argv
 sigmanet: bool = "sigma" in argv
 
@@ -17,8 +19,8 @@ torch.manual_seed(2)
 
 model = meta.load_model()
 
-to_np = lambda x: x[meta.features].values
-X: torch.Tensor = torch.from_numpy(np.concatenate([to_np(sig), to_np(bkg)])).float()
+X: torch.Tensor = torch.from_numpy(np.concatenate(
+    [to_np(sig, meta.features), to_np(bkg, meta.features)])).float()
 
 limits = [np.quantile(X[:, i], (0.02, 0.98)) for i in range(nfeats)]
 linspaces = [np.linspace(*xi, 100 if two_dim else 20) for xi in limits]
@@ -32,7 +34,7 @@ idx = 0
 with torch.no_grad():
     for (x,) in loader:
         y: torch.Tensor = model(x)
-        Y[idx : idx + len(y)] = y
+        Y[idx: idx + len(y)] = y
         idx += len(y)
 
 # persist the numbers

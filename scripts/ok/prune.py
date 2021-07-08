@@ -15,8 +15,11 @@ if __name__ == '__main__':
     for param in obj.items():
         print(param)
 
-    params = [(m, next(m.named_parameters())[0]) for m in list(model.modules())[1::2]]
-    prune.global_unstructured(params, pruning_method=prune.L1Unstructured, amount=.3)
+    params = [
+        (m, next(m.named_parameters())[0])
+        for m in list(model.modules())[1:: 2]]
+    prune.global_unstructured(params,
+                              pruning_method=prune.L1Unstructured, amount=.3)
 
     for param in model.named_parameters():
         print(param)

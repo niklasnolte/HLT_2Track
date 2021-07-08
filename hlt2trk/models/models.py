@@ -17,6 +17,7 @@ def build_module(
     nlayers: int = 3,
     norm: bool = True,
     activation: Callable = nn.LeakyReLU(),
+    out_activation: Callable = None,
 ) -> nn.Module:
     """
 
@@ -25,12 +26,17 @@ def build_module(
     in_features : int
     nclasses : int
     nunits : [int, Iterable]
-        If int is provided, use nlayers to specify depth. Otherwise, if Iterable, the depth is
-        inferred.
+        If int is provided, use nlayers to specify depth. Otherwise,
+        if Iterable, the depth is inferred.
     nlayers : int
-        Used to specify depth when nunits is int. Is ignored if nunits is Iterable.
+        Used to specify depth when nunits is int. Ignored if nunits is
+        Iterable.
     norm : bool
+        Whether or not to use Inf norm. If False a simple nn.Linear is used.
     activation : Callable
+        Activation used between hidden layers.
+    out_activation : Callable
+        Activation used in the last layer.
     Returns
     -------
     nn.Module
@@ -48,6 +54,8 @@ def build_module(
         layers.append(activation)
         in_features = out_features
     layers.append(norm_func(nn.Linear(in_features, nclasses)))
+    if out_activation is not None:
+        layers.append(out_activation)
     return nn.Sequential(*layers)
 
 
