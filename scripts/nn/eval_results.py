@@ -12,7 +12,8 @@ feynman = "feynman" in argv
 
 if feynman:
     with open(join(meta.locations.project_root,
-                   'scripts/results/solution_MC_preprocessedExp3_train.txt'), 'r') as f:
+                   'scripts/results/solution_MC_preprocessedExp3_train.txt'),
+              'r') as f:
         x = f.readlines()[-1]
     x = " ".join(x.split(" ")[5:])
     x = re.sub('x(\\d)', 'x[:,\\g<1>]', x)
@@ -61,7 +62,8 @@ if feynman:
     print("roc feynman {:.6f}".format(roc_auc_score(Y_truth, Y_feynman)))
 
 print("acc regular {:.6f}".format(
-    max([balanced_accuracy_score(Y_truth, Y > i) for i in np.linspace(0, 1, 50)])))
+    max([balanced_accuracy_score(Y_truth, Y > i)
+         for i in np.linspace(0, 1, 50)])))
 # print("acc sigma   {:.6f}".format(max([balanced_accuracy_score(
 #     Y_truth, Y_sigma > i) for i in np.linspace(0, 1, 50)])))
 if feynman:
