@@ -63,9 +63,9 @@ class locations:
 
 class experiments:
     features = [
-        ["fdchi2", "sumpt"],
-        ["minipchi2", "vchi2"],
-        ["fdchi2", "sumpt", "minipchi2", "vchi2"]]
+        np.array(["fdchi2", "sumpt"]),
+        np.array(["minipchi2", "vchi2"]),
+        np.array(["fdchi2", "sumpt", "minipchi2", "vchi2"])]
 
 
 def get_data():
