@@ -4,7 +4,7 @@ import numpy as np
 from sklearn.discriminant_analysis import (LinearDiscriminantAnalysis,
                                            QuadraticDiscriminantAnalysis)
 from sklearn.naive_bayes import GaussianNB
-from hlt2trk.data import meta_info as meta
+from hlt2trk.utils import meta_info as meta
 from matplotlib import pyplot as plt
 import typing as t
 # plt.style.use('~/.dark_paper.mplstyle')

@@ -5,7 +5,7 @@ import lightgbm as lgb
 
 plt.style.use("seaborn")
 
-import hlt2trk.data.meta_info as meta
+import hlt2trk.utils.meta_info as meta
 
 X_train, Y_train, X_test, Y_test = meta.get_data_for_training()
 

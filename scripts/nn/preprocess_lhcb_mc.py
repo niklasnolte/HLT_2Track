@@ -1,7 +1,7 @@
 import pandas as pd
 import uproot3 as u
 import numpy as np
-from hlt2trk.data import meta_info as meta
+from hlt2trk.utils import meta_info as meta
 from os.path import join
 from sys import argv
 

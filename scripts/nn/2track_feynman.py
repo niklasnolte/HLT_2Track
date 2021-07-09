@@ -1,7 +1,7 @@
 import torch
 import numpy as np
 
-import hlt2trk.data.meta_info as meta
+import hlt2trk.utils.meta_info as meta
 
 
 X = torch.load(meta.locations.grid_X)

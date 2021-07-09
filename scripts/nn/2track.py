@@ -4,7 +4,7 @@ import numpy as np
 import torch
 from torch.nn import functional as F
 from torch.utils.data import TensorDataset, DataLoader
-import hlt2trk.data.meta_info as meta
+import hlt2trk.utils.meta_info as meta
 from sklearn.metrics import roc_auc_score, balanced_accuracy_score
 from matplotlib import pyplot as plt
 plt.style.use("seaborn")

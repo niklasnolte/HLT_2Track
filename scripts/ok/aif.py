@@ -1,5 +1,5 @@
 import aifeynman
-from hlt2trk.data.meta_info import get_data_for_training, locations
+from hlt2trk.utils.meta_info import get_data_for_training, locations
 from tqdm import tqdm
 
 X_train, y_train, X_val, y_val = get_data_for_training(normalize=True)

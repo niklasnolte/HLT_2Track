@@ -3,13 +3,13 @@ from sys import argv
 import numpy as np
 from torch.utils.data import DataLoader, TensorDataset
 from itertools import product
-from hlt2trk.data.utils import to_np
+from hlt2trk.utils.utils import to_np
 
 # TODO import from config
 two_dim: bool = "2d" in argv
 sigmanet: bool = "sigma" in argv
 
-import hlt2trk.data.meta_info as meta
+import hlt2trk.utils.meta_info as meta
 
 sig, bkg = meta.get_data()
 

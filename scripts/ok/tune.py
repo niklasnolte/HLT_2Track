@@ -10,7 +10,7 @@ from optuna.trial import TrialState
 from sklearn.metrics import roc_auc_score
 from torch.utils.data import DataLoader, TensorDataset
 
-from hlt2trk.data.meta_info import get_data_for_training
+from hlt2trk.utils.meta_info import get_data_for_training
 from InfinityNorm import infnorm
 
 DEVICE = torch.device("cuda:0")

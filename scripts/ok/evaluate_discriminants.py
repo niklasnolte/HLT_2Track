@@ -2,8 +2,8 @@ from typing import DefaultDict
 import numpy as np
 import pandas as pd
 import pickle
-from hlt2trk.data.meta_info import get_data_for_training
-from hlt2trk.data import meta_info as meta
+from hlt2trk.utils.meta_info import get_data_for_training
+from hlt2trk.utils import meta_info as meta
 from sklearn.decomposition import PCA
 from sklearn.metrics import (
     balanced_accuracy_score,
