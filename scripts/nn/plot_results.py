@@ -8,7 +8,7 @@ from matplotlib import pyplot as plt
 
 plt.style.use("seaborn")
 
-import hlt2trk.data.meta_info as meta
+import hlt2trk.utils.meta_info as meta
 
 X = torch.load(meta.locations.grid_X).numpy()
 Y = torch.load(meta.locations.grid_Y).squeeze().numpy()

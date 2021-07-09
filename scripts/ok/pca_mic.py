@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from hlt2trk.data.meta_info import get_data_for_training, features
+from hlt2trk.utils.meta_info import get_data_for_training, features
 from sklearn.decomposition import PCA
 from sklearn.feature_selection import mutual_info_classif
 from sys import argv

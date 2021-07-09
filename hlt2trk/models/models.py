@@ -3,7 +3,7 @@ from typing import Union, Iterable, Callable
 import torch
 from torch import nn
 
-from hlt2trk.data.meta_info import features, sigma_net
+from hlt2trk.utils.meta_info import features, sigma_net
 from InfinityNorm import infnorm
 from InfinityNorm import SigmaNet
 

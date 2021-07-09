@@ -5,7 +5,7 @@ from sklearn.metrics import roc_auc_score, balanced_accuracy_score
 import re
 from os.path import join
 
-import hlt2trk.data.meta_info as meta
+import hlt2trk.utils.meta_info as meta
 from sys import argv
 
 feynman = "feynman" in argv

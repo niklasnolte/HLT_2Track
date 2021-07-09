@@ -1,6 +1,6 @@
 import numpy as np
 from matplotlib import pyplot as plt
-import hlt2trk.data.meta_info as meta
+import hlt2trk.utils.meta_info as meta
 import os
 
 sig, bkg = meta.get_data()
