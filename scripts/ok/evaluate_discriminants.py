@@ -19,13 +19,7 @@ from os.path import join
 import fire
 
 
-x_train, y_train, x_val, y_val = get_data_for_training(normalize=True)
-X = np.concatenate([x_train, x_val], axis=0)
-y = np.concatenate([y_train, y_val], axis=0)
-features_names = ["fdchi2", "sumpt", "minipchi2", "vchi2"]
-
-
-def get_metrics(x_train, x_val, method):
+def get_metrics(x_train, y_train, x_val, y_val, method):
     method.fit(x_train, y_train.reshape(-1))
     preds = method.predict(x_val)
     probs = method.predict_proba(x_val)
@@ -61,14 +55,9 @@ def main(save_model: bool = True, save_path: str = None, latex: bool = False):
         # ["LinearDiscriminantAnalysis","QuadraticDiscriminantAnalysis","GaussianNB",]
         model = eval(model_name + "()")
         print(model_name)
-        for i, (train, val) in enumerate(
-            zip(
-                [x_train[:, -2:], x_train[:, :2], x_train],
-                [x_val[:, -2:], x_val[:, :2], x_val],
-            )
-        ):
-            print(i)
-            acc, auc = get_metrics(train, val, model)
+        for i, features in enumerate(meta.experiments.features):
+            acc, auc = get_metrics(
+                *get_data_for_training(features, normalize=True), model)
             print(f"{acc:.3f}")
             print(f"{auc:.3f}")
             model_results[model_name].append([acc, auc])

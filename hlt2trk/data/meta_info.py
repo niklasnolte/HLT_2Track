@@ -27,6 +27,7 @@ if sigma_net:
 else:
     path_suffix = "regular"
 
+# TODO remove and use experiments instead
 if two_dim:
     features = ["minipchi2", "sumpt"]
 else:
@@ -60,6 +61,13 @@ class locations:
         model, f"{path_suffix.replace('sigma', 'regular')}.torch")
 
 
+class experiments:
+    features = [
+        ["fdchi2", "sumpt"],
+        ["minipchi2", "vchi2"],
+        ["fdchi2", "sumpt", "minipchi2", "vchi2"]]
+
+
 def get_data():
     if not lhcb_sim:
         sig: pd.DataFrame = pd.read_pickle(locations.sig_pkl)
@@ -71,7 +79,7 @@ def get_data():
     return sig, bkg
 
 
-def get_data_for_training(normalize=False):
+def get_data_for_training(features=features, normalize=False):
     sig, bkg = get_data()
     # some preprocessing
     if lhcb_sim:
