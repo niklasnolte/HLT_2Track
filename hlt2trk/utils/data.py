@@ -3,6 +3,7 @@ import pandas as pd
 from .utils import to_np
 from . import config
 from .config import Locations
+from typing import Tuple
 
 __all__ = [
     'lhcb_sim',
@@ -18,19 +19,14 @@ __all__ = [
 
 
 
-def get_data(cfg):
+def get_data(cfg, preprocess_for_training=False):
     mc: pd.DataFrame = pd.read_pickle(config.format_location(Locations.data, cfg))
     bkg = mc[mc.label == 0].reset_index(drop=True)
     sig = mc[mc.label != 0].reset_index(drop=True)
-    return sig, bkg
-
-
-def get_data_for_training(cfg):
-    sig, bkg = get_data(cfg)
-    # some preprocessing
-    if cfg.data_type == "lhcb":
-        bkg = bkg[bkg.eventtype == 0]  # only take minbias as bkg for now
-        sig = sig[sig.eventtype != 0]  # why is there signal in minbias?
+    if preprocess_for_training:
+      if cfg.data_type == "lhcb":
+          bkg = bkg[bkg.eventtype == 0]  # only take minbias as bkg for now
+          sig = sig[sig.eventtype != 0]  # why is there signal in minbias?
 
     X: np.ndarray = np.concatenate([to_np(sig, cfg.features),
                                     to_np(bkg, cfg.features)])
@@ -38,17 +34,22 @@ def get_data_for_training(cfg):
     if cfg.normalize:
         X = (X - X.min(axis=0)) / (X.max(axis=0) - X.min(axis=0))
 
-    Y: np.ndarray = np.concatenate([np.ones(len(sig)), np.zeros(len(bkg))])
+    y: np.ndarray = np.concatenate([np.ones(len(sig)), np.zeros(len(bkg))])
+    print(y.mean())
+    return X, y
+
+
+def get_data_for_training(cfg) -> Tuple[np.ndarray]:
+    X, y = get_data(cfg, preprocess_for_training=True)
 
     np.random.seed(3)
-
     shuffle_idx: np.ndarray = np.random.permutation(np.arange(len(X)))
     X = X[shuffle_idx]
-    Y = Y[shuffle_idx]
+    y = y[shuffle_idx]
 
     split = (len(X) * 3) // 4
     X_train = X[:split]
     X_test = X[split:]
-    Y_train = Y[:split]
-    Y_test = Y[split:]
-    return X_train, Y_train, X_test, Y_test
+    y_train = y[:split]
+    y_test = y[split:]
+    return X_train, y_train, X_test, y_test

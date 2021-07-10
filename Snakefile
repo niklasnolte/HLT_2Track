@@ -26,7 +26,7 @@ rule eval_on_grid:
 rule train:
   input:
     Locations.data,
-    script = "scripts/nn/2track.py"
+    script = "scripts/nn/training.py"
   output:
     Locations.model
   run:

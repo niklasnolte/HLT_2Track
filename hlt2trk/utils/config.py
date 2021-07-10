@@ -1,4 +1,3 @@
-from locale import normalize
 from os.path import dirname, join, abspath
 from functools import lru_cache
 
@@ -29,8 +28,8 @@ from functools import lru_cache
 
 class Configs:
     # list all possible configurations (cartesian product of these)
-    model = ("regular", "sigma")
-    data_type = ("lhcb")#, "standalone")
+    model = ("regular", "sigma", "bdt")
+    data_type = ("lhcb",)#, "standalone")
     features = (["minipchi2", "sumpt"], ["fdchi2", "sumpt"])
     normalize = (False, True)
 
@@ -68,10 +67,10 @@ class Locations:
     data = join(project_root, "data/MC_{data_type}.pkl")
     # grid evaluation
     grid_X = join(
-        project_root, "savepoints/gridX_{model}_{features}_{data_type}_{normalize}.pkl"
+        project_root, "savepoints/gridX_{model}_{features}_{data_type}_{normalize}.npz"
     )
     grid_Y = join(
-        project_root, "savepoints/gridY_{model}_{features}_{data_type}_{normalize}.pkl"
+        project_root, "savepoints/gridY_{model}_{features}_{data_type}_{normalize}.npz"
     )
     # plots
     train_distribution_gif = join(
@@ -105,7 +104,7 @@ def format_location(location, config):
     )
 
 
-def get_cli_args(config):
+def get_cli_args(config) -> str:
     """
     config has a subset of .model, .features, .data_type, .normalize
     """
@@ -122,6 +121,6 @@ def get_cli_args(config):
 
 
 @lru_cache(1)
-def get_config():
+def get_config() -> Configuration:
   from fire import Fire
   return Fire(Configuration)
