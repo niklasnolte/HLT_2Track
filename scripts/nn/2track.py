@@ -4,19 +4,23 @@ import numpy as np
 import torch
 from torch.nn import functional as F
 from torch.utils.data import TensorDataset, DataLoader
-import hlt2trk.utils.meta_info as meta
 from sklearn.metrics import roc_auc_score, balanced_accuracy_score
 from matplotlib import pyplot as plt
+from hlt2trk.utils.data import get_data_for_training
+from hlt2trk.utils.config import get_config, Locations, format_location
 plt.style.use("seaborn")
 
 # TODO change if else statements to network as imported from config.
+
+cfg = get_config()
+
 print(
-    f"training {'sigma' if meta.sigma_net else 'regular'} network in\
-    {len(meta.features)} dimensions \
-    {'on LHCb sim' if meta.lhcb_sim else 'on standalone sim'}"
+    f"training {cfg.model} network in "
+    f"{len(cfg.features)} dimensions "
+    f"on {cfg.data_type} sim "
 )
 
-x_train, y_train, x_val, y_val = meta.get_data_for_training()
+x_train, y_train, x_val, y_val = get_data_for_training(cfg)
 
 print(f"mean label: {y_train.mean()}")
 print(f"size of data: {len(x_train)}")
@@ -30,17 +34,16 @@ data = TensorDataset(x_train, y_train)
 loader = DataLoader(data, batch_size=512, shuffle=False)
 
 
-def train(model, optimizer, scheduler, filename=None,
+def train(model, optimizer, scheduler, filename,
           loss_fun=F.binary_cross_entropy):
     device = torch.device("cpu" if not torch.cuda.is_available() else "cuda:0")
     print(f"training on {device}")
 
     y_val_ = y_val.to(device)
 
-    if filename is not None:
-        tmp_file = os.path.splitext(filename)[0]
-        tmp_file += "{}.png"
-        files = []
+    tmp_file = os.path.splitext(filename)[0]
+    tmp_file += "{}.png"
+    files = []
     fig, ax = plt.subplots(1, 1, dpi=120, figsize=(16, 9))
     ax.set_xlim(-0.1, 1.1)
     plt.tight_layout()
@@ -94,29 +97,29 @@ def train(model, optimizer, scheduler, filename=None,
                 fontsize=20,
             )
         scheduler.step()
-        if filename is not None:
-            f = tmp_file.format(i)
-            files.append(f)
-            plt.savefig(f)
+        f = tmp_file.format(i)
+        files.append(f)
+        plt.savefig(f)
         fig.canvas.draw()
         # plt.pause(0.0001)
         ax.cla()
         fig.canvas.flush_events()
-    if filename is not None:
-        # build gif
-        with imageio.get_writer(filename, mode="I") as writer:
-            for fn in files:
-                image = imageio.imread(fn)
-                writer.append_data(image)
-                os.remove(fn)
+    # build gif
+    with imageio.get_writer(filename, mode="I") as writer:
+        for fn in files:
+            image = imageio.imread(fn)
+            writer.append_data(image)
+            os.remove(fn)
     plt.close()
 
 
-EPOCHS = 50
+EPOCHS = 1
 LR = 1e-2
 
 torch.manual_seed(2)
-from hlt2trk.models import default_model as model
+from hlt2trk.models import get_model
+
+model = get_model(cfg)
 
 nparams = sum([x.view(-1).shape[0] for x in model.parameters()])
 print(
@@ -129,11 +132,11 @@ train(
     model,
     optimizer,
     scheduler,
-    filename=f"plots/train_{meta.path_suffix}.gif",
+    filename=format_location(Locations.train_distribution_gif, cfg),
     loss_fun=F.binary_cross_entropy,
 )
 
-torch.save(model.state_dict(), meta.locations.model)
+torch.save(model.state_dict(), format_location(Locations.model, cfg))
 
 with torch.no_grad():
     preds = model.to(torch.device("cpu"))(x_val)
