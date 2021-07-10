@@ -89,5 +89,5 @@ def get_model(cfg):
 def load_model(cfg):
     location = config.format_location(config.Locations.model, cfg)
     m = get_model(cfg)
-    m.load_state_dict(location)
+    m.load_state_dict(torch.load(location))
     return m

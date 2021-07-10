@@ -1,29 +1,27 @@
 import torch
-from sys import argv
 import numpy as np
 from torch.utils.data import DataLoader, TensorDataset
 from itertools import product
 from hlt2trk.utils.utils import to_np
+from hlt2trk.utils import config
+from hlt2trk.utils.data import get_data
+from hlt2trk.models import load_model
 
-# TODO import from config
-two_dim: bool = "2d" in argv
-sigmanet: bool = "sigma" in argv
+cfg = config.get_config()
 
-import hlt2trk.utils.meta_info as meta
+sig, bkg = get_data(cfg)
 
-sig, bkg = meta.get_data()
-
-nfeats = len(meta.features)
+nfeats = len(cfg.features)
 
 torch.manual_seed(2)
 
-model = meta.load_model()
+model = load_model(cfg)
 
 X: torch.Tensor = torch.from_numpy(np.concatenate(
-    [to_np(sig, meta.features), to_np(bkg, meta.features)])).float()
+    [to_np(sig, cfg.features), to_np(bkg, cfg.features)])).float()
 
 limits = [np.quantile(X[:, i], (0.02, 0.98)) for i in range(nfeats)]
-linspaces = [np.linspace(*xi, 100 if two_dim else 20) for xi in limits]
+linspaces = [np.linspace(*xi, 100 if nfeats == 2 else 20) for xi in limits]
 grid = np.array(tuple(product(*linspaces)))
 X: torch.Tensor = torch.from_numpy(grid).float()
 data = TensorDataset(X)
@@ -38,5 +36,5 @@ with torch.no_grad():
         idx += len(y)
 
 # persist the numbers
-torch.save(X, meta.locations.grid_X)
-torch.save(Y, meta.locations.grid_Y)
+torch.save(X, config.format_location(config.Locations.grid_X, cfg))
+torch.save(Y, config.format_location(config.Locations.grid_Y, cfg))

@@ -68,7 +68,7 @@ class Locations:
     data = join(project_root, "data/MC_{data_type}.pkl")
     # grid evaluation
     grid_X = join(
-        project_root, "savepoints/gridX_{features}_{data_type}_{normalize}.pkl"
+        project_root, "savepoints/gridX_{model}_{features}_{data_type}_{normalize}.pkl"
     )
     grid_Y = join(
         project_root, "savepoints/gridY_{model}_{features}_{data_type}_{normalize}.pkl"
