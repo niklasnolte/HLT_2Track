@@ -3,13 +3,46 @@ from hlt2trk.utils.config import Configs, Locations
 
 rule all:
   input:
+    # feat_vs_output plots
     expand(
-      Locations.grid_Y,
+      Locations.feat_vs_output,
       model=Configs.model,
       data_type=Configs.data_type,
       features=map(config.to_string_features,Configs.features),
       normalize=map(config.to_string_normalize,Configs.normalize),
+    ),
+    # heatmap plots for 2d trainings
+    expand(
+      Locations.heatmap,
+      model=Configs.model,
+      data_type=Configs.data_type,
+      features=map(config.to_string_features,[feats for feats in Configs.features if len(feats) == 2]),
+      normalize=map(config.to_string_normalize,Configs.normalize),
     )
+
+rule plot_heatmap:
+  input:
+    Locations.grid_Y,
+    Locations.grid_X,
+    script = "scripts/nn/plot_heatmap.py"
+  output:
+    Locations.heatmap
+  wildcard_constraints:
+    features="\w+\+\w+"
+  run:
+    args = config.get_cli_args(wildcards)
+    shell(f"python {input.script} {args}")
+
+rule plot_feat_vs_output:
+  input:
+    Locations.grid_Y,
+    Locations.grid_X,
+    script = "scripts/nn/plot_feat_vs_output.py"
+  output: 
+    Locations.feat_vs_output
+  run:
+    args = config.get_cli_args(wildcards)
+    shell(f"python {input.script} {args}")
 
 rule eval_on_grid:
   input:
@@ -20,16 +53,22 @@ rule eval_on_grid:
     Locations.grid_X
   run:
     args = config.get_cli_args(wildcards)
-    print(args)
     shell(f"python {input.script} {args}")
+
+def get_inputs_train(wildcards):
+  if wildcards.model == "bdt":
+    return "scripts/nn/train_bdt_model.py"
+  else:
+    return "scripts/nn/train_torch_model.py"
 
 rule train:
   input:
     Locations.data,
-    script = "scripts/nn/training.py"
+    "hlt2trk/models/models.py",
+    get_inputs_train,
+    script="scripts/nn/training.py"
   output:
     Locations.model
   run:
     args = config.get_cli_args(wildcards)
-    print(args)
     shell(f"python {input.script} {args}")

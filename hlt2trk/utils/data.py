@@ -6,30 +6,28 @@ from .config import Locations
 from typing import Tuple
 
 __all__ = [
-    'lhcb_sim',
-    'two_dim',
-    'sigma_net',
-    'features',
-    'path_suffix',
-    'locations',
-    'get_data',
-    'get_data_for_training',
-    'load_model',
+    "get_dataframe",
+    "get_data",
+    "get_data_for_training",
 ]
 
 
+def get_dataframe(cfg: config.Configuration) -> pd.DataFrame:
+    return pd.read_pickle(config.format_location(Locations.data, cfg))
 
-def get_data(cfg, preprocess_for_training=False):
-    mc: pd.DataFrame = pd.read_pickle(config.format_location(Locations.data, cfg))
+
+def get_data(
+    cfg: config.Configuration, preprocess_for_training: bool = False
+) -> Tuple[np.ndarray, np.ndarray]:
+    mc = get_dataframe(cfg)
     bkg = mc[mc.label == 0].reset_index(drop=True)
     sig = mc[mc.label != 0].reset_index(drop=True)
     if preprocess_for_training:
-      if cfg.data_type == "lhcb":
-          bkg = bkg[bkg.eventtype == 0]  # only take minbias as bkg for now
-          sig = sig[sig.eventtype != 0]  # why is there signal in minbias?
+        if cfg.data_type == "lhcb":
+            bkg = bkg[bkg.eventtype == 0]  # only take minbias as bkg for now
+            sig = sig[sig.eventtype != 0]  # why is there signal in minbias?
 
-    X: np.ndarray = np.concatenate([to_np(sig, cfg.features),
-                                    to_np(bkg, cfg.features)])
+    X: np.ndarray = np.concatenate([to_np(sig, cfg.features), to_np(bkg, cfg.features)])
 
     if cfg.normalize:
         X = (X - X.min(axis=0)) / (X.max(axis=0) - X.min(axis=0))
@@ -39,7 +37,7 @@ def get_data(cfg, preprocess_for_training=False):
     return X, y
 
 
-def get_data_for_training(cfg) -> Tuple[np.ndarray]:
+def get_data_for_training(cfg: config.Configuration) -> Tuple[np.ndarray]:
     X, y = get_data(cfg, preprocess_for_training=True)
 
     np.random.seed(3)
