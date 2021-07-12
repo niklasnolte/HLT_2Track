@@ -27,7 +27,9 @@ def get_data(
             bkg = bkg[bkg.eventtype == 0]  # only take minbias as bkg for now
             sig = sig[sig.eventtype != 0]  # why is there signal in minbias?
 
-    X: np.ndarray = np.concatenate([to_np(sig, cfg.features), to_np(bkg, cfg.features)])
+    X: np.ndarray = np.concatenate(
+        [to_np(sig, cfg.features),
+         to_np(bkg, cfg.features)])
 
     if cfg.normalize:
         X = (X - X.min(axis=0)) / (X.max(axis=0) - X.min(axis=0))
