@@ -121,4 +121,5 @@ def load_model(cfg: config.Configuration) -> Union[nn.Module, lgb.Booster]:
         m = lgb.Booster(model_file=location)
     else:
         with open(location, 'rb') as f:
-            return pickle.load(f)
+            m = pickle.load(f)
+    return m

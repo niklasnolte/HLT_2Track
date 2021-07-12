@@ -8,11 +8,15 @@ plt.style.use("seaborn")
 
 cfg = get_config()
 
-X, Y = np.load(format_location(Locations.gridXY, cfg))
+X, Y = np.load(format_location(Locations.gridXY, cfg)).values()
+breakpoint()
 
-def plot_feat_vs_output(x: np.ndarray, y: np.ndarray, params: t.Optional[dict] = None):
+def plot_feat_vs_output(
+        x: np.ndarray, y: np.ndarray, params: t.Optional[dict] = None):
     params = params or {}
-    _,axes = plt.subplots(int(np.ceil(len(cfg.features)/ 2)), 2, dpi=120, figsize=(16,9))
+    _, axes = plt.subplots(
+        int(np.ceil(len(cfg.features) / 2)),
+        2, dpi=120, figsize=(16, 9))
     for i, (feature, ax) in enumerate(zip(cfg.features, axes.flatten())):
         xi = x[:, i]
         srt = np.argsort(xi)
@@ -29,6 +33,7 @@ def plot_feat_vs_output(x: np.ndarray, y: np.ndarray, params: t.Optional[dict] =
         plt.ylabel("output")
         plt.title(cfg.model)
     plt.savefig(format_location(Locations.feat_vs_output, cfg))
-    #plt.show()
+    # plt.show()
+
 
 plot_feat_vs_output(X, Y)
