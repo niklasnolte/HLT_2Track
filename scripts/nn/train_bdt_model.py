@@ -33,7 +33,6 @@ def train_bdt_model(
 
     clf.booster_.save_model(format_location(Locations.model, cfg))
 
-    print((y_val == 1).mean())
     auc = roc_auc_score(y_val, preds)
     acc = max(balanced_accuracy_score(y_val, preds > i) for i in np.linspace(0, 1, 100))
     print(f"roc: {auc:.6f}, acc: {acc:.6f}")

@@ -9,7 +9,6 @@ plt.style.use("seaborn")
 cfg = get_config()
 
 X, Y = np.load(format_location(Locations.gridXY, cfg)).values()
-breakpoint()
 
 def plot_feat_vs_output(
         x: np.ndarray, y: np.ndarray, params: t.Optional[dict] = None):
