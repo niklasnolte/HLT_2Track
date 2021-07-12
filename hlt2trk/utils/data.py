@@ -35,7 +35,6 @@ def get_data(
         X = (X - X.min(axis=0)) / (X.max(axis=0) - X.min(axis=0))
 
     y: np.ndarray = np.concatenate([np.ones(len(sig)), np.zeros(len(bkg))])
-    print(y.mean())
     return X, y
 
 
