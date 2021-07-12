@@ -1,36 +1,11 @@
 from os.path import dirname, join, abspath
 from functools import lru_cache
 
-# class Configuration:
-#     def __init__(self, model: str = 'LDA', experiment: int = 0,
-#                  normalize: bool = True, data: str = 'lhcb') -> None:
-#         """Configure everything.
-
-#         Args:
-#             model (str, optional): Which model to train one of:
-#                 'LDA', 'QDA', 'GNB', 'NN', 'INN', 'BDT'. Defaults to 'LDA'.
-#             experiment (int, optional): 0, 1, or 2.
-#                 Exp1: uses "fdchi2", "sumpt"
-#                 Exp2: uses "minipchi2", "vchi2"
-#                 Exp3: uses "fdchi2", "sumpt", "minipchi2", "vchi2"
-#                 Defaults to 0.
-#             normalize (bool, optional): Whether to normalize the data
-#                 between 0 and 1.
-#                 Defaults to True.
-#             data (str, optional): 'lhcb' or 'sim' data. Defaults to 'lhcb'.
-#         """
-#         self.model = model
-#         self.normalize = normalize
-#         self.data = data
-#         self.experiment = experiment
-#         self.output =  f"models/{model}_{features}_{data_type}_{normalized}.pkl"
-
-
 class Configs:
     # list all possible configurations (cartesian product of these)
     model = ("regular", "sigma", "bdt")
     data_type = ("lhcb",)#, "standalone")
-    features = (["minipchi2", "sumpt"], ["fdchi2", "sumpt"])
+    features = (["minipchi2", "sumpt"], ["fdchi2", "sumpt"], ["fdchi2", "sumpt", "vchi2", "minipchi2"])
     normalize = (False, True)
 
 
@@ -67,17 +42,20 @@ class Locations:
     data = join(project_root, "data/MC_{data_type}.pkl")
     # grid evaluation
     grid_X = join(
-        project_root, "savepoints/gridX_{model}_{features}_{data_type}_{normalize}.npz"
+        project_root, "savepoints/gridX_{model}_{features}_{data_type}_{normalize}.npy"
     )
     grid_Y = join(
-        project_root, "savepoints/gridY_{model}_{features}_{data_type}_{normalize}.npz"
+        project_root, "savepoints/gridY_{model}_{features}_{data_type}_{normalize}.npy"
     )
     # plots
     train_distribution_gif = join(
         project_root,
         "plots/training_distributions_{model}_{features}_{data_type}_{normalize}.gif",
     )
-
+    heatmap = join(project_root, "plots/heatmap_{model}_{features}_{data_type}_{normalize}.pdf")
+    twodim_vs_output = join(project_root, "plots/twodim_vs_output_{model}_{features}_{data_type}_{normalize}.pdf")
+    feat_vs_output = join(project_root, "plots/feat_vs_output_{model}_{features}_{data_type}_{normalize}.pdf")
+    roc = join(project_root, "plots/roc_{model}_{features}_{data_type}_{normalize}.pdf")
 
 def to_string_features(features: list):
     return "+".join(features)
