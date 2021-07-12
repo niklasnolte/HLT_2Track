@@ -1,13 +1,14 @@
-from typing import Union, Iterable, Callable
-
-import torch
-from torch import nn
-
-from hlt2trk.utils import config
-from InfinityNorm import infnorm
-from InfinityNorm import SigmaNet
+import pickle
+from typing import Callable, Iterable, Union
 
 import lightgbm as lgb
+import torch
+from hlt2trk.utils import config
+from InfinityNorm import SigmaNet, infnorm
+from sklearn.discriminant_analysis import (LinearDiscriminantAnalysis,
+                                           QuadraticDiscriminantAnalysis)
+from sklearn.naive_bayes import GaussianNB
+from torch import nn
 
 
 def _build_module(
@@ -98,12 +99,26 @@ def get_model(cfg: config.Configuration) -> Union[nn.Module, lgb.Booster]:
         )
         return clf
 
+    elif cfg.model == "lda":
+        model = LinearDiscriminantAnalysis()
+        return model
+
+    elif cfg.model == "qda":
+        model = QuadraticDiscriminantAnalysis()
+        return model
+
+    elif cfg.model == 'gnb':
+        model = GaussianNB()
+        return model
+
 
 def load_model(cfg: config.Configuration) -> Union[nn.Module, lgb.Booster]:
     location = config.format_location(config.Locations.model, cfg)
     if cfg.model in ["regular", "sigma"]:
         m = get_model(cfg)
         m.load_state_dict(torch.load(location))
-    else:
+    elif cfg.model == 'bdt':
         m = lgb.Booster(model_file=location)
-    return m
+    else:
+        with open(location, 'rb') as f:
+            return pickle.load(f)

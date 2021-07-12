@@ -1,10 +1,18 @@
-import torch
-import numpy as np
 from itertools import product
+from typing import Union
+
+import lightgbm as lgb
+import numpy as np
+import torch
+from hlt2trk.models import load_model
 from hlt2trk.utils import config
 from hlt2trk.utils.data import get_data
-from hlt2trk.models import load_model
-from evaluate import eval_torch_network ,eval_bdt
+from sklearn.discriminant_analysis import (LinearDiscriminantAnalysis,
+                                           QuadraticDiscriminantAnalysis)
+from sklearn.naive_bayes import GaussianNB
+from torch.utils.data import DataLoader, TensorDataset
+
+from evaluate import eval_bdt, eval_simple, eval_torch_network
 
 cfg = config.get_config()
 
@@ -25,9 +33,10 @@ if cfg.model == "bdt":
     eval_fun = eval_bdt
 elif cfg.model in ["regular", "sigma"]:
     eval_fun = eval_torch_network
+elif cfg.model in ['lda', 'qda', 'gnb']:
+    eval_fun = eval_simple
 
 Y = eval_fun(model, grid).flatten()
 
 # persist the numbers
-np.save(config.format_location(config.Locations.grid_X, cfg), grid)
-np.save(config.format_location(config.Locations.grid_Y, cfg), Y)
+np.savez_compressed(config.format_location(config.Locations.gridXY, cfg), X=grid, Y=Y)

@@ -1,4 +1,4 @@
-from typing import DefaultDict
+from itertools import defaultdict
 import numpy as np
 import pandas as pd
 import pickle
@@ -14,15 +14,14 @@ from sklearn.discriminant_analysis import (
     LinearDiscriminantAnalysis,
     QuadraticDiscriminantAnalysis,
 )
-from sys import argv
 from os.path import join
 import fire
 
 
-def get_metrics(x_train, y_train, x_val, y_val, method):
-    method.fit(x_train, y_train.reshape(-1))
-    preds = method.predict(x_val)
-    probs = method.predict_proba(x_val)
+def get_metrics(x_train, y_train, x_val, y_val, model):
+    model.fit(x_train, y_train.reshape(-1))
+    preds = model.predict(x_val)
+    probs = model.predict_proba(x_val)
     acc = max(
         [
             balanced_accuracy_score(y_val.reshape(-1), probs[:, 1] > cut)
@@ -50,7 +49,7 @@ def main(save_model: bool = True, save_path: str = None, latex: bool = False):
         latex (bool, optional): Whether to print a latex table to console.
          Defaults to False.
     """
-    model_results = DefaultDict(list)
+    model_results = defaultdict(list)
     for model_name in meta.model_names:
         # ["LinearDiscriminantAnalysis","QuadraticDiscriminantAnalysis","GaussianNB",]
         model = eval(model_name + "()")

@@ -8,8 +8,7 @@ plt.style.use("seaborn")
 
 cfg = get_config()
 
-X = np.load(format_location(Locations.grid_X, cfg))
-Y = np.load(format_location(Locations.grid_Y, cfg))
+X, Y = np.load(format_location(Locations.gridXY, cfg))
 
 def plot_heatmap(
         x: np.ndarray,
