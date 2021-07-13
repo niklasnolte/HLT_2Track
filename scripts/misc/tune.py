@@ -1,4 +1,5 @@
-import os.path
+from hlt2trk.utils.config import Configuration
+from os.path import join, abspath, dirname
 from sys import argv
 
 import optuna
@@ -10,7 +11,7 @@ from optuna.trial import TrialState
 from sklearn.metrics import roc_auc_score
 from torch.utils.data import DataLoader, TensorDataset
 
-from hlt2trk.utils.meta_info import get_data_for_training
+from hlt2trk.utils.data import get_data_for_training
 from InfinityNorm import infnorm
 
 DEVICE = torch.device("cuda:0")
@@ -50,11 +51,11 @@ def define_model(trial):
     return nn.Sequential(*layers)
 
 
-def get_mnist():
+def get_loaders():
     # Load Data
     X_train, y_train, X_val, y_val = [
         torch.from_numpy(x).float().view(len(x), -1)
-        for x in get_data_for_training(normalize=NORMALIZE)
+        for x in get_data_for_training(Configuration(normalize=NORMALIZE))
     ]
 
     train_loader = DataLoader(
@@ -78,12 +79,13 @@ def objective(trial):
     model = define_model(trial).to(DEVICE)
 
     # Generate the optimizers.
-    optimizer_name = trial.suggest_categorical("optimizer", ["Adam", "RMSprop", "SGD"])
+    optimizer_name = trial.suggest_categorical(
+        "optimizer", ["Adam", "RMSprop", "SGD"])
     lr = trial.suggest_float("lr", 1e-5, 1e-1, log=True)
     optimizer = getattr(optim, optimizer_name)(model.parameters(), lr=lr)
 
     # Get the FashionMNIST dataset.
-    train_loader, val_loader = get_mnist()
+    train_loader, val_loader = get_loaders()
 
     # Training of the model.
     for epoch in range(EPOCHS):
@@ -93,7 +95,8 @@ def objective(trial):
             if batch_idx * BATCHSIZE >= N_TRAIN_EXAMPLES:
                 break
 
-            data, target = data.view(data.size(0), -1).to(DEVICE), target.to(DEVICE)
+            data, target = data.view(
+                data.size(0), -1).to(DEVICE), target.to(DEVICE)
 
             optimizer.zero_grad()
             output = model(data)
@@ -110,7 +113,8 @@ def objective(trial):
                 # Limiting validation data.
                 if batch_idx * BATCHSIZE >= N_VALID_EXAMPLES:
                     break
-                data, target = data.view(data.size(0), -1).to(DEVICE), target.to(DEVICE)
+                data, target = data.view(
+                    data.size(0), -1).to(DEVICE), target.to(DEVICE)
                 output = model(data)
 
                 y_score.append(output)
@@ -131,8 +135,10 @@ if __name__ == "__main__":
     study = optuna.create_study(direction="maximize", )
     study.optimize(objective, n_trials=TRIALS, timeout=TIMEOUT)
 
-    pruned_trials = study.get_trials(deepcopy=False, states=[TrialState.PRUNED])
-    complete_trials = study.get_trials(deepcopy=False, states=[TrialState.COMPLETE])
+    pruned_trials = study.get_trials(
+        deepcopy=False, states=[TrialState.PRUNED])
+    complete_trials = study.get_trials(
+        deepcopy=False, states=[TrialState.COMPLETE])
 
     print("Study statistics: ")
     print("  Number of finished trials: ", len(study.trials))
@@ -151,4 +157,4 @@ if __name__ == "__main__":
     if SAVE_PATH is not None:
         with open(SAVE_PATH, 'w') as f:
             f.write(out_string)
-        print(f'saved to: {os.path.join(os.path.abspath(os.path.dirname(SAVE_PATH)), SAVE_PATH)}')
+        print(f'saved to: {join(abspath(dirname(SAVE_PATH)), SAVE_PATH)}')

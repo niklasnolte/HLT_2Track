@@ -1,6 +1,7 @@
+from hlt2trk.utils.config import Configuration
 import numpy as np
 import pandas as pd
-from hlt2trk.utils.meta_info import get_data_for_training, features
+from hlt2trk.utils.data import get_data_for_training
 from sklearn.decomposition import PCA
 from sklearn.feature_selection import mutual_info_classif
 from sys import argv
@@ -8,7 +9,9 @@ from sys import argv
 
 LATEX = "--latex" in argv
 
-x_train, y_train, x_val, y_val = get_data_for_training(normalize=True)
+features = ["fdchi2", "sumpt", "vchi2", "minipchi2"]
+x_train, y_train, x_val, y_val = get_data_for_training(
+    cfg=Configuration(features=features))
 X = np.concatenate([x_train, x_val], axis=0)
 y = np.concatenate([y_train, y_val], axis=0)
 

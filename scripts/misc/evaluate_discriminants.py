@@ -1,4 +1,4 @@
-from hlt2trk.utils.config import Configs, dirs, get_config
+from hlt2trk.utils.config import Configs, Configuration, dirs, get_config
 import pickle
 from collections import defaultdict
 from os.path import join
@@ -53,7 +53,8 @@ def main(save_model: bool = True, save_path: str = None, latex: bool = False):
         print(model_name)
         for i, features in enumerate(Configs.features):
             acc, auc = get_metrics(
-                *get_data_for_training(cfg=get_config()), model)
+                *get_data_for_training(Configuration(features=features, normalize=True)),
+                model)
             print(f"{acc:.3f}")
             print(f"{auc:.3f}")
             model_results[model_name].append([acc, auc])
@@ -69,8 +70,8 @@ def main(save_model: bool = True, save_path: str = None, latex: bool = False):
     df = pd.DataFrame(np.stack(list(model_results.values())).reshape(3, -1))
 
     df.columns = np.concatenate([[[f"{i}", "acc"],
-                                  [f"{i}", "auc"]]
-                                 for i in range(len(df.columns) // 2)])
+                                [f"{i}", "auc"]]
+        for i in range(len(df.columns) // 2)])
 
     df.columns = pd.MultiIndex.from_tuples(
         df.columns, names=["Experiment", "metric"]

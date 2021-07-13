@@ -7,9 +7,9 @@ class Configs:
     # list all possible configurations (cartesian product of these)
     model = ("regular", "sigma", "bdt", "lda", "qda", "gnb")
     data_type = ("lhcb",)  # , "standalone")
-    features = (["minipchi2", "sumpt"], ["fdchi2", "sumpt"])  # ,
-    # ["fdchi2", "sumpt", "vchi2", "minipchi2"])
-    normalize = (False,)  # , True)
+    features = (["minipchi2", "sumpt"], ["fdchi2", "sumpt"],
+                ["fdchi2", "sumpt", "vchi2", "minipchi2"])
+    normalize = (True, False)
 
 
 class Configuration:
