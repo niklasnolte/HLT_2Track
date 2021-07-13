@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from hlt2trk.utils import config
 from hlt2trk.utils import data
 from hlt2trk.models import load_model
-from evaluate import eval_bdt, eval_torch_network
+from evaluate import eval_bdt, eval_torch_network, eval_simple
 
 cfg = config.get_config()
 
@@ -18,6 +18,9 @@ def eval(data):
         return eval_bdt(model, X)
     elif cfg.model in ["sigma", "regular"]:
         return eval_torch_network(model, X)
+    elif cfg.model in ["lda", "qda", "gnb"]:
+        return eval_simple(model, X)
+
 
 def plot_rates_vs_effs(data):
     truths = data["label"]
@@ -31,7 +34,7 @@ def plot_rates_vs_effs(data):
         pred = preds[data.eventtype == mode]
         truth = truths[data.eventtype == mode]
         if mode != 0:
-            print((truth>0).mean())
+            print((truth > 0).mean())
             eff = [(pred[truth > 0] > i).mean() for i in cutrange]
             ax.plot(rates, eff, label=f"mode = {mode}")
     ax.plot([0, 1], [0, 1], color="grey", linestyle="--", label="random choice")

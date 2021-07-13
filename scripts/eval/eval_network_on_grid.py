@@ -7,10 +7,6 @@ import torch
 from hlt2trk.models import load_model
 from hlt2trk.utils import config
 from hlt2trk.utils.data import get_data
-from sklearn.discriminant_analysis import (LinearDiscriminantAnalysis,
-                                           QuadraticDiscriminantAnalysis)
-from sklearn.naive_bayes import GaussianNB
-from torch.utils.data import DataLoader, TensorDataset
 
 from evaluate import eval_bdt, eval_simple, eval_torch_network
 
@@ -33,7 +29,7 @@ if cfg.model == "bdt":
     eval_fun = eval_bdt
 elif cfg.model in ["regular", "sigma"]:
     eval_fun = eval_torch_network
-elif cfg.model in ['lda', 'qda', 'gnb']:
+elif cfg.model in ["lda", "qda", "gnb"]:
     eval_fun = eval_simple
 
 Y = eval_fun(model, grid).flatten()
