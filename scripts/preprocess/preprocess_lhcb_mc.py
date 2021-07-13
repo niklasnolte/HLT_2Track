@@ -1,9 +1,10 @@
-import pandas as pd
-import uproot3 as u
-import numpy as np
-from hlt2trk.utils import meta_info as meta
 from os.path import join
 from sys import argv
+
+import numpy as np
+import pandas as pd
+import uproot3 as u
+from hlt2trk.utils import dirs
 
 try:
     prefix = argv[1]
@@ -122,7 +123,7 @@ for i, df in enumerate(dfs):
 
 df = pd.concat(dfs)
 df = preprocess(df)
-save_file = join(meta.locations.project_root, "data/MC.pkl")
+save_file = join(dirs.data, "MC_lhcb.pkl")
 df.to_pickle(save_file)
-print('data saved to:')
+print('Preprocessed data saved to:')
 print(save_file)

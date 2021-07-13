@@ -1,5 +1,6 @@
-from os.path import dirname, join, abspath
 from functools import lru_cache
+from os import mkdir
+from os.path import abspath, dirname, join
 
 
 class Configs:
@@ -40,35 +41,43 @@ class Configuration:
         )
 
 
+class dirs:
+    project_root = abspath(dirname(__file__) + "/../..")
+    models = join(project_root, 'models')
+    plots = join(project_root, 'plots')
+    heatmaps = join(plots, 'heatmaps')
+    scatter = join(plots, 'scatter')
+    gifs = join(plots, 'gifs')
+    data = join(project_root, 'data')
+    ckpt = join(project_root, 'ckpt')
+
+
 class Locations:
     project_root = abspath(dirname(__file__) + "/../..")
-    model = join(project_root, "models/{model}_{features}_{data_type}_{normalize}.pkl")
-    data = join(project_root, "data/MC_{data_type}.pkl")
+    model = join(dirs.models, "{model}_{features}_{data_type}_{normalize}.pkl")
+    data = join(dirs.data, "MC_{data_type}.pkl")
     # grid evaluation
     gridXY = join(
-        project_root, "savepoints/gridXY_{model}_{features}_{data_type}_{normalize}.npz"
-    )
-
+        dirs.ckpt, "gridXY_{model}_{features}_{data_type}_{normalize}.npz")
     # plots
     train_distribution_gif = join(
-        project_root,
-        "plots/training_distributions_{model}_{features}_{data_type}_{normalize}.gif",
-    )
+        dirs.gifs,
+        "training_distributions_{model}_{features}_{data_type}_{normalize}.gif",)
     heatmap = join(
-        project_root, "plots/heatmap_{model}_{features}_{data_type}_{normalize}.pdf"
-    )
+        dirs.heatmaps,
+        "heatmap_{model}_{features}_{data_type}_{normalize}.pdf")
     twodim_vs_output = join(
-        project_root,
-        "plots/twodim_vs_output_{model}_{features}_{data_type}_{normalize}.pdf",
-    )
+        dirs.scatter,
+        "twodim_vs_output_{model}_{features}_{data_type}_{normalize}.pdf",)
     feat_vs_output = join(
-        project_root,
-        "plots/feat_vs_output_{model}_{features}_{data_type}_{normalize}.pdf",
-    )
-    roc = join(project_root, "plots/roc_{model}_{features}_{data_type}_{normalize}.pdf")
+        dirs.scatter,
+        "feat_vs_output_{model}_{features}_{data_type}_{normalize}.pdf",)
+    roc = join(
+        dirs.scatter,
+        "roc_{model}_{features}_{data_type}_{normalize}.pdf")
     rate_vs_eff = join(
-        project_root, "plots/rate_vs_eff_{model}_{features}_{data_type}_{normalize}.pdf"
-    )
+        dirs.scatter,
+        "rate_vs_eff_{model}_{features}_{data_type}_{normalize}.pdf")
 
 
 def to_string_features(features: list):

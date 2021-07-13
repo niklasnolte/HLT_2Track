@@ -1,21 +1,17 @@
-from itertools import defaultdict
+from hlt2trk.utils.config import Configs, dirs, get_config
+import pickle
+from collections import defaultdict
+from os.path import join
+
+import fire
 import numpy as np
 import pandas as pd
-import pickle
-from hlt2trk.utils.meta_info import get_data_for_training
-from hlt2trk.utils import meta_info as meta
+from hlt2trk.utils.data import get_data_for_training
 from sklearn.decomposition import PCA
-from sklearn.metrics import (
-    balanced_accuracy_score,
-    roc_auc_score,
-)
+from sklearn.discriminant_analysis import (LinearDiscriminantAnalysis,
+                                           QuadraticDiscriminantAnalysis)
+from sklearn.metrics import balanced_accuracy_score, roc_auc_score
 from sklearn.naive_bayes import GaussianNB
-from sklearn.discriminant_analysis import (
-    LinearDiscriminantAnalysis,
-    QuadraticDiscriminantAnalysis,
-)
-from os.path import join
-import fire
 
 
 def get_metrics(x_train, y_train, x_val, y_val, model):
@@ -42,7 +38,7 @@ def main(save_model: bool = True, save_path: str = None, latex: bool = False):
 
     Args:
         save_model (bool, optional): Whether to save trained models.
-        If no save_path is specified saves to meta.locations.model_dir.
+        If no save_path is specified saves to dirs.models.
         Defaults to True.
         save_path (str, optional): Directory where to save models. If nothing
         is passed no model is saved. Defaults to None.
@@ -50,19 +46,20 @@ def main(save_model: bool = True, save_path: str = None, latex: bool = False):
          Defaults to False.
     """
     model_results = defaultdict(list)
-    for model_name in meta.model_names:
-        # ["LinearDiscriminantAnalysis","QuadraticDiscriminantAnalysis","GaussianNB",]
+    model_names = ["LinearDiscriminantAnalysis",
+                   "QuadraticDiscriminantAnalysis", "GaussianNB", ]
+    for model_name in model_names:
         model = eval(model_name + "()")
         print(model_name)
-        for i, features in enumerate(meta.experiments.features):
+        for i, features in enumerate(Configs.features):
             acc, auc = get_metrics(
-                *get_data_for_training(features, normalize=True), model)
+                *get_data_for_training(cfg=get_config()), model)
             print(f"{acc:.3f}")
             print(f"{auc:.3f}")
             model_results[model_name].append([acc, auc])
             if save_model:
                 if save_path is None:
-                    save_path = meta.locations.model_dir
+                    save_path = dirs.models
                 file_name = join(save_path, model_name + f"_{i}.pkl")
                 with open(file_name, "wb") as f:
                     pickle.dump(model, f)
@@ -70,14 +67,11 @@ def main(save_model: bool = True, save_path: str = None, latex: bool = False):
 
     print("\nDone training and evaluating!\n")
     df = pd.DataFrame(np.stack(list(model_results.values())).reshape(3, -1))
-    df.columns = [
-        ("1", "acc"),
-        ("1", "auc"),
-        ("2", "acc"),
-        ("2", "auc"),
-        ("3", "acc"),
-        ("3", "auc"),
-    ]
+
+    df.columns = np.concatenate([[[f"{i}", "acc"],
+                                  [f"{i}", "auc"]]
+                                 for i in range(len(df.columns) // 2)])
+
     df.columns = pd.MultiIndex.from_tuples(
         df.columns, names=["Experiment", "metric"]
     )
