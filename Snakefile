@@ -6,34 +6,32 @@ rule all:
     input:
         # feat_vs_output plots
         expand(
-          Locations.feat_vs_output,
-          model=Configs.model,
-          data_type=Configs.data_type,
-          features=map(config.to_string_features,Configs.features),
-          normalize=map(config.to_string_normalize,Configs.normalize),
+            Locations.feat_vs_output,
+            model=Configs.model,
+            data_type=Configs.data_type,
+            features=map(config.to_string_features, Configs.features),
+            normalize=map(config.to_string_normalize, Configs.normalize),
         ),
         # heatmap plots for 2d trainings
-        expand(
-          Locations.heatmap,
-          model=Configs.model,
-          data_type=Configs.data_type,
-          features=map(config.to_string_features,[feats for feats in Configs.features if len(feats) == 2]),
-          normalize=map(config.to_string_normalize,Configs.normalize),
-        ),
+        expand(Locations.heatmap, model=Configs.model,
+               data_type=Configs.data_type,
+               features=map(
+                   config.to_string_features,
+                   [feats for feats in Configs.features if len(feats) == 2]),
+               normalize=map(config.to_string_normalize, Configs.normalize),),
         # rates vs efficiencies
-        expand(
-          Locations.heatmap,
-          model=Configs.model,
-          data_type=Configs.data_type,
-          features=map(config.to_string_features,[feats for feats in Configs.features if len(feats) == 2]),
-          normalize=map(config.to_string_normalize,Configs.normalize),
-        )
+        expand(Locations.heatmap, model=Configs.model,
+               data_type=Configs.data_type,
+               features=map(
+                   config.to_string_features,
+                   [feats for feats in Configs.features if len(feats) == 2]),
+               normalize=map(config.to_string_normalize, Configs.normalize),)
 
 
 rule plot_heatmap:
     input:
         Locations.gridXY,
-        script = "scripts/nn/plot_heatmap.py"
+        script = "scripts/plot/plot_heatmap.py"
     output:
         Locations.heatmap
     wildcard_constraints:
@@ -45,7 +43,7 @@ rule plot_heatmap:
 rule plot_feat_vs_output:
     input:
         Locations.gridXY,
-        script = "scripts/nn/plot_feat_vs_output.py"
+        script = "scripts/plot/plot_feat_vs_output.py"
     output:
         Locations.feat_vs_output
     run:
@@ -55,7 +53,7 @@ rule plot_feat_vs_output:
 rule eval_on_grid:
     input:
         Locations.model,
-        script = "scripts/nn/eval_network_on_grid.py"
+        script = "scripts/eval/eval_network_on_grid.py"
     output:
         Locations.gridXY,
     run:
@@ -65,11 +63,11 @@ rule eval_on_grid:
 
 def get_inputs_train(wildcards):
     if wildcards.model == "bdt":
-        return "scripts/nn/train_bdt_model.py"
+        return "scripts/train/train_bdt_model.py"
     elif wildcards.model in ["regular", "sigma"]:
-        return "scripts/nn/train_torch_model.py"
+        return "scripts/train/train_torch_model.py"
     else:
-        return "scripts/nn/train_simple_model.py"
+        return "scripts/train/train_simple_model.py"
 
 
 rule train:
@@ -77,7 +75,7 @@ rule train:
         Locations.data,
         "hlt2trk/models/models.py",
         get_inputs_train,
-        script = "scripts/nn/training.py"
+        script = "scripts/train/training.py"
     output:
         Locations.model
     run:

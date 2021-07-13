@@ -8,9 +8,6 @@ cfg = get_config()
 
 x_train, y_train, x_val, y_val = get_data_for_training(cfg)
 
-print(f"mean label: {y_train.mean()}")
-print(f"size of data: {len(x_train)}")
-
 if cfg.model in ["regular", "sigma"]:
     train_torch_model(cfg, x_train, y_train, x_val, y_val)
 if cfg.model == "bdt":
