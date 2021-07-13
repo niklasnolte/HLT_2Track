@@ -14,19 +14,31 @@ rule all:
         ),
         # heatmap plots for 2d trainings
         expand(Locations.heatmap, model=Configs.model,
-               data_type=Configs.data_type,
-               features=map(
-                   config.to_string_features,
-                   [feats for feats in Configs.features if len(feats) == 2]),
-               normalize=map(config.to_string_normalize, Configs.normalize),),
+            data_type=Configs.data_type,
+            features=map(
+                config.to_string_features,
+                [feats for feats in Configs.features if len(feats) == 2]),
+            normalize=map(config.to_string_normalize, Configs.normalize),
+        ),
         # rates vs efficiencies
-        expand(Locations.heatmap, model=Configs.model,
-               data_type=Configs.data_type,
-               features=map(
-                   config.to_string_features,
-                   [feats for feats in Configs.features if len(feats) == 2]),
-               normalize=map(config.to_string_normalize, Configs.normalize),)
+        expand(Locations.rate_vs_eff, model=Configs.model,
+            data_type=Configs.data_type,
+            features=map(
+                config.to_string_features,
+                Configs.features),
+            normalize=map(config.to_string_normalize, Configs.normalize),
+        )
 
+rule plot_rate_vs_eff:
+    input:
+        Locations.data,
+        Locations.model,
+        script = "scripts/eval/eval_and_plot_score.py"
+    output:
+        Locations.rate_vs_eff
+    run:
+        args = config.get_cli_args(wildcards)
+        shell(f"python {input.script} {args}")
 
 rule plot_heatmap:
     input:
