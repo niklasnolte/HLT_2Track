@@ -6,19 +6,29 @@ rule all:
     input:
         # feat_vs_output plots
         expand(
-            Locations.feat_vs_output,
-            model=Configs.model,
-            data_type=Configs.data_type,
-            features=map(config.to_string_features, Configs.features),
-            normalize=map(config.to_string_normalize, Configs.normalize),
+          Locations.feat_vs_output,
+          model=Configs.model,
+          data_type=Configs.data_type,
+          features=map(config.to_string_features,Configs.features),
+          normalize=map(config.to_string_normalize,Configs.normalize),
         ),
         # heatmap plots for 2d trainings
-        expand(Locations.heatmap, model=Configs.model,
-               data_type=Configs.data_type,
-               features=map(
-                   config.to_string_features,
-                   [feats for feats in Configs.features if len(feats) == 2]),
-               normalize=map(config.to_string_normalize, Configs.normalize),)
+        expand(
+          Locations.heatmap,
+          model=Configs.model,
+          data_type=Configs.data_type,
+          features=map(config.to_string_features,[feats for feats in Configs.features if len(feats) == 2]),
+          normalize=map(config.to_string_normalize,Configs.normalize),
+        ),
+        # rates vs efficiencies
+        expand(
+          Locations.heatmap,
+          model=Configs.model,
+          data_type=Configs.data_type,
+          features=map(config.to_string_features,[feats for feats in Configs.features if len(feats) == 2]),
+          normalize=map(config.to_string_normalize,Configs.normalize),
+        )
+
 
 rule plot_heatmap:
     input:
