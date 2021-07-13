@@ -50,11 +50,11 @@ def _axis_labels(ax, labels):
 if __name__ == '__main__':
     fig, axes = plt.subplots(3, 3, figsize=(12, 12), sharex=True, sharey=True)
 
-    for exp in range(len(Configs.features)):
-        gs = (100, 100, 10, 10) if len(features) else (100, 100)
+    for exp, features in enumerate(Configs.features):
+        gs = (100, 100, 10, 10) if len(features) == 4 else (100, 100)
         X = _get_grid(grid_size=gs)
         model_names = ["LinearDiscriminantAnalysis",
-                       "QuadraticDiscriminantAnalysis", "GaussianNB", ]
+                       "QuadraticDiscriminantAnalysis", "GaussianNB"]
         for i, model_name in enumerate(model_names):
             fname = f"{model_name}_{exp}.pkl"
             with open(join(dirs.models, fname), 'rb') as f:
@@ -67,7 +67,7 @@ if __name__ == '__main__':
                 index_keep = [0, 1]
                 sc = _heatmap(*_flattenXy(X, y, dims=gs,
                               index_keep=index_keep), ax)
-        labels = Configs.features[exp][index_keep]
+        labels = np.array(Configs.features[exp])[index_keep]
         _axis_labels(axes[exp, 0], labels)
     plt.colorbar(sc)
     plt.tight_layout()

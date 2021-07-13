@@ -4,7 +4,7 @@ from hlt2trk.utils.config import Configs, Locations, dirs
 from os import makedirs
 
 
-k, v in dirs.__dict__.items():
+for k, v in dirs.__dict__.items():
     if not k.startswith('__'):
         makedirs(v, exist_ok=True)
 

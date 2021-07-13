@@ -10,6 +10,7 @@ cfg = get_config()
 
 X, Y = np.load(format_location(Locations.gridXY, cfg)).values()
 
+
 def plot_heatmap(
         x: np.ndarray,
         y: np.ndarray,
