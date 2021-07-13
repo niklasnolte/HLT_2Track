@@ -78,8 +78,10 @@ def get_inputs_train(wildcards):
         return "scripts/train/train_bdt_model.py"
     elif wildcards.model in ["regular", "sigma"]:
         return "scripts/train/train_torch_model.py"
-    else:
+    elif wildcards.model in ["lda", "qda", "gnb"]:
         return "scripts/train/train_simple_model.py"
+    else:
+        raise ValueError(f"Unknown model {wildcards.model}")
 
 
 rule train:
