@@ -30,23 +30,24 @@ class Configuration:
         self.features = features
 
     def __str__(self):
-        return "\n".join((
-            f"model={self.model}",
-            f"features={self.features}",
-            f"data_type={self.data_type}",
-            f"normalize={self.normalize}",
-        ))
+        return "\n".join(
+            (
+                f"model={self.model}",
+                f"features={self.features}",
+                f"data_type={self.data_type}",
+                f"normalize={self.normalize}",
+            )
+        )
 
 
 class Locations:
     project_root = abspath(dirname(__file__) + "/../..")
-    model = join(
-        project_root, "models/{model}_{features}_{data_type}_{normalize}.pkl")
+    model = join(project_root, "models/{model}_{features}_{data_type}_{normalize}.pkl")
     data = join(project_root, "data/MC_{data_type}.pkl")
     # grid evaluation
     gridXY = join(
-        project_root,
-        "savepoints/gridXY_{model}_{features}_{data_type}_{normalize}.npz")
+        project_root, "savepoints/gridXY_{model}_{features}_{data_type}_{normalize}.npz"
+    )
 
     # plots
     train_distribution_gif = join(
@@ -54,17 +55,20 @@ class Locations:
         "plots/training_distributions_{model}_{features}_{data_type}_{normalize}.gif",
     )
     heatmap = join(
-        project_root,
-        "plots/heatmap_{model}_{features}_{data_type}_{normalize}.pdf")
+        project_root, "plots/heatmap_{model}_{features}_{data_type}_{normalize}.pdf"
+    )
     twodim_vs_output = join(
         project_root,
-        "plots/twodim_vs_output_{model}_{features}_{data_type}_{normalize}.pdf")
+        "plots/twodim_vs_output_{model}_{features}_{data_type}_{normalize}.pdf",
+    )
     feat_vs_output = join(
         project_root,
-        "plots/feat_vs_output_{model}_{features}_{data_type}_{normalize}.pdf")
-    roc = join(
-        project_root,
-        "plots/roc_{model}_{features}_{data_type}_{normalize}.pdf")
+        "plots/feat_vs_output_{model}_{features}_{data_type}_{normalize}.pdf",
+    )
+    roc = join(project_root, "plots/roc_{model}_{features}_{data_type}_{normalize}.pdf")
+    rate_vs_eff = join(
+        project_root, "plots/rate_vs_eff_{model}_{features}_{data_type}_{normalize}.pdf"
+    )
 
 
 def to_string_features(features: list):
@@ -111,4 +115,5 @@ def get_cli_args(config) -> str:
 @lru_cache(1)
 def get_config() -> Configuration:
     from fire import Fire
+
     return Fire(Configuration)
