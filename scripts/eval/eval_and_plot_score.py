@@ -34,7 +34,6 @@ def plot_rates_vs_effs(data):
         pred = preds[data.eventtype == mode]
         truth = truths[data.eventtype == mode]
         if mode != 0:
-            print((truth > 0).mean())
             eff = [(pred[truth > 0] > i).mean() for i in cutrange]
             ax.plot(rates, eff, label=f"mode = {mode}")
     ax.plot([0, 1], [0, 1], color="grey", linestyle="--", label="random choice")
