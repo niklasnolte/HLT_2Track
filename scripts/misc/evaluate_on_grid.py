@@ -1,10 +1,10 @@
+from hlt2trk.utils.config import Configs, dirs
 import pickle
 from os.path import join
 import numpy as np
 from sklearn.discriminant_analysis import (LinearDiscriminantAnalysis,
                                            QuadraticDiscriminantAnalysis)
 from sklearn.naive_bayes import GaussianNB
-from hlt2trk.utils import meta_info as meta
 from matplotlib import pyplot as plt
 import typing as t
 # plt.style.use('~/.dark_paper.mplstyle')
@@ -50,12 +50,14 @@ def _axis_labels(ax, labels):
 if __name__ == '__main__':
     fig, axes = plt.subplots(3, 3, figsize=(12, 12), sharex=True, sharey=True)
 
-    for exp in range(3):
-        gs = (100, 100, 10, 10) if exp == 2 else (100, 100)
+    for exp in range(len(Configs.features)):
+        gs = (100, 100, 10, 10) if len(features) else (100, 100)
         X = _get_grid(grid_size=gs)
-        for i, model_name in enumerate(meta.model_names):
+        model_names = ["LinearDiscriminantAnalysis",
+                       "QuadraticDiscriminantAnalysis", "GaussianNB", ]
+        for i, model_name in enumerate(model_names):
             fname = f"{model_name}_{exp}.pkl"
-            with open(join(meta.locations.model_dir, fname), 'rb') as f:
+            with open(join(dirs.models, fname), 'rb') as f:
                 model = pickle.load(f)
                 y = model.predict_proba(X)[:, 1]
                 # plotting
@@ -65,7 +67,7 @@ if __name__ == '__main__':
                 index_keep = [0, 1]
                 sc = _heatmap(*_flattenXy(X, y, dims=gs,
                               index_keep=index_keep), ax)
-        labels = meta.experiments.features[exp][index_keep]
+        labels = Configs.features[exp][index_keep]
         _axis_labels(axes[exp, 0], labels)
     plt.colorbar(sc)
     plt.tight_layout()

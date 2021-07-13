@@ -1,15 +1,15 @@
-import torch
 import numpy as np
+import torch
+from hlt2trk.utils.config import Locations, dirs, format_location, get_config
 
-import hlt2trk.utils.meta_info as meta
+cfg = get_config()
+fname = format_location(Locations.gridXY, cfg)
+X, Y = np.load(fname).values()
 
-
-X = torch.load(meta.locations.grid_X)
-Y = torch.load(meta.locations.grid_Y)
-
-path = f"{meta.locations.project_root}/feynman_data/"
-fn = f"{meta.path_suffix}.txt"
-np.savetxt(path + fn, torch.hstack((X, Y)).numpy())
+path = f"{dirs.project_root}/feynman_data/"
+fn = f"{fname.split('.')[0]}.txt"
+np.savetxt(path + fn, np.hstack((X, Y)))
 
 from aifeynman import run_aifeynman
+
 run_aifeynman(path, fn, 0, "14ops.txt")

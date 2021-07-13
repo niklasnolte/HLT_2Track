@@ -1,14 +1,15 @@
 import pickle
 import typing as t
-from os.path import join
+from itertools import product
 from os import makedirs
+from os.path import join
 
 import fire
 import numpy as np
+from hlt2trk.models import load_model
 from hlt2trk.utils import meta_info as meta
 from hlt2trk.utils.config import get_config
 from hlt2trk.utils.data import get_data
-from hlt2trk.models import load_model
 from sklearn.discriminant_analysis import (LinearDiscriminantAnalysis,
                                            QuadraticDiscriminantAnalysis)
 from sklearn.naive_bayes import GaussianNB
