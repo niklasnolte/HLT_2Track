@@ -13,9 +13,9 @@ X, Y = np.load(format_location(Locations.gridXY, cfg)).values()
 def plot_feat_vs_output(
         x: np.ndarray, y: np.ndarray, params: t.Optional[dict] = None):
     params = params or {}
-    _, axes = plt.subplots(
+    fig, axes = plt.subplots(
         int(np.ceil(len(cfg.features) / 2)),
-        2, dpi=120, figsize=(16, 9))
+        2, dpi=120, figsize=(16, 9), sharey=True)
     for i, (feature, ax) in enumerate(zip(cfg.features, axes.flatten())):
         xi = x[:, i]
         srt = np.argsort(xi)
@@ -27,10 +27,11 @@ def plot_feat_vs_output(
         ax.scatter(xiuniq, y_by_xi_mean, **params, label="mean")
         ax.scatter(xiuniq, y_by_xi_min, **params, label="min")
         ax.scatter(xiuniq, y_by_xi_max, **params, label="max")
+        ax.set_xlabel(feature)
+        ax.set_ylabel("output")
         ax.legend()
-        plt.xlabel(feature)
-        plt.ylabel("output")
-        plt.title(cfg.model)
+    fig.suptitle(cfg.model)
+    plt.tight_layout()
     plt.savefig(format_location(Locations.feat_vs_output, cfg))
     # plt.show()
 
