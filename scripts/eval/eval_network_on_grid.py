@@ -1,7 +1,5 @@
 from itertools import product
-from typing import Union
 
-import lightgbm as lgb
 import numpy as np
 import torch
 from hlt2trk.models import load_model
@@ -12,7 +10,7 @@ from evaluate import eval_bdt, eval_simple, eval_torch_network
 
 cfg = config.get_config()
 
-X, y = get_data(cfg)
+X = get_data(cfg)[cfg.features].values
 
 nfeats = len(cfg.features)
 
@@ -31,6 +29,8 @@ elif cfg.model in ["regular", "sigma"]:
     eval_fun = eval_torch_network
 elif cfg.model in ["lda", "qda", "gnb"]:
     eval_fun = eval_simple
+else:
+    raise ValueError(f"Unknown model: {cfg.model}, please specify eval function in case this is a new model")
 
 Y = eval_fun(model, grid).flatten()
 

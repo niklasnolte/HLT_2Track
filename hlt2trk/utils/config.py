@@ -1,5 +1,4 @@
 from functools import lru_cache
-from os import mkdir
 from os.path import abspath, dirname, join
 from warnings import warn
 
@@ -9,10 +8,14 @@ import torch
 class Configs:
     # list all possible configurations (cartesian product of these)
     model = ("regular", "sigma", "bdt", "lda", "qda", "gnb")
-    data_type = ("lhcb",)  # , "standalone")
-    features = (["minipchi2", "sumpt"], ["fdchi2", "sumpt"],
-                ["fdchi2", "sumpt", "vchi2", "minipchi2"])
+    data_type = ("lhcb", "standalone")
+    features = (
+        ["minipchi2", "sumpt"],
+        ["fdchi2", "sumpt"],
+        ["fdchi2", "sumpt", "vchi2", "minipchi2"],
+    )
     normalize = (True, False)
+    signal_type = ("heavy-flavor", "beauty", "charm")
 
 
 class Configuration:
@@ -22,18 +25,21 @@ class Configuration:
         features: list = Configs.features[0],
         normalize: bool = Configs.normalize[0],
         data_type: str = Configs.data_type[0],
+        signal_type: str = Configs.signal_type[0],
         seed: int = None,
-        use_cuda: bool = True
+        use_cuda: bool = False,
     ) -> None:
         assert model in Configs.model
         assert data_type in Configs.data_type
         assert features in Configs.features
         assert normalize in Configs.normalize
+        assert signal_type in Configs.signal_type
 
         self.model = model
+        self.features = features
         self.normalize = normalize
         self.data_type = data_type
-        self.features = features
+        self.signal_type = signal_type
         self.seed = seed
 
         self.device = torch.device("cpu")
@@ -41,7 +47,7 @@ class Configuration:
             if torch.cuda.is_available():
                 self.device = torch.device("cuda:0")
             else:
-                warn('use_cuda is set to True but CUDA is unavailable...')
+                warn("use_cuda is set to True but CUDA is unavailable...")
 
     def __str__(self):
         return "\n".join(
@@ -52,48 +58,57 @@ class Configuration:
                 f"normalize={self.normalize}",
                 f"seed={self.seed}",
                 f"device={self.device}",
+                f"signal_type={self.signal_type}",
             )
         )
 
 
 class dirs:
     project_root = abspath(dirname(__file__) + "/../..")
-    models = join(project_root, 'models')
-    plots = join(project_root, 'plots')
-    heatmaps = join(plots, 'heatmaps')
-    scatter = join(plots, 'scatter')
-    gifs = join(plots, 'gifs')
-    data = join(project_root, 'data')
-    savepoints = join(project_root, 'savepoints')
+    models = join(project_root, "models")
+    plots = join(project_root, "plots")
+    heatmaps = join(plots, "heatmaps")
+    scatter = join(plots, "scatter")
+    gifs = join(plots, "gifs")
+    data = join(project_root, "data")
+    savepoints = join(project_root, "savepoints")
 
 
 class Locations:
     project_root = abspath(dirname(__file__) + "/../..")
-    model = join(dirs.models, "{model}_{features}_{data_type}_{normalize}.pkl")
+    model = join(
+        dirs.models, "{model}_{features}_{data_type}_{normalize}_{signal_type}.pkl"
+    )
     data = join(dirs.data, "MC_{data_type}.pkl")
+    raw_data_path = join(dirs.data, "raw_{data_type}")
     # grid evaluation
     gridXY = join(
-        dirs.savepoints,
-        "gridXY_{model}_{features}_{data_type}_{normalize}.npz")
+        dirs.savepoints, "gridXY_{model}_{features}_{data_type}_{normalize}_{signal_type}.npz"
+    )
     # plots
     train_distribution_gif = join(
         dirs.gifs,
-        "training_distributions_{model}_{features}_{data_type}_{normalize}.gif",)
+        "training_distributions_{model}_{features}_{data_type}_{normalize}_{signal_type}.gif",
+    )
     heatmap = join(
         dirs.heatmaps,
-        "heatmap_{model}_{features}_{data_type}_{normalize}.pdf")
+        "heatmap_{model}_{features}_{data_type}_{normalize}_{signal_type}.pdf",
+    )
     twodim_vs_output = join(
         dirs.scatter,
-        "twodim_vs_output_{model}_{features}_{data_type}_{normalize}.pdf",)
+        "twodim_vs_output_{model}_{features}_{data_type}_{normalize}_{signal_type}.pdf",
+    )
     feat_vs_output = join(
         dirs.scatter,
-        "feat_vs_output_{model}_{features}_{data_type}_{normalize}.pdf",)
+        "feat_vs_output_{model}_{features}_{data_type}_{normalize}_{signal_type}.pdf",
+    )
     roc = join(
-        dirs.scatter,
-        "roc_{model}_{features}_{data_type}_{normalize}.pdf")
+        dirs.scatter, "roc_{model}_{features}_{data_type}_{normalize}_{signal_type}.pdf"
+    )
     rate_vs_eff = join(
         dirs.scatter,
-        "rate_vs_eff_{model}_{features}_{data_type}_{normalize}.pdf")
+        "rate_vs_eff_{model}_{features}_{data_type}_{normalize}_{signal_type}.pdf",
+    )
 
 
 def to_string_features(features: list):
@@ -112,12 +127,13 @@ def from_string_normalize(normalize: str):
     return normalize == "normed"
 
 
-def format_location(location, config):
+def format_location(location: str, config: Configuration):
     return location.format(
         model=config.model,
         features=to_string_features(config.features),
         data_type=config.data_type,
         normalize=to_string_normalize(config.normalize),
+        signal_type=config.signal_type,
     )
 
 
@@ -134,6 +150,8 @@ def get_cli_args(config) -> str:
         argstr += f"--data_type={config.data_type} "
     if hasattr(config, "normalize"):
         argstr += f"--normalize={from_string_normalize(config.normalize)} "
+    if hasattr(config, "signal_type"):
+        argstr += f"--signal_type={config.signal_type} "
     return argstr
 
 

@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from hlt2trk.utils import config
-from hlt2trk.utils import data
+from hlt2trk.utils.data import get_data, is_signal
 from hlt2trk.models import load_model
 from evaluate import eval_bdt, eval_torch_network, eval_simple
 
@@ -23,7 +23,8 @@ def eval(data):
 
 
 def plot_rates_vs_effs(data):
-    truths = data["label"]
+    truths = is_signal(cfg, data['signal_type'])
+    print(truths.mean())
     preds = data["pred"]
     cutrange = np.linspace(0, 1, 50)
     minbias_preds = preds[data.eventtype == 0]
@@ -50,7 +51,7 @@ def plot_rates_vs_effs(data):
     plt.savefig(config.format_location(config.Locations.rate_vs_eff, cfg))
 
 
-data = data.get_dataframe(cfg)
+data = get_data(cfg)
 
 data["pred"] = eval(data)
 

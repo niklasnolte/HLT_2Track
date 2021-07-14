@@ -1,24 +1,16 @@
 from os.path import join
-from sys import argv
-
 import numpy as np
 import pandas as pd
 import uproot3 as u
-from hlt2trk.utils import dirs
+from hlt2trk.utils.config import get_config, Locations, format_location
 
-try:
-    prefix = argv[1]
-except IndexError:
-    prefix = "/home/kitouni/projects/HLT_2Track/data/ntuples"
+cfg = get_config()
 
-print(
-    f"preprocessing data in {prefix}.\nYou can "
-    "change the path via sys.argv[1] if the data lies somewhere else"
-)
+input_loc = format_location(Locations.raw_data_path, cfg)
 
 
 def from_root(path: str, columns="*") -> pd.DataFrame:
-    ttree = u.open(join(prefix, path))
+    ttree = u.open(join(input_loc, path))
     return ttree["DecayTreeTuple#1/N2Trk"].pandas.df(columns)
 
 
@@ -83,10 +75,8 @@ def presel(df: pd.DataFrame) -> pd.DataFrame:
 
 def preprocess(df: pd.DataFrame) -> pd.DataFrame:
     df["sumpt"] = df[["trk1_PT", "trk2_PT"]].sum(axis=1)
-    df["minipchi2"] = df[["trk1_IPCHI2_OWNPV",
-                          "trk2_IPCHI2_OWNPV"]].min(axis=1)
-    df["label"] = (df[["trk1_signal_type",
-                       "trk2_signal_type"]].min(axis=1) > 0).astype(int)
+    df["minipchi2"] = df[["trk1_IPCHI2_OWNPV", "trk2_IPCHI2_OWNPV"]].min(axis=1)
+    df["signal_type"] = df[["trk1_signal_type", "trk2_signal_type"]].min(axis=1)
     df = presel(df)
     df.rename(
         columns={"sv_FDCHI2_OWNPV": "fdchi2", "sv_ENDVERTEX_CHI2": "vchi2"},
@@ -123,7 +113,7 @@ for i, df in enumerate(dfs):
 
 df = pd.concat(dfs)
 df = preprocess(df)
-save_file = join(dirs.data, "MC_lhcb.pkl")
+save_file = format_location(Locations.data, cfg)
 df.to_pickle(save_file)
-print('Preprocessed data saved to:')
+print("Preprocessed data saved to:")
 print(save_file)

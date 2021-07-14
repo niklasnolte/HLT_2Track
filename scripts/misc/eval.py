@@ -42,7 +42,7 @@ def _flattenXy(X: np.ndarray, y: np.ndarray, dims: t.Iterable = None,
 
 if __name__ == '__main__':
     cfg = get_config()
-    X, y = get_data(cfg)
+    X = get_data(cfg)[cfg.features].values
     nfeats = len(cfg.features)
 
     model = load_model(cfg)
