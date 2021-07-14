@@ -3,6 +3,9 @@ from hlt2trk.utils import config
 from hlt2trk.utils.config import Configs, Locations, dirs
 from os import makedirs
 
+# parameters
+USE_CUDA = False
+SEED = 1f
 
 for k, v in dirs.__dict__.items():
     if not k.startswith('__'):
@@ -101,4 +104,4 @@ rule train:
         Locations.model
     run:
         args = config.get_cli_args(wildcards)
-        shell(f"python {input.script} {args}")
+        shell(f"python {input.script} {args} --use_cuda={USE_CUDA} --seed={SEED}")
