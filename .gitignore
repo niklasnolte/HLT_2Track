@@ -139,3 +139,6 @@ results
 
 #snakemake
 .snakemake
+
+#scratch
+scratch
