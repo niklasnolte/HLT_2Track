@@ -49,7 +49,7 @@ class dirs:
     scatter = join(plots, 'scatter')
     gifs = join(plots, 'gifs')
     data = join(project_root, 'data')
-    ckpt = join(project_root, 'ckpt')
+    savepoints = join(project_root, 'savepoints')
 
 
 class Locations:
@@ -58,7 +58,7 @@ class Locations:
     data = join(dirs.data, "MC_{data_type}.pkl")
     # grid evaluation
     gridXY = join(
-        dirs.ckpt, "gridXY_{model}_{features}_{data_type}_{normalize}.npz")
+        dirs.savepoints, "gridXY_{model}_{features}_{data_type}_{normalize}.npz")
     # plots
     train_distribution_gif = join(
         dirs.gifs,
