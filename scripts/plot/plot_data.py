@@ -1,7 +1,9 @@
 import numpy as np
 from matplotlib import pyplot as plt
-import hlt2trk.utils.meta_info as meta
+import hlt2trk.utils.config import config, format_location, Locations
 import os
+
+#finish this pls
 
 sig, bkg = meta.get_data()
 
