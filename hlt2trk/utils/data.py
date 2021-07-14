@@ -41,7 +41,7 @@ def get_data(
 def get_data_for_training(cfg: config.Configuration) -> Tuple[np.ndarray]:
     X, y = get_data(cfg, preprocess_for_training=True)
 
-    np.random.seed(3)
+    np.random.seed(cfg.seed)
     shuffle_idx: np.ndarray = np.random.permutation(np.arange(len(X)))
     X = X[shuffle_idx]
     y = y[shuffle_idx]

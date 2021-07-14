@@ -29,7 +29,7 @@ def train_torch_model(
     loader = DataLoader(data, batch_size=512, shuffle=False)
 
     def train(model, optimizer, scheduler, filename, loss_fun=F.binary_cross_entropy):
-        device = torch.device("cpu" if not torch.cuda.is_available() else "cuda:0")
+        device = cfg.device
         print(f"training on {device}")
 
         y_val_ = y_val.to(device)
