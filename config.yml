@@ -1,11 +1,24 @@
 seed: 111
 use_cuda: True
 # list all possible configurations (cartesian product of these)
-model : ["bdt", "regular", "sigma", "bdt", "lda", "qda", "gnb"]
-data_type : 
-  - "lhcb"  # , "standalone")
-features : [["minipchi2", "sumpt"], ["fdchi2", "sumpt"], ["fdchi2", "sumpt", "vchi2", "minipchi2"]]
-signal_type : ["heavy-flavor", "beauty", "charm"]
-normalize : 
+model :
+  - "bdt"
+  - "regular"
+  - "sigma"
+  - "lda"
+  - "qda"
+  - "gnb"
+data_type :
+  - "lhcb"
+  - "standalone"
+features :
+  - ["minipchi2", "sumpt"]
+  - ["fdchi2", "sumpt"]
+  - ["fdchi2", "sumpt", "vchi2", "minipchi2"]
+signal_type :
+  - "heavy-flavor"
+  - "beauty"
+    #  - "charm"
+normalize :
   - False
   - True
