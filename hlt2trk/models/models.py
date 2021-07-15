@@ -3,12 +3,14 @@ from typing import Callable, Iterable, Union
 
 import lightgbm as lgb
 import torch
+from torch.random import seed
 from hlt2trk.utils import config
 from InfinityNorm import SigmaNet, infnorm
 from sklearn.discriminant_analysis import (LinearDiscriminantAnalysis,
                                            QuadraticDiscriminantAnalysis)
 from sklearn.naive_bayes import GaussianNB
 from torch import nn
+import numpy as np
 
 
 def _build_module(
@@ -62,6 +64,9 @@ def _build_module(
 
 def get_model(cfg: config.Configuration) -> Union[nn.Module, lgb.Booster]:
     nfeatures = len(cfg.features)
+    if cfg.seed is not None:
+        np.random.seed(cfg.seed)
+        torch.random.manual_seed(cfg.seed)
 
     if cfg.model == "sigma":
         be_monotonic_in = list(range(len(cfg.features)))
@@ -96,6 +101,8 @@ def get_model(cfg: config.Configuration) -> Union[nn.Module, lgb.Booster]:
             is_unbalance=True,
             num_leaves=15,
             boosting_type="gbdt",
+            seed=cfg.seed,
+            device=cfg.device
         )
         return clf
 

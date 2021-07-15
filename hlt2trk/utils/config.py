@@ -125,10 +125,10 @@ class Configuration:
         self.signal_type = signal_type
         self.seed = seed
 
-        self.device = torch.device("cpu")
+        self.device = "cpu"
         if use_cuda:
             if torch.cuda.is_available():
-                self.device = torch.device("cuda:0")
+                self.device = "cuda:0"
             else:
                 warn("use_cuda is set to True but CUDA is unavailable...")
 
