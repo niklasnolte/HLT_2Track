@@ -126,6 +126,7 @@ def get_script_preprocess(wildcards):
 
 rule preprocess:
     input:
+        "./hlt2trk/utils/config.py",
         raw_data=dirs.raw_data,
         script=get_script_preprocess,
     output:

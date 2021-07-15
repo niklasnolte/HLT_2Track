@@ -10,7 +10,7 @@ model :
   - "gnb"
 data_type :
   - "lhcb"
-  - "standalone"
+  #- "standalone"
 features :
   - ["minipchi2", "sumpt"]
   - ["fdchi2", "sumpt"]
