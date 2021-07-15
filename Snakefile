@@ -1,11 +1,7 @@
 # type: ignore
-from hlt2trk.utils import config
-from hlt2trk.utils.config import Configs, Locations, dirs
+from hlt2trk.utils import config, load_config
+from hlt2trk.utils.config import Locations, dirs, Configs
 from os import makedirs
-
-# parameters
-USE_CUDA = False # make sure its used everywhere (how?)
-SEED = 1
 
 for k, v in dirs.__dict__.items():
     if not k.startswith("__"):
@@ -130,10 +126,10 @@ def get_script_preprocess(wildcards):
 
 rule preprocess:
     input:
-        raw_data=Locations.raw_data_path,
+        raw_data=dirs.raw_data,
         script=get_script_preprocess,
     output:
         Locations.data,
     run:
         args = config.get_cli_args(wildcards)
-        shell(f"python {input.script} {args} --use_cuda={USE_CUDA} --seed={SEED}")
+        shell(f"python {input.script} {args}")

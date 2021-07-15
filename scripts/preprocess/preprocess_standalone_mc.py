@@ -1,12 +1,12 @@
 import pandas as pd
 import numpy as np
 import uproot3 as u
-from hlt2trk.utils.config import get_config, Locations, format_location
+from hlt2trk.utils.config import get_config, Locations, format_location, dirs
 from hlt2trk.utils.data import signal_type_int
 
 cfg = get_config()
 
-prefix = format_location(Locations.raw_data_path, cfg)
+prefix = format_location(dirs.raw_data, cfg)
 
 def from_root(path : str, tree : str = 'data') -> pd.DataFrame:
     return u.open(path)[tree].pandas.df()
