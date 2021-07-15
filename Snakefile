@@ -41,11 +41,11 @@ rule all:
             signal_type=Configs.signal_type,
         ),
 
-
 rule plot_rate_vs_eff:
     input:
         Locations.data,
         Locations.model,
+        Locations.presel_efficiencies,
         script="scripts/eval/eval_and_plot_score.py",
     output:
         Locations.rate_vs_eff,
@@ -130,6 +130,7 @@ rule preprocess:
         script=get_script_preprocess,
     output:
         Locations.data,
+        Locations.presel_efficiencies
     run:
         args = config.get_cli_args(wildcards)
         shell(f"python {input.script} {args}")

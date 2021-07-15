@@ -1,4 +1,5 @@
 from os.path import join
+import json
 import numpy as np
 import pandas as pd
 import uproot3 as u
@@ -6,11 +7,10 @@ from hlt2trk.utils.config import get_config, Locations, format_location, dirs
 
 cfg = get_config()
 
-input_loc = format_location(dirs.raw_data, cfg)
 
 
 def from_root(path: str, columns="*") -> pd.DataFrame:
-    ttree = u.open(join(input_loc, path))
+    ttree = u.open(join(dirs.raw_data, path))
     return ttree["DecayTreeTuple#1/N2Trk"].pandas.df(columns)
 
 
@@ -34,7 +34,6 @@ columns = [
 ]
 
 tupleTrees = [
-    # "upgrade_magdown_sim10_up08_30000000_digi_MVATuple.root",
     "2018MinBias_MVATuple.root",
     "upgrade_magdown_sim10_up08_11102202_digi_MVATuple.root",
     "upgrade_magdown_sim10_up08_11124001_digi_MVATuple.root",
@@ -64,11 +63,9 @@ def presel(df: pd.DataFrame) -> pd.DataFrame:
         for et in selt.eventtype.unique()
     }
 
-    for et in n_events_after:
-        print(
-            f"preselection efficiency for {tupleTrees[et]}: "
-            f"{100*n_events_after[et]/n_events_before[et]:.2f}%"
-        )
+    effs = { int(et): n_events_after[et] / n_events_before[et] for et in n_events_after }
+    with open(format_location(Locations.presel_efficiencies, cfg), "w") as f:
+        json.dump(effs, f)
 
     return selt
 
