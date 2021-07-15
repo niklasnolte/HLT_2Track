@@ -114,8 +114,8 @@ class Configuration:
         normalize: bool = Configs.normalize[0],
         data_type: str = Configs.data_type[0],
         signal_type: str = Configs.signal_type[0],
-        seed: int = None,
-        use_cuda: bool = False,
+        seed: int = Configs.seed,
+        use_cuda: bool = Configs.use_cuda,
     ):
 
         self.model = model
