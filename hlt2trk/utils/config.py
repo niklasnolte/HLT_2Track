@@ -14,8 +14,9 @@ class dirs:
     scatter = join(plots, "scatter")
     gifs = join(plots, "gifs")
     data = join(project_root, "data")
-    raw_data = join(data, "raw_{data_type}")
+    raw_data = join(data, "raw")
     savepoints = join(project_root, "savepoints")
+    results = join(project_root, "results")
 
 
 class Locations:
@@ -51,6 +52,10 @@ class Locations:
     rate_vs_eff = join(
         dirs.scatter,
         "rate_vs_eff_{model}_{features}_{data_type}_{normalize}_{signal_type}.pdf",
+    )
+    presel_efficiencies = join(
+        dirs.results,
+        "presel_efficiencies_{data_type}.json",
     )
 
 
