@@ -112,7 +112,10 @@ def get_model(cfg: config.Configuration) -> Union[nn.Module, lgb.Booster]:
         return model
 
 
-def load_model(cfg: config.Configuration) -> Union[nn.Module, lgb.Booster]:
+def load_model(cfg: config.Configuration) -> Union[nn.Module, lgb.Booster,
+                                                   LinearDiscriminantAnalysis,
+                                                   QuadraticDiscriminantAnalysis,
+                                                   GaussianNB]:
     location = config.format_location(config.Locations.model, cfg)
     if cfg.model in ["regular", "sigma"]:
         m = get_model(cfg)

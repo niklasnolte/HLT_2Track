@@ -1,66 +1,9 @@
 from functools import lru_cache
 from os.path import abspath, dirname, join
 from warnings import warn
+from .utils import load_config
 
 import torch
-
-
-class Configs:
-    # list all possible configurations (cartesian product of these)
-    model = ("regular", "sigma", "bdt", "lda", "qda", "gnb")
-    data_type = ("lhcb", "standalone")
-    features = (
-        ["minipchi2", "sumpt"],
-        ["fdchi2", "sumpt"],
-        ["fdchi2", "sumpt", "vchi2", "minipchi2"],
-    )
-    normalize = (True, False)
-    signal_type = ("heavy-flavor", "beauty", "charm")
-
-
-class Configuration:
-    def __init__(
-        self,
-        model: str = Configs.model[0],
-        features: list = Configs.features[0],
-        normalize: bool = Configs.normalize[0],
-        data_type: str = Configs.data_type[0],
-        signal_type: str = Configs.signal_type[0],
-        seed: int = None,
-        use_cuda: bool = False,
-    ) -> None:
-        assert model in Configs.model
-        assert data_type in Configs.data_type
-        assert features in Configs.features
-        assert normalize in Configs.normalize
-        assert signal_type in Configs.signal_type
-
-        self.model = model
-        self.features = features
-        self.normalize = normalize
-        self.data_type = data_type
-        self.signal_type = signal_type
-        self.seed = seed
-
-        self.device = torch.device("cpu")
-        if use_cuda:
-            if torch.cuda.is_available():
-                self.device = torch.device("cuda:0")
-            else:
-                warn("use_cuda is set to True but CUDA is unavailable...")
-
-    def __str__(self):
-        return "\n".join(
-            (
-                f"model={self.model}",
-                f"features={self.features}",
-                f"data_type={self.data_type}",
-                f"normalize={self.normalize}",
-                f"seed={self.seed}",
-                f"device={self.device}",
-                f"signal_type={self.signal_type}",
-            )
-        )
 
 
 class dirs:
@@ -71,20 +14,20 @@ class dirs:
     scatter = join(plots, "scatter")
     gifs = join(plots, "gifs")
     data = join(project_root, "data")
+    raw_data = join(data, "raw_{data_type}")
     savepoints = join(project_root, "savepoints")
 
 
 class Locations:
     project_root = abspath(dirname(__file__) + "/../..")
     model = join(
-        dirs.models, "{model}_{features}_{data_type}_{normalize}_{signal_type}.pkl"
-    )
+        dirs.models,
+        "{model}_{features}_{data_type}_{normalize}_{signal_type}.pkl")
     data = join(dirs.data, "MC_{data_type}.pkl")
-    raw_data_path = join(dirs.data, "raw_{data_type}")
     # grid evaluation
     gridXY = join(
-        dirs.savepoints, "gridXY_{model}_{features}_{data_type}_{normalize}_{signal_type}.npz"
-    )
+        dirs.savepoints,
+        "gridXY_{model}_{features}_{data_type}_{normalize}_{signal_type}.npz")
     # plots
     train_distribution_gif = join(
         dirs.gifs,
@@ -103,8 +46,8 @@ class Locations:
         "feat_vs_output_{model}_{features}_{data_type}_{normalize}_{signal_type}.pdf",
     )
     roc = join(
-        dirs.scatter, "roc_{model}_{features}_{data_type}_{normalize}_{signal_type}.pdf"
-    )
+        dirs.scatter,
+        "roc_{model}_{features}_{data_type}_{normalize}_{signal_type}.pdf")
     rate_vs_eff = join(
         dirs.scatter,
         "rate_vs_eff_{model}_{features}_{data_type}_{normalize}_{signal_type}.pdf",
@@ -127,7 +70,7 @@ def from_string_normalize(normalize: str):
     return normalize == "normed"
 
 
-def format_location(location: str, config: Configuration):
+def format_location(location: str, config):
     return location.format(
         model=config.model,
         features=to_string_features(config.features),
@@ -155,8 +98,50 @@ def get_cli_args(config) -> str:
     return argstr
 
 
+Configs = load_config(join(dirs.project_root, 'config.yml'))
+
+
+class Configuration:
+    def __init__(
+        self,
+        model: str = Configs.model[0],
+        features: list = Configs.features[0],
+        normalize: bool = Configs.normalize[0],
+        data_type: str = Configs.data_type[0],
+        signal_type: str = Configs.signal_type[0],
+        seed: int = None,
+        use_cuda: bool = False,
+    ):
+
+        self.model = model
+        self.features = features
+        self.normalize = normalize
+        self.data_type = data_type
+        self.signal_type = signal_type
+        self.seed = seed
+
+        self.device = torch.device("cpu")
+        if use_cuda:
+            if torch.cuda.is_available():
+                self.device = torch.device("cuda:0")
+            else:
+                warn("use_cuda is set to True but CUDA is unavailable...")
+
+    def __str__(self):
+        return "\n".join(
+            (
+                f"model={self.model}",
+                f"features={self.features}",
+                f"normalize={self.normalize}",
+                f"data_type={self.data_type}",
+                f"signal_type={self.signal_type}",
+                f"seed={self.seed}",
+                f"device={self.device}",
+            )
+        )
+
+
 @lru_cache(1)
 def get_config() -> Configuration:
     from fire import Fire
-
     return Fire(Configuration)

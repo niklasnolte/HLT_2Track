@@ -22,22 +22,34 @@ def eval(data):
         return eval_simple(model, X)
 
 
-def plot_rates_vs_effs(data):
-    truths = is_signal(cfg, data['signal_type'])
-    print(truths.mean())
-    preds = data["pred"]
-    cutrange = np.linspace(0, 1, 50)
-    minbias_preds = preds[data.eventtype == 0]
-    rates = [(minbias_preds > i).mean() for i in cutrange]
+def roc_auc_score(rates, eff):
+    eff = np.array(eff)
+    rates = np.array(rates)
+    return sum(center(eff) * np.diff(rates))
 
-    _, ax = plt.subplots()
+def center(a):
+    return (a[1:] + a[:-1]) * .5
+
+
+def plot_rates_vs_effs(data):
+    truths=is_signal(cfg, data['signal_type'])
+    print(truths.mean())
+    preds=data["pred"]
+    cutrange=np.linspace(1, 0, 100)
+    minbias_preds=preds[data.eventtype == 0]
+    rates=[(minbias_preds > i).mean() for i in cutrange]
+
+    _, ax=plt.subplots()
     for mode in data.eventtype.unique():
-        pred = preds[data.eventtype == mode]
-        truth = truths[data.eventtype == mode]
+        pred=preds[data.eventtype == mode]
+        truth=truths[data.eventtype == mode]
+
         if mode != 0:
-            eff = [(pred[truth > 0] > i).mean() for i in cutrange]
-            ax.plot(rates, eff, label=f"mode = {mode}")
-    ax.plot([0, 1], [0, 1], color="grey", linestyle="--", label="random choice")
+            eff=[(pred[truth > 0] > i).mean() for i in cutrange]
+            auc=roc_auc_score(rates, eff)
+            ax.plot(rates, eff, label=f"{mode:^4} / {auc:^5.4f}", c=f"C{mode}")
+    ax.plot([0, 1], [0, 1], color="grey",
+            linestyle="--", label="random choice")
     ax.set_xlabel("rate")
     ax.set_ylabel("efficiency")
     ax.set_xlim(0, 1)
@@ -47,15 +59,15 @@ def plot_rates_vs_effs(data):
     ax.grid(linestyle="--")
     ax.grid(linestyle=":", which="minor")
     ax.set_title(cfg.model)
-    ax.legend(loc="lower right")
+    ax.legend(loc="lower right", title="mode / auc")
     plt.savefig(config.format_location(config.Locations.rate_vs_eff, cfg))
 
 
-data = get_data(cfg)
+data=get_data(cfg)
 
-data["pred"] = eval(data)
+data["pred"]=eval(data)
 
 # per event performance evaluation
-grpd = data.groupby(["eventtype", "EventInSequence"]).agg(max).reset_index()
+grpd=data.groupby(["eventtype", "EventInSequence"]).agg(max).reset_index()
 
 plot_rates_vs_effs(grpd)

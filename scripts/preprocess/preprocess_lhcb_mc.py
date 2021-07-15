@@ -2,11 +2,11 @@ from os.path import join
 import numpy as np
 import pandas as pd
 import uproot3 as u
-from hlt2trk.utils.config import get_config, Locations, format_location
+from hlt2trk.utils.config import get_config, Locations, format_location, dirs
 
 cfg = get_config()
 
-input_loc = format_location(Locations.raw_data_path, cfg)
+input_loc = format_location(dirs.raw_data, cfg)
 
 
 def from_root(path: str, columns="*") -> pd.DataFrame:
