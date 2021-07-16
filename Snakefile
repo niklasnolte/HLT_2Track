@@ -1,5 +1,5 @@
 # type: ignore
-from hlt2trk.utils import config, load_config
+from hlt2trk.utils import config as cfg
 from hlt2trk.utils.config import Locations, dirs, Configs
 from os import makedirs
 
@@ -15,8 +15,8 @@ rule all:
             Locations.feat_vs_output,
             model=Configs.model,
             data_type=Configs.data_type,
-            features=map(config.to_string_features, Configs.features),
-            normalize=map(config.to_string_normalize, Configs.normalize),
+            features=map(cfg.to_string_features, Configs.features),
+            normalize=map(cfg.to_string_normalize, Configs.normalize),
             signal_type=Configs.signal_type,
         ),
         # heatmap plots for 2d trainings
@@ -25,10 +25,10 @@ rule all:
             model=Configs.model,
             data_type=Configs.data_type,
             features=map(
-                config.to_string_features,
+                cfg.to_string_features,
                 [feats for feats in Configs.features if len(feats) == 2],
             ),
-            normalize=map(config.to_string_normalize, Configs.normalize),
+            normalize=map(cfg.to_string_normalize, Configs.normalize),
             signal_type=Configs.signal_type,
         ),
         # rates vs efficiencies, only for lhcb data
@@ -36,8 +36,8 @@ rule all:
             Locations.rate_vs_eff,
             model=Configs.model,
             data_type=["lhcb"], # only for lhcb data
-            features=map(config.to_string_features, Configs.features),
-            normalize=map(config.to_string_normalize, Configs.normalize),
+            features=map(cfg.to_string_features, Configs.features),
+            normalize=map(cfg.to_string_normalize, Configs.normalize),
             signal_type=Configs.signal_type,
         ),
 
@@ -50,7 +50,7 @@ rule plot_rate_vs_eff:
     output:
         Locations.rate_vs_eff,
     run:
-        args = config.get_cli_args(wildcards)
+        args = cfg.get_cli_args(wildcards)
         shell(f"python {input.script} {args}")
 
 
@@ -64,7 +64,7 @@ rule plot_heatmap:
     wildcard_constraints:
         features="\w+\+\w+",
     run:
-        args = config.get_cli_args(wildcards)
+        args = cfg.get_cli_args(wildcards)
         shell(f"python {input.script} {args}")
 
 
@@ -76,7 +76,7 @@ rule plot_feat_vs_output:
     output:
         Locations.feat_vs_output,
     run:
-        args = config.get_cli_args(wildcards)
+        args = cfg.get_cli_args(wildcards)
         shell(f"python {input.script} {args}")
 
 
@@ -87,7 +87,7 @@ rule eval_on_grid:
     output:
         Locations.gridXY,
     run:
-        args = config.get_cli_args(wildcards)
+        args = cfg.get_cli_args(wildcards)
         shell(f"python {input.script} {args}")
 
 
@@ -112,25 +112,26 @@ rule train:
     output:
         Locations.model,
     run:
-        args = config.get_cli_args(wildcards)
+        args = cfg.get_cli_args(wildcards)
         shell(f"python {input.script} {args}")
 
 
-
-def get_script_preprocess(wildcards):
-    if wildcards.data_type == "lhcb":
-        return "scripts/preprocess/preprocess_lhcb_mc.py"
-    elif wildcards.data_type == "standalone":
-        return "scripts/preprocess/preprocess_standalone_mc.py"
-
-
-rule preprocess:
+rule preprocess_lhcb:
     input:
         raw_data=dirs.raw_data,
-        script=get_script_preprocess,
+        script = "scripts/preprocess/preprocess_lhcb_mc.py"
     output:
-        Locations.data,
-        Locations.presel_efficiencies
+        Locations.data.format(data_type="lhcb"),
+        Locations.presel_efficiencies.format(data_type="lhcb"),
     run:
-        args = config.get_cli_args(wildcards)
-        shell(f"python {input.script} {args}")
+        shell(f"python {input.script} --data_type=lhcb")
+
+
+rule preprocess_standalone:
+    input:
+        raw_data=dirs.raw_data,
+        script="scripts/preprocess/preprocess_standalone_mc.py"
+    output:
+        Locations.data.format(data_type="standalone"),
+    run:
+        shell(f"python {input.script} --data_type=standalone")

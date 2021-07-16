@@ -35,12 +35,12 @@ columns = [
 
 tupleTrees = [
     "2018MinBias_MVATuple.root",
-    "upgrade_magdown_sim10_up08_11102202_digi_MVATuple.root",
-    "upgrade_magdown_sim10_up08_11124001_digi_MVATuple.root",
-    "upgrade_magdown_sim10_up08_21103100_digi_MVATuple.root",
-    "upgrade_magdown_sim10_up08_11874004_digi_MVATuple.root",
-    "upgrade_magdown_sim10_up08_27163003_digi_MVATuple.root",
-    "upgrade_magdown_sim10_up08_13104012_digi_MVATuple.root",
+    "upgrade_magdown_sim10_up08_11102202_digi_MVATuple.root", # Bd -> (Kst -> K pi) gamma
+    "upgrade_magdown_sim10_up08_11124001_digi_MVATuple.root", # Bd -> (Kst -> K pi) ee
+    "upgrade_magdown_sim10_up08_21103100_digi_MVATuple.root", # D+ -> Ks pi+
+    "upgrade_magdown_sim10_up08_11874004_digi_MVATuple.root", # B0 -> (D* -> (D -> K pi) pi) mu nu
+    "upgrade_magdown_sim10_up08_27163003_digi_MVATuple.root", # D* -> (D -> K pi) pi
+    "upgrade_magdown_sim10_up08_13104012_digi_MVATuple.root", # Bs -> phi phi
 ]
 
 
@@ -54,8 +54,9 @@ def presel(df: pd.DataFrame) -> pd.DataFrame:
 
     selt = df[sel].copy()
     # calculate efficiency
+    # EventInSequence.max() should be close to the total number of events run over
     n_events_before = {
-        et: df[df.eventtype == et].EventInSequence.nunique()
+        et: df[df.eventtype == et].EventInSequence.max()
         for et in df.eventtype.unique()
     }
     n_events_after = {
