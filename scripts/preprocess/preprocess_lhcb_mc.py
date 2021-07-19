@@ -8,7 +8,6 @@ from hlt2trk.utils.config import get_config, Locations, format_location, dirs
 cfg = get_config()
 
 
-
 def from_root(path: str, columns="*") -> pd.DataFrame:
     ttree = u.open(join(dirs.raw_data, path))
     return ttree["DecayTreeTuple#1/N2Trk"].pandas.df(columns)
@@ -64,7 +63,7 @@ def presel(df: pd.DataFrame) -> pd.DataFrame:
         for et in selt.eventtype.unique()
     }
 
-    effs = { int(et): n_events_after[et] / n_events_before[et] for et in n_events_after }
+    effs = {int(et): n_events_after[et] / n_events_before[et] for et in n_events_after}
     with open(format_location(Locations.presel_efficiencies, cfg), "w") as f:
         json.dump(effs, f)
 
@@ -103,6 +102,7 @@ def preprocess(df: pd.DataFrame) -> pd.DataFrame:
     df[to_log] = df[to_log].apply(np.log)
     df[to_scale] = df[to_scale].clip(lower_bound, 1e5)
     df[to_scale] = df[to_scale] / 1000  # to GeV
+    df = df[df["minipchi2"] < 6]
     return df
 
 

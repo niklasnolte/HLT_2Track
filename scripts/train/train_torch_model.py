@@ -42,6 +42,8 @@ def train_torch_model(
         plt.tight_layout()
         model.to(device)
         for i in range(EPOCHS):
+            if cfg.model == "sigma" and cfg.sigma_final is not None:
+                model.sigmanet.sigma *= (cfg.sigma_final / cfg.sigma_init)**(1 / EPOCHS)
             model.train()
             for x, y in loader:
                 x = x.to(device)
@@ -84,6 +86,12 @@ def train_torch_model(
                     ]
                 )
                 print(f"epoch {i}, auc: {auc:.4f}, acc: {acc:.4f}", end="\r")
+                if cfg.model == "sigma":
+                    print(f"epoch {i}, auc: {auc:.4f}, acc: {acc:.4f}, \
+                        sigma: {model.sigmanet.sigma.item():.2f}", end="\r")
+                else:
+                    print(f"epoch {i}, auc: {auc:.4f}, acc: {acc:.4f}", end="\r")
+
                 ax.text(
                     0,
                     0.965,
@@ -109,8 +117,8 @@ def train_torch_model(
                 os.remove(fn)
         plt.close()
 
-    EPOCHS = 30
-    LR = 1e-2
+    EPOCHS = 60
+    LR = 5e-2
 
     torch.manual_seed(2)
     from hlt2trk.models import get_model
@@ -137,3 +145,4 @@ def train_torch_model(
     auc = roc_auc_score(y_val, preds)
     acc = max(balanced_accuracy_score(y_val, preds > i) for i in np.linspace(0, 1, 100))
     print(f"\nroc: {auc:.6f}, acc: {acc:.6f}")
+    return model

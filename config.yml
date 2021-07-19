@@ -1,10 +1,12 @@
-seed: 111
+seed: 100
 use_cuda: False
+sigma_final: 3
+sigma_init: 1
 # list all possible configurations (cartesian product of these)
 model :
-  # - "bdt"
-  - "regular"
   - "sigma"
+  # - "regular"
+  # - "bdt"
   # - "lda"
   # - "qda"
   # - "gnb"
