@@ -2,23 +2,28 @@ seed: 111
 use_cuda: False
 # list all possible configurations (cartesian product of these)
 model :
-  - "bdt"
+  # - "bdt"
   - "regular"
   - "sigma"
-  - "lda"
-  - "qda"
-  - "gnb"
+  # - "lda"
+  # - "qda"
+  # - "gnb"
 data_type :
   - "lhcb"
-  - "standalone"
+  # - "standalone"
 features :
   - ["minipchi2", "sumpt"]
-  - ["fdchi2", "sumpt"]
-  - ["fdchi2", "sumpt", "vchi2", "minipchi2"]
+  # - ["fdchi2", "sumpt"]
+  # - ["fdchi2", "sumpt", "vchi2", "minipchi2"]
 signal_type :
   - "heavy-flavor"
-  - "beauty"
-  - "charm"
+  # - "beauty"
+  # - "charm"
 normalize :
   - False
-  - True
+  # - True
+presel_conf :
+  - svPT : 2000 # [MeV]
+    trkPT : 500 # [MeV]
+  - svPT : 1000 # [MeV]
+    trkPT : 500 # [MeV]
