@@ -71,15 +71,22 @@ def get_model(cfg: config.Configuration) -> Union[nn.Module, lgb.Booster]:
             # if vchi2 is not in there, we don't need to remove it
             pass
 
-        sigma_network = nn.Sequential(
-            SigmaNet(
-                _build_module(in_features=nfeatures, norm=True),
-                sigma=1.6,
-                monotonic_in=be_monotonic_in,
-                nfeatures=nfeatures,
-            ),
-            nn.Sigmoid(),
-        )
+        class Sigma(nn.Module):
+            def __init__(self, sigma):
+                super().__init__()
+                self.sigmanet = SigmaNet(
+                    _build_module(in_features=nfeatures, norm=True),
+                    sigma=sigma,
+                    monotonic_in=be_monotonic_in,
+                    nfeatures=nfeatures)
+
+            def forward(self, x):
+                x = self.sigmanet(x)
+                x = torch.sigmoid(x)
+                return x
+
+        sigma = cfg.sigma_init if cfg.sigma_init is not None else 1
+        sigma_network = Sigma(sigma=sigma)
         return sigma_network
 
     elif cfg.model == "regular":

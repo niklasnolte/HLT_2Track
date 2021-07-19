@@ -33,3 +33,4 @@ def train_simple_model(
     auc = roc_auc_score(y_val.reshape(-1), probs[:, 1])
 
     print(f"roc: {auc:.6f}, acc: {acc:.6f}")
+    return model

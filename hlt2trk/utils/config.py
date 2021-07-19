@@ -29,24 +29,29 @@ class Locations:
     # grid evaluation
     gridXY = join(
         dirs.savepoints,
-        "gridXY_{model}_{features}_{data_type}_{normalize}_{signal_type}_{presel_conf}.npz",
+        "gridXY_{model}_{features}_{data_type}_{normalize}\
+            _{signal_type}_{presel_conf}.npz",
     )
     # plots
     train_distribution_gif = join(
         dirs.gifs,
-        "training_distributions_{model}_{features}_{data_type}_{normalize}_{signal_type}_{presel_conf}.gif",
+        "training_distributions_{model}_{features}_{data_type}_{normalize}\
+            _{signal_type}_{presel_conf}.gif",
     )
     heatmap = join(
         dirs.heatmaps,
-        "heatmap_{model}_{features}_{data_type}_{normalize}_{signal_type}_{presel_conf}.pdf",
+        "heatmap_{model}_{features}_{data_type}_{normalize}\
+            _{signal_type}_{presel_conf}.pdf",
     )
     twodim_vs_output = join(
         dirs.scatter,
-        "twodim_vs_output_{model}_{features}_{data_type}_{normalize}_{signal_type}_{presel_conf}.pdf",
+        "twodim_vs_output_{model}_{features}_{data_type}_{normalize}\
+            _{signal_type}_{presel_conf}.pdf",
     )
     feat_vs_output = join(
         dirs.scatter,
-        "feat_vs_output_{model}_{features}_{data_type}_{normalize}_{signal_type}_{presel_conf}.pdf",
+        "feat_vs_output_{model}_{features}_{data_type}_{normalize}\
+            _{signal_type}_{presel_conf}.pdf",
     )
     roc = join(
         dirs.scatter,
@@ -54,11 +59,16 @@ class Locations:
     )
     rate_vs_eff = join(
         dirs.scatter,
-        "rate_vs_eff_{model}_{features}_{data_type}_{normalize}_{signal_type}_{presel_conf}.pdf",
+        "rate_vs_eff_{model}_{features}_{data_type}_{normalize}\
+            _{signal_type}_{presel_conf}.pdf",
     )
     presel_efficiencies = join(
         dirs.results,
         "presel_efficiencies_{data_type}_{presel_conf}.json",
+    )
+    auc_acc = join(
+        dirs.results,
+        "metrics_{model}_{features}_{data_type}_{normalize}_{signal_type}.json",
     )
 
 
@@ -114,7 +124,9 @@ def get_cli_args(config) -> str:
         argstr += f"--signal_type={config.signal_type} "
     if hasattr(config, "presel_conf"):
         # need to double curly brace, so f strings do not work here
-        argstr += "--presel_conf='{" + str(from_string_presel_conf(config.presel_conf)) + "}'"
+        argstr += "--presel_conf='{"\
+            + str(from_string_presel_conf(config.presel_conf))\
+            + "}'"
     return argstr
 
 
@@ -132,6 +144,8 @@ class Configuration:
         presel_conf: dict = Configs.presel_conf[0],
         seed: int = Configs.seed,
         use_cuda: bool = Configs.use_cuda,
+        sigma_final: float = Configs.sigma_final,
+        sigma_init: float = Configs.sigma_init,
     ):
 
         self.model = model
@@ -141,6 +155,8 @@ class Configuration:
         self.signal_type = signal_type
         self.presel_conf = presel_conf
         self.seed = seed
+        self.sigma_final = sigma_final
+        self.sigma_init = sigma_init
 
         self.device = torch.device("cpu")
         if use_cuda:
