@@ -18,6 +18,7 @@ rule all:
             features=map(cfg.to_string_features, Configs.features),
             normalize=map(cfg.to_string_normalize, Configs.normalize),
             signal_type=Configs.signal_type,
+            presel_conf=map(cfg.to_string_presel_conf, Configs.presel_conf),
         ),
         # heatmap plots for 2d trainings
         expand(
@@ -30,6 +31,7 @@ rule all:
             ),
             normalize=map(cfg.to_string_normalize, Configs.normalize),
             signal_type=Configs.signal_type,
+            presel_conf=map(cfg.to_string_presel_conf, Configs.presel_conf),
         ),
         # rates vs efficiencies, only for lhcb data
         expand(
@@ -39,6 +41,7 @@ rule all:
             features=map(cfg.to_string_features, Configs.features),
             normalize=map(cfg.to_string_normalize, Configs.normalize),
             signal_type=Configs.signal_type,
+            presel_conf=map(cfg.to_string_presel_conf, Configs.presel_conf),
         ),
 
 rule plot_rate_vs_eff:
@@ -121,10 +124,12 @@ rule preprocess_lhcb:
         raw_data=dirs.raw_data,
         script = "scripts/preprocess/preprocess_lhcb_mc.py"
     output:
-        Locations.data.format(data_type="lhcb"),
-        Locations.presel_efficiencies.format(data_type="lhcb"),
+        # format doesn't work because there are other placeholders to be filled
+        Locations.data.replace("{data_type}", "lhcb"),
+        Locations.presel_efficiencies.replace("{data_type}", "lhcb"),
     run:
-        shell(f"python {input.script} --data_type=lhcb")
+        args = cfg.get_cli_args(wildcards)
+        shell(f"python {input.script} --data_type=lhcb {args}")
 
 
 rule preprocess_standalone:
@@ -132,6 +137,7 @@ rule preprocess_standalone:
         raw_data=dirs.raw_data,
         script="scripts/preprocess/preprocess_standalone_mc.py"
     output:
-        Locations.data.format(data_type="standalone"),
+        Locations.data.replace("{data_type}", "standalone"),
     run:
-        shell(f"python {input.script} --data_type=standalone")
+        args = cfg.get_cli_args(wildcards)
+        shell(f"python {input.script} --data_type=standalone {args}")

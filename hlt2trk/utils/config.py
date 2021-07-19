@@ -23,56 +23,67 @@ class Locations:
     project_root = abspath(dirname(__file__) + "/../..")
     model = join(
         dirs.models,
-        "{model}_{features}_{data_type}_{normalize}_{signal_type}.pkl")
-    data = join(dirs.data, "MC_{data_type}.pkl")
+        "{model}_{features}_{data_type}_{normalize}_{signal_type}_{presel_conf}.pkl",
+    )
+    data = join(dirs.data, "MC_{data_type}_{presel_conf}.pkl")
     # grid evaluation
     gridXY = join(
         dirs.savepoints,
-        "gridXY_{model}_{features}_{data_type}_{normalize}_{signal_type}.npz")
+        "gridXY_{model}_{features}_{data_type}_{normalize}_{signal_type}_{presel_conf}.npz",
+    )
     # plots
     train_distribution_gif = join(
         dirs.gifs,
-        "training_distributions_{model}_{features}_{data_type}_{normalize}_{signal_type}.gif",
+        "training_distributions_{model}_{features}_{data_type}_{normalize}_{signal_type}_{presel_conf}.gif",
     )
     heatmap = join(
         dirs.heatmaps,
-        "heatmap_{model}_{features}_{data_type}_{normalize}_{signal_type}.pdf",
+        "heatmap_{model}_{features}_{data_type}_{normalize}_{signal_type}_{presel_conf}.pdf",
     )
     twodim_vs_output = join(
         dirs.scatter,
-        "twodim_vs_output_{model}_{features}_{data_type}_{normalize}_{signal_type}.pdf",
+        "twodim_vs_output_{model}_{features}_{data_type}_{normalize}_{signal_type}_{presel_conf}.pdf",
     )
     feat_vs_output = join(
         dirs.scatter,
-        "feat_vs_output_{model}_{features}_{data_type}_{normalize}_{signal_type}.pdf",
+        "feat_vs_output_{model}_{features}_{data_type}_{normalize}_{signal_type}_{presel_conf}.pdf",
     )
     roc = join(
         dirs.scatter,
-        "roc_{model}_{features}_{data_type}_{normalize}_{signal_type}.pdf")
+        "roc_{model}_{features}_{data_type}_{normalize}_{signal_type}_{presel_conf}.pdf",
+    )
     rate_vs_eff = join(
         dirs.scatter,
-        "rate_vs_eff_{model}_{features}_{data_type}_{normalize}_{signal_type}.pdf",
+        "rate_vs_eff_{model}_{features}_{data_type}_{normalize}_{signal_type}_{presel_conf}.pdf",
     )
     presel_efficiencies = join(
         dirs.results,
-        "presel_efficiencies_{data_type}.json",
+        "presel_efficiencies_{data_type}_{presel_conf}.json",
     )
 
 
-def to_string_features(features: list):
+def to_string_features(features: list) -> str:
     return "+".join(features)
 
 
-def from_string_features(features: str):
+def from_string_features(features: str) -> list:
     return features.split("+")
 
 
-def to_string_normalize(normalize: bool):
+def to_string_normalize(normalize: bool) -> str:
     return "normed" if normalize else "unnormed"
 
 
-def from_string_normalize(normalize: str):
+def from_string_normalize(normalize: str) -> bool:
     return normalize == "normed"
+
+
+def to_string_presel_conf(presel_conf: dict) -> str:
+    return "+".join([f"{k}:{v}" for k, v in presel_conf.items()])
+
+
+def from_string_presel_conf(presel_conf: str) -> dict:
+    return {k: v for k, v in (kv.split(":") for kv in presel_conf.split("+"))}
 
 
 def format_location(location: str, config):
@@ -82,6 +93,7 @@ def format_location(location: str, config):
         data_type=config.data_type,
         normalize=to_string_normalize(config.normalize),
         signal_type=config.signal_type,
+        presel_conf=to_string_presel_conf(config.presel_conf),
     )
 
 
@@ -100,10 +112,13 @@ def get_cli_args(config) -> str:
         argstr += f"--normalize={from_string_normalize(config.normalize)} "
     if hasattr(config, "signal_type"):
         argstr += f"--signal_type={config.signal_type} "
+    if hasattr(config, "presel_conf"):
+        # need to double curly brace, so f strings do not work here
+        argstr += "--presel_conf='{" + str(from_string_presel_conf(config.presel_conf)) + "}'"
     return argstr
 
 
-Configs = load_config(join(dirs.project_root, 'config.yml'))
+Configs = load_config(join(dirs.project_root, "config.yml"))
 
 
 class Configuration:
@@ -114,6 +129,7 @@ class Configuration:
         normalize: bool = Configs.normalize[0],
         data_type: str = Configs.data_type[0],
         signal_type: str = Configs.signal_type[0],
+        presel_conf: dict = Configs.presel_conf[0],
         seed: int = Configs.seed,
         use_cuda: bool = Configs.use_cuda,
     ):
@@ -123,6 +139,7 @@ class Configuration:
         self.normalize = normalize
         self.data_type = data_type
         self.signal_type = signal_type
+        self.presel_conf = presel_conf
         self.seed = seed
 
         self.device = torch.device("cpu")
@@ -140,6 +157,7 @@ class Configuration:
                 f"normalize={self.normalize}",
                 f"data_type={self.data_type}",
                 f"signal_type={self.signal_type}",
+                f"presel_conf={self.presel_conf}",
                 f"seed={self.seed}",
                 f"device={self.device}",
             )
@@ -149,4 +167,5 @@ class Configuration:
 @lru_cache(1)
 def get_config() -> Configuration:
     from fire import Fire
+
     return Fire(Configuration)

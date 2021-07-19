@@ -48,9 +48,9 @@ dfs = [from_root(x, columns) for x in tupleTrees]
 
 
 def presel(df: pd.DataFrame) -> pd.DataFrame:
-    sel = df.sv_PT > 2000
-    sel &= df.trk1_PT > 500
-    sel &= df.trk2_PT > 500
+    sel = df.sv_PT > cfg.presel_conf["svPT"]
+    sel &= df.trk1_PT > cfg.presel_conf["trkPT"]
+    sel &= df.trk2_PT > cfg.presel_conf["trkPT"]
 
     selt = df[sel].copy()
     # calculate efficiency
