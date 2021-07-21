@@ -1,3 +1,4 @@
+from functools import partial
 import pickle
 from typing import Callable, Iterable, Union
 
@@ -17,6 +18,7 @@ def _build_module(
     nunits: Union[int, Iterable] = 15,
     nlayers: int = 3,
     norm: bool = True,
+    always_norm: bool = True,
     activation: Callable = nn.LeakyReLU(),
     out_activation: Callable = None,
 ) -> nn.Module:
@@ -34,6 +36,9 @@ def _build_module(
       Iterable.
   norm : bool
       Whether or not to use Inf norm. If False a simple nn.Linear is used.
+  always_norm : bool
+      Whether or not to inf normalize columns whose sum is less than 1 always.
+      i.e. normalize by max(1, norm).
   activation : Callable
       Activation used between hidden layers.
   out_activation : Callable
@@ -43,7 +48,9 @@ def _build_module(
   nn.Module
       Sequential module.
   """
-    norm_func = infnorm if norm else lambda x: x
+
+    norm_func = partial(infnorm, always_norm=always_norm) if norm else lambda x: x
+
     nunits = [nunits] * (nlayers - 1) if isinstance(nunits, int) else nunits
     try:
         nunits = iter(nunits)
@@ -63,7 +70,7 @@ def _build_module(
 def get_model(cfg: config.Configuration) -> Union[nn.Module, lgb.Booster]:
     nfeatures = len(cfg.features)
 
-    if cfg.model == "sigma":
+    if cfg.model in ["sigma", "sigma-safe"]:
         be_monotonic_in = list(range(len(cfg.features)))
         try:
             be_monotonic_in.pop(cfg.features.index("vchi2"))
@@ -75,9 +82,10 @@ def get_model(cfg: config.Configuration) -> Union[nn.Module, lgb.Booster]:
             def __init__(self, sigma):
                 super().__init__()
                 self.sigmanet = SigmaNet(
-                    _build_module(in_features=nfeatures, norm=True),
-                    sigma=sigma,
-                    monotonic_in=be_monotonic_in,
+                    _build_module(
+                        in_features=nfeatures, norm=True,
+                        always_norm=cfg.model == "sigma-safe"),
+                    sigma=sigma, monotonic_in=be_monotonic_in,
                     nfeatures=nfeatures)
 
             def forward(self, x):
@@ -124,7 +132,7 @@ def load_model(cfg: config.Configuration) -> Union[nn.Module, lgb.Booster,
                                                    QuadraticDiscriminantAnalysis,
                                                    GaussianNB]:
     location = config.format_location(config.Locations.model, cfg)
-    if cfg.model in ["regular", "sigma"]:
+    if cfg.model in ["regular", "sigma", "sigma-safe"]:
         m = get_model(cfg)
         m.load_state_dict(torch.load(location))
     elif cfg.model == 'bdt':

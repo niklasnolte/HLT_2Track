@@ -13,7 +13,7 @@ x_train, y_train, x_val, y_val = get_data_for_training(cfg)
 
 if cfg.model == "bdt":
     eval_fun = eval_bdt
-elif cfg.model in ["regular", "sigma"]:
+elif cfg.model in ["regular", "sigma", "sigma-safe"]:
     eval_fun = eval_torch_network
 elif cfg.model in ["lda", "qda", "gnb"]:
     eval_fun = eval_simple

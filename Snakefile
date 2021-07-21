@@ -113,7 +113,7 @@ rule eval_validation:
 def get_inputs_train(wildcards):
     if wildcards.model == "bdt":
         return "scripts/train/train_bdt_model.py"
-    elif wildcards.model in ["regular", "sigma"]:
+    elif wildcards.model in ["regular", "sigma", "sigma-safe"]:
         return "scripts/train/train_torch_model.py"
     elif wildcards.model in ["lda", "qda", "gnb"]:
         return "scripts/train/train_simple_model.py"

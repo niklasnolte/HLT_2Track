@@ -8,7 +8,7 @@ cfg = get_config()
 
 x_train, y_train, x_val, y_val = get_data_for_training(cfg)
 
-if cfg.model in ["regular", "sigma"]:
+if cfg.model in ["regular", "sigma", "sigma-safe"]:
     train_torch_model(cfg, x_train, y_train, x_val, y_val)
 if cfg.model == "bdt":
     train_bdt_model(cfg, x_train, y_train, x_val, y_val)

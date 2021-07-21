@@ -18,7 +18,7 @@ def train_torch_model(
     x_val: np.ndarray,
     y_val: np.ndarray,
 ):
-    assert cfg.model in ["regular", "sigma"]
+    assert cfg.model in ["regular", "sigma", "sigma-safe"]
 
     x_train: torch.Tensor = torch.from_numpy(x_train).float()
     y_train: torch.Tensor = torch.from_numpy(y_train).float()[:, None]
@@ -42,7 +42,7 @@ def train_torch_model(
         plt.tight_layout()
         model.to(device)
         for i in range(EPOCHS):
-            if cfg.model == "sigma" and cfg.sigma_final is not None:
+            if cfg.model in ["sigma", "sigma-safe"] and cfg.sigma_final is not None:
                 model.sigmanet.sigma *= (cfg.sigma_final / cfg.sigma_init)**(1 / EPOCHS)
             model.train()
             for x, y in loader:
@@ -86,7 +86,7 @@ def train_torch_model(
                     ]
                 )
                 print(f"epoch {i}, auc: {auc:.4f}, acc: {acc:.4f}", end="\r")
-                if cfg.model == "sigma":
+                if cfg.model in ["sigma", "sigma-safe"]:
                     print(f"epoch {i}, auc: {auc:.4f}, acc: {acc:.4f}, \
                         sigma: {model.sigmanet.sigma.item():.2f}", end="\r")
                 else:
