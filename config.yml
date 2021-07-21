@@ -2,9 +2,11 @@ seed: 100
 use_cuda: False
 sigma_final: 3
 sigma_init: 1
+# plot_style: None
 # list all possible configurations (cartesian product of these)
 model :
   - "sigma"
+  - "sigma-safe"
   # - "regular"
   # - "bdt"
   # - "lda"
