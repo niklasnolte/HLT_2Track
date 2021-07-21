@@ -1,7 +1,9 @@
 # %%
+from functools import partial
 import math
 from itertools import product
 from os.path import join
+import matplotlib
 
 import numpy as np
 import pytorch_lightning as pl
@@ -65,33 +67,41 @@ class Linear2(torch.nn.Linear):
             fan_in, _ = init._calculate_fan_in_and_fan_out(self.weight)
             bound = 1 / math.sqrt(fan_in) if fan_in > 0 else 0
             init.uniform_(self.bias, -bound, bound)
-        init.normal_(self.weight, mean=0, std=.1)
-        output = self.weight.shape[0]
-        mask = torch.randint(0, self.weight.shape[1], (output, ))
+        n_output, n_input = self.weight.shape
+        std = .1 / math.sqrt(n_output)
+        # init.normal_(self.weight, mean=0, std=std)
+        init.uniform_(self.weight, a=-std, b=std)
+        mask = torch.randint(0, n_input, (n_output, ))
         with torch.no_grad():
-            self.weight[np.arange(output), mask] = 1
+            self.weight[np.arange(n_output), mask] = 1
 
 
-def test_init(X, norm, layer):
+def test_init(X, norm, layer, title=""):
     torch.manual_seed(32)
-    for i in range(10):
+    fig, axes = plt.subplots(5, 2, sharex=True, sharey=True, figsize=(8, 12))
+    for ax in axes.flatten():
         model = torch.nn.Sequential(norm(layer(2, 64)), torch.nn.ReLU(),
                                     norm(layer(64, 64)), torch.nn.ReLU(),
                                     norm(layer(64, 64)), torch.nn.ReLU(),
                                     layer(64, 1))
         y = model(X)
-        fig, ax = plt.subplots(1, 1)
         sc = ax.scatter(X[:, 0], X[:, 1], c=y.detach().numpy(),
                         cmap=plt.cm.RdBu, s=9, marker="s", alpha=1)
-        plt.colorbar(sc)
-        plt.show()
+        plt.colorbar(sc, ax=ax)
+    fig.suptitle(title, y=1)
+    fig.tight_layout()
+    plt.show()
+
+
 # %%
-
-
-test_init(X, infnorm2, Linear2)
+test_init(X, partial(infnorm, alpha=1 / 100, always_norm=False), Linear2,
+          title="init: onehot " "norm: unsafe" r"$a=.01$")
 # %%
-test_init(X, infnorm2, torch.nn.Linear)
-
+test_init(X, lambda x: x, torch.nn.Linear,
+          title="init: regular " "unnormed ")
+# %%
+test_init(X, partial(infnorm, always_norm=False), Linear2,
+          title="init: onehot " "norm:safe")
 # %%
 X_train = torch.from_numpy(np.random.uniform(X.min(), X.max(), (1000, 2))).float()
 Y_train = f(X_train).float()

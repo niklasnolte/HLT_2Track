@@ -34,12 +34,13 @@ columns = [
 
 tupleTrees = [
     "2018MinBias_MVATuple.root",
-    "upgrade_magdown_sim10_up08_11102202_digi_MVATuple.root", # Bd -> (Kst -> K pi) gamma
-    "upgrade_magdown_sim10_up08_11124001_digi_MVATuple.root", # Bd -> (Kst -> K pi) ee
-    "upgrade_magdown_sim10_up08_21103100_digi_MVATuple.root", # D+ -> Ks pi+
-    "upgrade_magdown_sim10_up08_11874004_digi_MVATuple.root", # B0 -> (D* -> (D -> K pi) pi) mu nu
-    "upgrade_magdown_sim10_up08_27163003_digi_MVATuple.root", # D* -> (D -> K pi) pi
-    "upgrade_magdown_sim10_up08_13104012_digi_MVATuple.root", # Bs -> phi phi
+    "upgrade_magdown_sim10_up08_11102202_digi_MVATuple.root",  # Bd -> (Kst -> K pi) gamma
+    "upgrade_magdown_sim10_up08_11124001_digi_MVATuple.root",  # Bd -> (Kst -> K pi) ee
+    "upgrade_magdown_sim10_up08_21103100_digi_MVATuple.root",  # D+ -> Ks pi+
+    # B0 -> (D* -> (D -> K pi) pi) mu nu
+    "upgrade_magdown_sim10_up08_11874004_digi_MVATuple.root",
+    "upgrade_magdown_sim10_up08_27163003_digi_MVATuple.root",  # D* -> (D -> K pi) pi
+    "upgrade_magdown_sim10_up08_13104012_digi_MVATuple.root",  # Bs -> phi phi
 ]
 
 
@@ -102,7 +103,6 @@ def preprocess(df: pd.DataFrame) -> pd.DataFrame:
     df[to_log] = df[to_log].apply(np.log)
     df[to_scale] = df[to_scale].clip(lower_bound, 1e5)
     df[to_scale] = df[to_scale] / 1000  # to GeV
-    df = df[df["minipchi2"] < 6]
     return df
 
 

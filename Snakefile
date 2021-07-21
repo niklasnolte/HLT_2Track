@@ -16,7 +16,9 @@ rule all:
                data_type=Configs.data_type,
                features=map(config.to_string_features, Configs.features),
                normalize=map(config.to_string_normalize, Configs.normalize),
-               signal_type=Configs.signal_type),
+               signal_type=Configs.signal_type,
+               presel_conf=map(config.to_string_presel_conf, Configs.presel_conf),
+               ),
         # feat_vs_output plots
         expand(
             Locations.feat_vs_output,

@@ -19,6 +19,7 @@ def _build_module(
     nlayers: int = 3,
     norm: bool = True,
     always_norm: bool = True,
+    alpha: float = None,
     activation: Callable = nn.LeakyReLU(),
     out_activation: Callable = None,
 ) -> nn.Module:
@@ -39,6 +40,8 @@ def _build_module(
   always_norm : bool
       Whether or not to inf normalize columns whose sum is less than 1 always.
       i.e. normalize by max(1, norm).
+  alpha : float
+      Used in normalizing each layer. i.e. normalize by norm*alpha. Defaults to 1.
   activation : Callable
       Activation used between hidden layers.
   out_activation : Callable
@@ -49,7 +52,8 @@ def _build_module(
       Sequential module.
   """
 
-    norm_func = partial(infnorm, always_norm=always_norm) if norm else lambda x: x
+    norm_func = partial(infnorm, always_norm=always_norm,
+                        alpha=alpha) if norm else lambda x: x
 
     nunits = [nunits] * (nlayers - 1) if isinstance(nunits, int) else nunits
     try:
@@ -81,10 +85,13 @@ def get_model(cfg: config.Configuration) -> Union[nn.Module, lgb.Booster]:
         class Sigma(nn.Module):
             def __init__(self, sigma):
                 super().__init__()
+                depth = 3
+                alpha = sigma**(-1 / depth)
+
                 self.sigmanet = SigmaNet(
-                    _build_module(
-                        in_features=nfeatures, norm=True,
-                        always_norm=cfg.model == "sigma-safe"),
+                    _build_module(nlayers=depth, alpha=alpha,
+                                  in_features=nfeatures, norm=True,
+                                  always_norm=cfg.model == "sigma-safe"),
                     sigma=sigma, monotonic_in=be_monotonic_in,
                     nfeatures=nfeatures)
 
