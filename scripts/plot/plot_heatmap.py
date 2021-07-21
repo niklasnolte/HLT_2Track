@@ -1,12 +1,13 @@
 import typing as t
+from os.path import join
 
 import numpy as np
+from hlt2trk.utils.config import Locations, dirs, format_location, get_config
 from matplotlib import pyplot as plt
-from hlt2trk.utils.config import get_config, Locations, format_location
-
-plt.style.use("seaborn")
 
 cfg = get_config()
+if cfg.plot_style == "dark":
+    plt.style.use(join(dirs.project_root, 'scripts/plot/paper-dark'))
 
 X, Y = np.load(format_location(Locations.gridXY, cfg)).values()
 with open(format_location(Locations.auc_acc, cfg), "r") as f:
