@@ -146,6 +146,7 @@ class Configuration:
         use_cuda: bool = Configs.use_cuda,
         sigma_final: float = Configs.sigma_final,
         sigma_init: float = Configs.sigma_init,
+        plot_style: bool = Configs.plot_style,
     ):
 
         self.model = model
@@ -157,6 +158,7 @@ class Configuration:
         self.seed = seed
         self.sigma_final = sigma_final
         self.sigma_init = sigma_init
+        self.plot_style = plot_style
 
         self.device = torch.device("cpu")
         if use_cuda:
