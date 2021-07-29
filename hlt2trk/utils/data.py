@@ -10,6 +10,7 @@ __all__ = [
     "get_data_for_training",
 ]
 
+
 def signal_type_int(signal_type: str) -> int:
     # this should match with the signal type definition in the root data
     if signal_type == "beauty":
@@ -19,19 +20,23 @@ def signal_type_int(signal_type: str) -> int:
     else:
         raise ValueError(f"signal_type must be one of (\"charm\", \"beauty\")")
 
+
 def is_signal(cfg, signal_int) -> bool:
     if cfg.signal_type == "beauty":
-      return signal_int == signal_type_int("beauty")
+        return signal_int == signal_type_int("beauty")
     elif cfg.signal_type == "charm":
-      return signal_int == signal_type_int("charm")
+        return signal_int == signal_type_int("charm")
     elif cfg.signal_type == "heavy-flavor":
-      return signal_int > 0
+        return signal_int > 0
+
 
 def get_data(cfg: config.Configuration) -> pd.DataFrame:
     mc = pd.read_pickle(config.format_location(Locations.data, cfg))
     if cfg.normalize:
         x = mc[cfg.features]
         mc[cfg.features] = (x - x.min(axis=0)) / (x.max(axis=0) - x.min(axis=0))
+    # test kink
+    # mc = mc[mc["minipchi2"] < 6]
     return mc.reset_index(drop=True)
 
 

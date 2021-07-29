@@ -5,23 +5,24 @@ from typing import Callable, Iterable, Union
 import lightgbm as lgb
 import torch
 from hlt2trk.utils import config
-from InfinityNorm import SigmaNet, infnorm
+from InfinityNorm import SigmaNet, project_norm, divide_norm, GroupSort
 from sklearn.discriminant_analysis import (LinearDiscriminantAnalysis,
                                            QuadraticDiscriminantAnalysis)
 from sklearn.naive_bayes import GaussianNB
 from torch import nn
 
 
-def _build_module(
+def build_module(
     in_features: int = 1,
     nclasses: int = 1,
     nunits: Union[int, Iterable] = 15,
+    biases: Union[bool, Iterable] = True,
     nlayers: int = 3,
-    norm: bool = True,
-    always_norm: bool = True,
-    alpha: float = None,
+    layer: Callable = nn.Linear,
+    norm: Callable = None,
     activation: Callable = nn.LeakyReLU(),
     out_activation: Callable = None,
+    bn_layer: int = None,
 ) -> nn.Module:
     """
 
@@ -33,15 +34,13 @@ def _build_module(
       If int is provided, use nlayers to specify depth. Otherwise,
       if Iterable, the depth is inferred.
   nlayers : int
-      Used to specify depth when nunits is int. Ignored if nunits is
-      Iterable.
-  norm : bool
-      Whether or not to use Inf norm. If False a simple nn.Linear is used.
-  always_norm : bool
-      Whether or not to inf normalize columns whose sum is less than 1 always.
-      i.e. normalize by max(1, norm).
-  alpha : float
-      Used in normalizing each layer. i.e. normalize by norm*alpha. Defaults to 1.
+      Used to specify depth when nunits is int. Ignored if nunits is passed.
+  layer : Callable
+      Layer type for example: nn.Linear.
+  bn_layer : int
+      Integer between 1 and nlayers. Used to specify where batchnorm would be inserted.
+  norm : Callable
+      Function used for norming the layers.
   activation : Callable
       Activation used between hidden layers.
   out_activation : Callable
@@ -51,30 +50,40 @@ def _build_module(
   nn.Module
       Sequential module.
   """
+    norm_func = norm if norm is not None else lambda x: x
+    assert(isinstance(norm_func, Callable)), f"norm: {norm} is not callable."
 
-    norm_func = partial(infnorm, always_norm=always_norm,
-                        alpha=alpha) if norm else lambda x: x
+    nunits = to_iter(nunits, nlayers - 1)
+    biases = to_iter(biases, nlayers)
 
-    nunits = [nunits] * (nlayers - 1) if isinstance(nunits, int) else nunits
-    try:
-        nunits = iter(nunits)
-    except TypeError:
-        raise TypeError("nunits must be either int or iterable.")
     layers = []
-    for out_features in nunits:
-        layers.append(norm_func(nn.Linear(in_features, out_features)))
+    for out_features, bias in zip(nunits, biases):
+        layers.append(norm_func(layer(in_features, out_features, bias)))
         layers.append(activation)
         in_features = out_features
-    layers.append(norm_func(nn.Linear(in_features, nclasses)))
+    layers.append(norm_func(layer(in_features, nclasses, biases[-1])))
+    if bn_layer is not None:
+        layers.insert(bn_layer, nn.BatchNorm1d(nunits[bn_layer - 1]))
     if out_activation is not None:
         layers.append(out_activation)
     return nn.Sequential(*layers)
 
 
+def to_iter(nunits, nlayers):
+    nunits = [nunits] * (nlayers) if isinstance(nunits, int) else nunits
+    if not isinstance(nunits, Iterable):
+        raise TypeError("nunits must be either int or iterable.")
+    if len(nunits) != nlayers:
+        raise ValueError(
+            f"property list has len {len(nunits)} while nlayers is {nlayers}."
+            "Check nunits or biases.")
+    return nunits
+
+
 def get_model(cfg: config.Configuration) -> Union[nn.Module, lgb.Booster]:
     nfeatures = len(cfg.features)
 
-    if cfg.model in ["sigma", "sigma-safe"]:
+    if cfg.model.endswith(("one", "inf")):
         be_monotonic_in = list(range(len(cfg.features)))
         try:
             be_monotonic_in.pop(cfg.features.index("vchi2"))
@@ -86,29 +95,39 @@ def get_model(cfg: config.Configuration) -> Union[nn.Module, lgb.Booster]:
             def __init__(self, sigma):
                 super().__init__()
                 depth = 3
-                alpha = sigma**(-1 / depth)
-
+                alpha = sigma**(1 / depth)
+                if "divide_norm" in cfg.model:
+                    normfunc = partial(divide_norm, always_norm=(
+                        "safe" not in cfg.model), alpha=alpha)
+                else:
+                    normfunc = partial(project_norm, always_norm=(
+                        "safe" not in cfg.model), alpha=alpha)
                 self.sigmanet = SigmaNet(
-                    _build_module(nlayers=depth, alpha=alpha,
-                                  in_features=nfeatures, norm=True,
-                                  always_norm=cfg.model == "sigma-safe"),
+                    build_module(nlayers=depth,
+                                 in_features=nfeatures,
+                                 norm=normfunc,
+                                 # nn.ReLU(),  # GroupSort(num_units=1),
+                                 activation=GroupSort(num_units=1)
+                                 ),
                     sigma=sigma, monotonic_in=be_monotonic_in,
                     nfeatures=nfeatures)
 
             def forward(self, x):
                 x = self.sigmanet(x)
-                x = torch.sigmoid(x)
+                # x = torch.sigmoid(x)
                 return x
 
         sigma = cfg.sigma_init if cfg.sigma_init is not None else 1
         sigma_network = Sigma(sigma=sigma)
         return sigma_network
 
-    elif cfg.model == "regular":
+    elif cfg.model.startswith("nn"):
         # regular full dim model for comparison
         regular_model = torch.nn.Sequential(
-            _build_module(in_features=nfeatures, norm=False), nn.Sigmoid(),
-        )
+            build_module(
+                in_features=nfeatures, norm=None,
+                activation=GroupSort(num_units=1)),
+            nn.Sigmoid(),)
         return regular_model
 
     elif cfg.model == "bdt":
@@ -139,7 +158,7 @@ def load_model(cfg: config.Configuration) -> Union[nn.Module, lgb.Booster,
                                                    QuadraticDiscriminantAnalysis,
                                                    GaussianNB]:
     location = config.format_location(config.Locations.model, cfg)
-    if cfg.model in ["regular", "sigma", "sigma-safe"]:
+    if cfg.model.startswith("nn"):
         m = get_model(cfg)
         m.load_state_dict(torch.load(location))
     elif cfg.model == 'bdt':

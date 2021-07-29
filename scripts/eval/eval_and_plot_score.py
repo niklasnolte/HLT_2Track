@@ -19,7 +19,7 @@ def eval(data):
 
     if cfg.model == "bdt":
         return eval_bdt(model, X)
-    elif cfg.model in ["regular", "sigma", "sigma-safe"]:
+    elif cfg.model.startswith("nn"):
         return eval_torch_network(model, X)
     elif cfg.model in ["lda", "qda", "gnb"]:
         return eval_simple(model, X)

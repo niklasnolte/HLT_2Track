@@ -1,13 +1,20 @@
 seed: 100
 use_cuda: False
-sigma_final: 3
-sigma_init: 1
+sigma_final: 10
+sigma_init: 10
+gamma_final: 1
+gamma_init: .5
 plot_style: None
 # list all possible configurations (cartesian product of these)
+nn_args:
+ - sigma: [False, True]
+ - division: ["scalar", "vector"]
+ - regularization: ["project", "diffable"]
+
 model :
-  - "sigma"
-  - "sigma-safe"
-  # - "regular"
+  - "nn-one"
+  - "nn-regular"
+  - "nn-inf"
   # - "bdt"
   # - "lda"
   # - "qda"
@@ -29,5 +36,5 @@ normalize :
 presel_conf :
   - svPT : 2000 # [MeV]
     trkPT : 500 # [MeV]
-  - svPT : 1000 # [MeV]
-    trkPT : 500 # [MeV]
+  # - svPT : 1000 # [MeV]
+  #   trkPT : 500 # [MeV]

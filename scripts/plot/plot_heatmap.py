@@ -32,7 +32,11 @@ def plot_heatmap(
     ax.set_xlabel(cfg.features[0])
     ax.set_ylabel(cfg.features[1])
     ax.set_title(cfg.model)
-    ax.text(.96, .98, f"auc: {auc:.3f}\nacc: {acc:.3f}\ncut: {cut:.3f}")
+    ax.text(0, 0, f"auc: {auc:.3f}\nacc: {acc:.3f}\ncut: {cut:.3f}",
+            transform=ax.transAxes,
+            horizontalalignment="left",
+            verticalalignment="top")
+
     plt.colorbar(sc)
     plt.savefig(format_location(Locations.heatmap, cfg))
 
