@@ -95,13 +95,15 @@ def get_model(cfg: config.Configuration) -> Union[nn.Module, lgb.Booster]:
             def __init__(self, sigma):
                 super().__init__()
                 depth = 3
-                alpha = sigma**(1 / depth)
+                norm_cfg = dict(
+                  always_norm = not cfg.max_norm,
+                  alpha = sigma**(1 / depth),
+                  vectorwise = "vector" == cfg.division
+                )
                 if cfg.regularization == "direct":
-                    normfunc = partial(divide_norm, always_norm=(
-                        not cfg.max_norm), alpha=alpha)
+                    normfunc = partial(divide_norm, **norm_cfg)
                 elif cfg.regularization == "project":
-                    normfunc = partial(project_norm, always_norm=(
-                        not cfg.max_norm), alpha=alpha)
+                    normfunc = partial(project_norm, **norm_cfg)
                 self.sigmanet = SigmaNet(
                     build_module(nlayers=depth,
                                  in_features=nfeatures,
