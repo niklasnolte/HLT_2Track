@@ -96,12 +96,12 @@ def get_model(cfg: config.Configuration) -> Union[nn.Module, lgb.Booster]:
                 super().__init__()
                 depth = 3
                 alpha = sigma**(1 / depth)
-                if "divide_norm" in cfg.model:
+                if cfg.regularization == "direct":
                     normfunc = partial(divide_norm, always_norm=(
-                        "safe" not in cfg.model), alpha=alpha)
-                else:
+                        not cfg.max_norm), alpha=alpha)
+                elif cfg.regularization == "project":
                     normfunc = partial(project_norm, always_norm=(
-                        "safe" not in cfg.model), alpha=alpha)
+                        not cfg.max_norm), alpha=alpha)
                 self.sigmanet = SigmaNet(
                     build_module(nlayers=depth,
                                  in_features=nfeatures,

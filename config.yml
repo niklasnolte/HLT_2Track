@@ -5,11 +5,22 @@ sigma_init: 10
 gamma_final: 1
 gamma_init: .5
 plot_style: None
-# list all possible configurations (cartesian product of these)
-nn_args:
- - sigma: [False, True]
- - division: ["scalar", "vector"]
- - regularization: ["project", "diffable"]
+
+
+# only for models with "nn"
+max_norm:
+  - True
+  - False
+
+# only for models with "nn"
+division:
+  - "scalar"
+  - "vector"
+
+# only for models with "nn"
+regularization:
+  - "project"
+  - "direct"
 
 model :
   # - "nn-one"
@@ -19,20 +30,25 @@ model :
   # - "lda"
   # - "qda"
   # - "gnb"
+
 data_type :
   - "lhcb"
   # - "standalone"
+
 features :
   - ["minipchi2", "sumpt"]
   # - ["fdchi2", "sumpt"]
   # - ["fdchi2", "sumpt", "vchi2", "minipchi2"]
+
 signal_type :
   - "heavy-flavor"
   # - "beauty"
   # - "charm"
+
 normalize :
   - False
   # - True
+
 presel_conf :
   - svPT : 2000 # [MeV]
     trkPT : 500 # [MeV]

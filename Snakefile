@@ -1,6 +1,6 @@
 # type: ignore
 from hlt2trk.utils import config
-from hlt2trk.utils.config import Locations, dirs, Configs
+from hlt2trk.utils.config import Locations, dirs, Configs, expand_with_rules
 from os import makedirs
 
 for k, v in dirs.__dict__.items():
@@ -11,16 +11,19 @@ for k, v in dirs.__dict__.items():
 rule all:
     input:
         # eval on validation data
-        expand(Locations.auc_acc,
+        expand_with_rules(Locations.auc_acc,
                model=Configs.model,
                data_type=Configs.data_type,
                features=map(config.to_string_features, Configs.features),
                normalize=map(config.to_string_normalize, Configs.normalize),
                signal_type=Configs.signal_type,
                presel_conf=map(config.to_string_presel_conf, Configs.presel_conf),
+               max_norm=map(config.to_string_max_norm, Configs.max_norm),
+               regularization=Configs.regularization,
+               division=Configs.division,
                ),
         # feat_vs_output plots
-        expand(
+        expand_with_rules(
             Locations.feat_vs_output,
             model=Configs.model,
             data_type=Configs.data_type,
@@ -28,9 +31,12 @@ rule all:
             normalize=map(config.to_string_normalize, Configs.normalize),
             signal_type=Configs.signal_type,
             presel_conf=map(config.to_string_presel_conf, Configs.presel_conf),
+            max_norm=map(config.to_string_max_norm, Configs.max_norm),
+            regularization=Configs.regularization,
+            division=Configs.division,
         ),
         # heatmap plots for 2d trainings
-        expand(
+        expand_with_rules(
             Locations.heatmap,
             model=Configs.model,
             data_type=Configs.data_type,
@@ -41,9 +47,12 @@ rule all:
             normalize=map(config.to_string_normalize, Configs.normalize),
             signal_type=Configs.signal_type,
             presel_conf=map(config.to_string_presel_conf, Configs.presel_conf),
+            max_norm=map(config.to_string_max_norm, Configs.max_norm),
+            regularization=Configs.regularization,
+            division=Configs.division,
         ),
         # rates vs efficiencies, only for lhcb data
-        expand(
+        expand_with_rules(
             Locations.rate_vs_eff,
             model=Configs.model,
             data_type=["lhcb"],  # only for lhcb data
@@ -51,6 +60,9 @@ rule all:
             normalize=map(config.to_string_normalize, Configs.normalize),
             signal_type=Configs.signal_type,
             presel_conf=map(config.to_string_presel_conf, Configs.presel_conf),
+            max_norm=map(config.to_string_max_norm, Configs.max_norm),
+            regularization=Configs.regularization,
+            division=Configs.division,
         ),
 
 rule plot_rate_vs_eff:
