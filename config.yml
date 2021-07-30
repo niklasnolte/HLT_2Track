@@ -1,7 +1,7 @@
 seed: 100
 use_cuda: False
-sigma_final: 1
-sigma_init: 1
+sigma_final: 2
+sigma_init: 2
 gamma_final: 1
 gamma_init: 1
 plot_style: None
@@ -52,5 +52,5 @@ normalize :
 presel_conf :
   - svPT : 2000 # [MeV]
     trkPT : 500 # [MeV]
-  # - svPT : 1000 # [MeV]
-  #   trkPT : 500 # [MeV]
+  - svPT : 1000 # [MeV]
+    trkPT : 500 # [MeV]

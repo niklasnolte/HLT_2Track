@@ -20,6 +20,7 @@ def build_module(
     nlayers: int = 3,
     layer: Callable = nn.Linear,
     norm: Callable = None,
+    norm_first: Callable = None,
     activation: Callable = nn.LeakyReLU(),
     out_activation: Callable = None,
     bn_layer: int = None,
@@ -41,6 +42,8 @@ def build_module(
       Integer between 1 and nlayers. Used to specify where batchnorm would be inserted.
   norm : Callable
       Function used for norming the layers.
+  norm_first : Callable
+      Function used for norming the first layer, defaults to the same as norm.
   activation : Callable
       Activation used between hidden layers.
   out_activation : Callable
@@ -51,14 +54,18 @@ def build_module(
       Sequential module.
   """
     norm_func = norm if norm is not None else lambda x: x
+    norm_func_first = norm_first if norm_first else norm_func
     assert(isinstance(norm_func, Callable)), f"norm: {norm} is not callable."
 
     nunits = to_iter(nunits, nlayers - 1)
     biases = to_iter(biases, nlayers)
 
     layers = []
-    for out_features, bias in zip(nunits, biases):
-        layers.append(norm_func(layer(in_features, out_features, bias)))
+    for i,(out_features, bias) in enumerate(zip(nunits, biases)):
+        if i == 0:
+          layers.append(norm_func_first(layer(in_features, out_features, bias)))
+        else:
+          layers.append(norm_func(layer(in_features, out_features, bias)))
         layers.append(activation)
         in_features = out_features
     layers.append(norm_func(layer(in_features, nclasses, biases[-1])))
@@ -95,6 +102,12 @@ def get_model(cfg: config.Configuration) -> Union[nn.Module, lgb.Booster]:
             def __init__(self, sigma):
                 super().__init__()
                 depth = 3
+
+                if cfg.model == "nn-inf":
+                  kind = "inf"
+                elif cfg.model == "nn-one":
+                  kind = "one"
+
                 norm_cfg = dict(
                   always_norm = not cfg.max_norm,
                   alpha = sigma**(1 / depth),
@@ -104,10 +117,19 @@ def get_model(cfg: config.Configuration) -> Union[nn.Module, lgb.Booster]:
                     normfunc = partial(divide_norm, **norm_cfg)
                 elif cfg.regularization == "project":
                     normfunc = partial(project_norm, **norm_cfg)
+
+                if kind == "nn-inf":
+                  normfunc_first = partial(normfunc, kind="one-inf")
+                else:
+                  normfunc_first = partial(normfunc, kind=kind)
+                
+                normfunc = partial(normfunc, kind=kind)
+
                 self.sigmanet = SigmaNet(
                     build_module(nlayers=depth,
                                  in_features=nfeatures,
                                  norm=normfunc,
+                                 norm_first=normfunc_first,
                                  # nn.ReLU(),  # GroupSort(num_units=1),
                                  activation=GroupSort(num_units=1)
                                  ),
