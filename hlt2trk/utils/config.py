@@ -1,7 +1,7 @@
 from functools import lru_cache
 import re
 from os.path import abspath, dirname, join
-from typing import Iterable
+from typing import Iterable, Optional
 from warnings import warn
 from .utils import load_config
 
@@ -65,8 +65,7 @@ class Locations:
         "_{signal_type}_{presel_conf}_{max_norm}_{regularization}_{division}.pdf",
     )
     presel_efficiencies = join(
-        dirs.results,
-        "presel_efficiencies_{data_type}_{presel_conf}.json",
+        dirs.results, "presel_efficiencies_{data_type}_{presel_conf}.json",
     )
     auc_acc = join(
         dirs.results,
@@ -75,34 +74,54 @@ class Locations:
     )
 
 
-def to_string_features(features: list) -> str:
+def to_string_features(features: Optional[list]) -> str:
+    if features is None:
+        return "None"
     return "+".join(features)
 
 
-def from_string_features(features: str) -> list:
+def from_string_features(features: str) -> Optional[list]:
+    if features == "None":
+        return None
     return features.split("+")
 
 
-def to_string_normalize(normalize: bool) -> str:
+def to_string_normalize(normalize: Optional[bool]) -> str:
+    if normalize is None:
+        return "None"
     return "normed" if normalize else "unnormed"
 
 
-def from_string_normalize(normalize: str) -> bool:
+def from_string_normalize(normalize: str) -> Optional[bool]:
+    if normalize == "None":
+        return None
     return normalize == "normed"
 
 
-def to_string_presel_conf(presel_conf: dict) -> str:
+def to_string_presel_conf(presel_conf: Optional[dict]) -> str:
+    if presel_conf is None:
+        return "None"
     return "+".join([f"{k}:{v}" for k, v in presel_conf.items()])
 
 
-def from_string_presel_conf(presel_conf: str) -> dict:
+def from_string_presel_conf(presel_conf: str) -> Optional[dict]:
+    if presel_conf == "None":
+        return None
     return {k: v for k, v in (kv.split(":") for kv in presel_conf.split("+"))}
 
-def to_string_max_norm(max_norm: bool) -> str:
+
+def to_string_max_norm(max_norm: Optional[bool]) -> str:
+    if max_norm is None:
+        return "None"
     return "max-norm" if max_norm else "always-norm"
 
-def from_string_max_norm(max_norm : str) -> bool:
-    return max_norm == "max-norm"
+
+def from_string_max_norm(max_norm: str) -> Optional[bool]:
+    if max_norm == "max-norm":
+        return True
+    if max_norm == "None":
+        return None
+    return False
 
 
 def format_location(location: str, config):
@@ -136,9 +155,11 @@ def get_cli_args(config) -> str:
         argstr += f"--signal_type={config.signal_type} "
     if hasattr(config, "presel_conf"):
         # need to double curly brace, so f strings do not work here
-        argstr += ("--presel_conf='{"
+        argstr += (
+            "--presel_conf='{"
             + str(from_string_presel_conf(config.presel_conf))
-            + "}' ")
+            + "}' "
+        )
     if hasattr(config, "max_norm"):
         argstr += f"--max_norm={from_string_max_norm(config.max_norm)} "
     if hasattr(config, "regularization"):
@@ -154,15 +175,15 @@ Configs = load_config(join(dirs.project_root, "config.yml"))
 class Configuration:
     def __init__(
         self,
-        model: str = Configs.model[0],
-        features: list = Configs.features[0],
-        normalize: bool = Configs.normalize[0],
-        data_type: str = Configs.data_type[0],
-        signal_type: str = Configs.signal_type[0],
-        presel_conf: dict = Configs.presel_conf[0],
-        max_norm: bool = Configs.max_norm[0],
-        regularization: str = Configs.regularization[0],
-        division: str = Configs.division[0],
+        model: Optional[str] = None,
+        features: Optional[list] = None,
+        normalize: Optional[bool] = None,
+        data_type: Optional[str] = None,
+        signal_type: Optional[str] = None,
+        presel_conf: Optional[dict] = None,
+        max_norm: Optional[bool] = None,
+        regularization: Optional[str] = None,
+        division: Optional[str] = None,
         seed: int = Configs.seed,
         use_cuda: bool = Configs.use_cuda,
         sigma_final: float = Configs.sigma_final,
@@ -214,51 +235,53 @@ class Configuration:
 
 
 def expand_with_rules(location, **cfg):
-  def valid_config(cfg:dict, key:str, value):
-    #rules for combinations
-    # if you have a new rule to restrict combinations, add it here
-    if key == "presel_conf":
-      if cfg["data_type"] == "standalone":
-        # standalone does not support preselections
-        return False
-    if key in ["max_norm", "regularization", "division"]:
-      # only nn models have these keywords
-      if "nn" not in cfg["model"]:
-        return False
-    return True
+    for k, v in cfg.items():
+        cfg[k] = list(v)
 
-  def expand(These: Iterable[dict], key: str,  With : Iterable):
-    # expand configurations in a cartesian product fashion
-    # with a new list
-    for t in These:
-      any = False
-      for w in With:
-        if valid_config(t, key, w):
-          any = True
-          new = t.copy()
-          new[key] = w
-          yield new
-      if not any:
-        yield t
+    def valid_config(cfg: dict, key: str, value):
+        # rules for combinations
+        # if you have a new rule to restrict combinations, add it here
+        if key == "presel_conf":
+            if cfg["data_type"] == "standalone":
+                # standalone does not support preselections
+                return False
+        if key in ["max_norm", "regularization", "division"]:
+            # only regularized nn models have these keywords
+            if cfg["model"] not in ["nn-inf", "nn-one"]:
+                return False
+        return True
 
-  cfgs = [{}]
-  for key, vals in cfg.items():
-    cfgs = expand(cfgs, key, vals)
-  
-  def format_if_present(location, **kwargs):
-    # replace the existing keywords
-    for k, v in kwargs.items():
-      to_replace = "{" + k + "}"
-      if to_replace in location:
-        location = location.replace(to_replace, str(v))
-    # remove the ones that were not filled
-    location = re.sub("{.*?}", "None", location)
-    return location
-  out = [format_if_present(location, **cfg) for cfg in cfgs]
-  return out
+    def expand(These: Iterable[dict], key: str, With: Iterable):
+        # expand configurations in a cartesian product fashion
+        # with a new list
+        for t in These:
+            any = False
+            for w in With:
+                if valid_config(t, key, w):
+                    any = True
+                    new = t.copy()
+                    new[key] = w
+                    yield new
+            if not any:
+                yield t
 
+    cfgs = [{}]
 
+    for key, vals in cfg.items():
+        cfgs = expand(cfgs, key, vals)
 
+    def format_if_present(loc, **kwargs):
+        # replace the existing keywords
+        for k, v in kwargs.items():
+            to_replace = "{" + k + "}"
+            if to_replace in loc:
+                loc = loc.replace(to_replace, str(v))
+        # remove the ones that were not filled
+        loc = re.sub("{.*?}", "None", loc)
+        return loc
+
+    out = [format_if_present(location, **cfg) for cfg in cfgs]
+    return out
 
 
 @lru_cache(1)
