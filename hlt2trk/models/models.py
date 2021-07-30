@@ -83,7 +83,7 @@ def to_iter(nunits, nlayers):
 def get_model(cfg: config.Configuration) -> Union[nn.Module, lgb.Booster]:
     nfeatures = len(cfg.features)
 
-    if cfg.model.endswith(("one", "inf")):
+    if cfg.model in ["nn-one", "nn-inf"]:
         be_monotonic_in = list(range(len(cfg.features)))
         try:
             be_monotonic_in.pop(cfg.features.index("vchi2"))
@@ -116,14 +116,14 @@ def get_model(cfg: config.Configuration) -> Union[nn.Module, lgb.Booster]:
 
             def forward(self, x):
                 x = self.sigmanet(x)
-                # x = torch.sigmoid(x)
+                x = torch.sigmoid(x)
                 return x
 
         sigma = cfg.sigma_init if cfg.sigma_init is not None else 1
         sigma_network = Sigma(sigma=sigma)
         return sigma_network
 
-    elif cfg.model.startswith("nn"):
+    elif cfg.model == "nn-regular":
         # regular full dim model for comparison
         regular_model = torch.nn.Sequential(
             build_module(

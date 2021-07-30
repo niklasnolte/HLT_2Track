@@ -1,25 +1,25 @@
 seed: 100
 use_cuda: False
-sigma_final: 10
-sigma_init: 10
+sigma_final: 1
+sigma_init: 1
 gamma_final: 1
-gamma_init: .5
+gamma_init: 1
 plot_style: None
 
 
-# only for models with "nn"
+# only for models with "nn-[one|inf]"
 max_norm:
   - True
-  - False
+  # - False
 
-# only for models with "nn"
+# only for models with "nn-[one|inf]"
 division:
-  - "scalar"
+  # - "scalar"
   - "vector"
 
-# only for models with "nn"
+# only for models with "nn-[one|inf]"
 regularization:
-  - "project"
+  # - "project"
   - "direct"
 
 model :
@@ -30,7 +30,6 @@ model :
   # - "lda"
   # - "qda"
   # - "gnb"
-
 
 data_type :
   - "lhcb"
@@ -53,5 +52,5 @@ normalize :
 presel_conf :
   - svPT : 2000 # [MeV]
     trkPT : 500 # [MeV]
-  - svPT : 1000 # [MeV]
-    trkPT : 500 # [MeV]
+  # - svPT : 1000 # [MeV]
+  #   trkPT : 500 # [MeV]

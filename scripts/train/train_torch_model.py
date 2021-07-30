@@ -50,9 +50,8 @@ def train_torch_model(
         model.to(device)
         pbar = tqdm(range(EPOCHS))
         for i in pbar:
-            if cfg.model.endswith(("one", "inf")) and cfg.sigma_final is not None:
+            if cfg.model in ["nn-one", "nn-inf"] and cfg.sigma_final is not None:
                 model.sigmanet.sigma *= (cfg.sigma_final / cfg.sigma_init)**(1 / EPOCHS)
-                # model.sigmanet.gamma *= (cfg.gamma_final / cfg.gamma_init)**(1 / EPOCHS)
                 model.sigmanet.gamma += (cfg.gamma_final - cfg.gamma_init) / EPOCHS
             # Train
             model.train()
@@ -80,7 +79,7 @@ def train_torch_model(
                       for x in np.linspace(0, 1, 100)])
 
             desc = f"epoch {i}, loss: {loss.item():.4f}, auc: {auc:.4f}, acc: {acc:.4f}"
-            if cfg.model.endswith(("one", "inf")):
+            if cfg.model in ["nn-one", "nn-inf"]:
                 desc += f" sigma: {model.sigmanet.sigma.item(): .2f}"
             pbar.set_description(desc)
 
@@ -110,7 +109,7 @@ def train_torch_model(
                     os.remove(fn)
             plt.close()
 
-    EPOCHS = 10
+    EPOCHS = 60
     LR = 1e-1
 
     torch.manual_seed(2)
