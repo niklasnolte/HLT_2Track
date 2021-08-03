@@ -30,7 +30,7 @@ def train_torch_model(
     y_val: torch.Tensor = torch.from_numpy(y_val).float()[:, None]
 
     data = TensorDataset(x_train, y_train)
-    loader = DataLoader(data, batch_size=128, shuffle=False)
+    loader = DataLoader(data, batch_size=4096, shuffle=False)
 
     def train(
             model, optimizer, scheduler, filename, loss_fun=F.binary_cross_entropy,
@@ -76,7 +76,7 @@ def train_torch_model(
 
             auc = roc_auc_score(val, np.clip(pred, 0., 1.))
             acc = max([balanced_accuracy_score(val, pred > x)
-                      for x in np.linspace(0, 1, 100)])
+                      for x in np.linspace(0.1, .9, 5)])
 
             desc = f"epoch {i}, loss: {loss.item():.4f}, auc: {auc:.4f}, acc: {acc:.4f}"
             if cfg.model in ["nn-one", "nn-inf"]:
@@ -85,9 +85,9 @@ def train_torch_model(
 
             if make_gif:
                 range_ = None  # (0, 1)
-                ax.hist(pred[val == 1].numpy(), bins=100, alpha=0.5,
+                ax.hist(pred[val == 1], bins=100, alpha=0.5,
                         density=True, label="sig preds", range=range_,)
-                ax.hist(pred[val == 0].numpy(), bins=100, alpha=0.5,
+                ax.hist(pred[val == 0], bins=100, alpha=0.5,
                         density=True, label="bkg preds", range=range_, )
                 ax.text(0, 0.965,
                         f"Epoch {i + 1}/{EPOCHS}, loss {loss.item():.3f}, auc {auc:.3f}",
@@ -109,8 +109,8 @@ def train_torch_model(
                     os.remove(fn)
             plt.close()
 
-    EPOCHS = 60
-    LR = 1e-1
+    EPOCHS = 20
+    LR = 5e-2
 
     torch.manual_seed(2)
     from hlt2trk.models import get_model
@@ -120,7 +120,7 @@ def train_torch_model(
     nparams = sum([x.view(-1).shape[0] for x in model.parameters()])
     print(f"model has {nparams} parameters")
     optimizer = torch.optim.Adam(model.parameters(), lr=LR)
-    scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer=optimizer, gamma=0.98)
+    scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer=optimizer, gamma=0.99)
 
     def weighted_mse_loss(input, target, weight=None):
         if weight is None:

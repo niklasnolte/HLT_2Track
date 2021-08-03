@@ -46,8 +46,11 @@ def plot_rates_vs_effs(data, presel_effs):
     # minimum bias rates (per event)
     minbias_preds = preds[preds.eventtype == 0].pred.values
     input_rate = 30000  # kHz
-    presel_rate = presel_effs[0]
+    presel_rate = presel_effs[0] # minbias
     rates = [input_rate * presel_rate * (minbias_preds > i).mean() for i in cutrange]
+
+    target_rate = 660
+    target_rate_idx = [i for i,r in enumerate(rates) if r < target_rate][-1]
 
     _, ax = plt.subplots()
     for mode in data.eventtype.unique():
@@ -57,11 +60,9 @@ def plot_rates_vs_effs(data, presel_effs):
         if mode != 0:
             eff = [presel_effs[mode] * (pred > i).mean() for i in cutrange]
             tos_eff = [presel_effs[mode] * (tos_pred > i).mean() for i in cutrange]
-            auc = roc_auc_score(rates / max(rates), eff)
-            tos_auc = roc_auc_score(rates / max(rates), tos_eff)
-            ax.plot(rates, eff, label=f"{mode:^4} / {auc:^5.4f}", c=f"C{mode}")
+            ax.plot(rates, eff, label=f"{mode:^4} / {eff[target_rate_idx]:^5.4f}", c=f"C{mode}")
             ax.plot(
-                rates, tos_eff, label=f"{mode:^4} / {tos_auc:^5.4f}", ls="--",
+                rates, tos_eff, label=f"{mode:^4} / {tos_eff[target_rate_idx]:^5.4f}", ls="--",
                 c=f"C{mode}")
     ax.set_xlabel("rate (kHz)")
     ax.set_ylabel("efficiency")
@@ -69,7 +70,7 @@ def plot_rates_vs_effs(data, presel_effs):
     ax.grid(linestyle="--")
     ax.grid(linestyle=":", which="minor")
     ax.set_title(cfg.model)
-    ax.legend(loc="best", title="mode / auc")
+    ax.legend(loc="lower right", title="mode / eff at 660Hz")
     plt.savefig(format_location(Locations.rate_vs_eff, cfg))
 
 

@@ -237,6 +237,8 @@ class Configuration:
 def expand_with_rules(location, **cfg):
     for k, v in cfg.items():
         cfg[k] = list(v)
+        if cfg[k] == []:
+          return []
 
     def valid_config(cfg: dict, key: str, value):
         # rules for combinations

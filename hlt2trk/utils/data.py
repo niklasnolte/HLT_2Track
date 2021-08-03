@@ -35,20 +35,18 @@ def get_data(cfg: config.Configuration) -> pd.DataFrame:
     if cfg.normalize:
         x = mc[cfg.features]
         mc[cfg.features] = (x - x.min(axis=0)) / (x.max(axis=0) - x.min(axis=0))
-    # test kink
-    mc = mc[mc["minipchi2"] < 6]
     return mc.reset_index(drop=True)
 
 
 def get_data_for_training(cfg: config.Configuration) -> Tuple[np.ndarray]:
     df = get_data(cfg)
+    #df = df[df["minipchi2"] < 6]
     bkg = df[df.signal_type == 0]
     sig = df[is_signal(cfg, df.signal_type)]
 
     if cfg.data_type == "lhcb":
         bkg = bkg[bkg.eventtype == 0]  # only take minbias as bkg for now
         sig = sig[sig.eventtype != 0]  # why is there signal in minbias?
-
     X = np.concatenate((bkg[cfg.features].values, sig[cfg.features].values))
     y = np.concatenate((np.zeros(len(bkg)), np.ones(len(sig))))
 

@@ -6,8 +6,10 @@ import lightgbm as lgb
 import torch
 from hlt2trk.utils import config
 from InfinityNorm import SigmaNet, project_norm, divide_norm, GroupSort
-from sklearn.discriminant_analysis import (LinearDiscriminantAnalysis,
-                                           QuadraticDiscriminantAnalysis)
+from sklearn.discriminant_analysis import (
+    LinearDiscriminantAnalysis,
+    QuadraticDiscriminantAnalysis,
+)
 from sklearn.naive_bayes import GaussianNB
 from torch import nn
 
@@ -55,17 +57,17 @@ def build_module(
   """
     norm_func = norm if norm is not None else lambda x: x
     norm_func_first = norm_first if norm_first else norm_func
-    assert(isinstance(norm_func, Callable)), f"norm: {norm} is not callable."
+    assert isinstance(norm_func, Callable), f"norm: {norm} is not callable."
 
     nunits = to_iter(nunits, nlayers - 1)
     biases = to_iter(biases, nlayers)
 
     layers = []
-    for i,(out_features, bias) in enumerate(zip(nunits, biases)):
+    for i, (out_features, bias) in enumerate(zip(nunits, biases)):
         if i == 0:
-          layers.append(norm_func_first(layer(in_features, out_features, bias)))
+            layers.append(norm_func_first(layer(in_features, out_features, bias)))
         else:
-          layers.append(norm_func(layer(in_features, out_features, bias)))
+            layers.append(norm_func(layer(in_features, out_features, bias)))
         layers.append(activation)
         in_features = out_features
     layers.append(norm_func(layer(in_features, nclasses, biases[-1])))
@@ -83,12 +85,15 @@ def to_iter(nunits, nlayers):
     if len(nunits) != nlayers:
         raise ValueError(
             f"property list has len {len(nunits)} while nlayers is {nlayers}."
-            "Check nunits or biases.")
+            "Check nunits or biases."
+        )
     return nunits
 
 
 def get_model(cfg: config.Configuration) -> Union[nn.Module, lgb.Booster]:
     nfeatures = len(cfg.features)
+    depth = 2
+    nunits = 64
 
     if cfg.model in ["nn-one", "nn-inf"]:
         be_monotonic_in = list(range(len(cfg.features)))
@@ -101,43 +106,64 @@ def get_model(cfg: config.Configuration) -> Union[nn.Module, lgb.Booster]:
         class Sigma(nn.Module):
             def __init__(self, sigma):
                 super().__init__()
-                depth = 3
 
                 if cfg.model == "nn-inf":
-                  kind = "inf"
+                    kind = "inf"
                 elif cfg.model == "nn-one":
-                  kind = "one"
+                    kind = "one"
+                else:
+                    raise ValueError(f"Unknown model: {cfg.model}")
+
+                if cfg.division == "vector":
+                    vectorwise = True
+                elif cfg.division == "scalar":
+                    vectorwise = False
+                else:
+                    raise ValueError(
+                        f"please specify division as either 'vector' or 'scalar'"
+                    )
+
+                if not isinstance(cfg.max_norm, bool):
+                    raise TypeError("please specify max_norm as bool.")
 
                 norm_cfg = dict(
-                  always_norm = not cfg.max_norm,
-                  alpha = sigma**(1 / depth),
-                  vectorwise = "vector" == cfg.division
+                    always_norm=not cfg.max_norm,
+                    alpha=sigma ** (1 / depth),
+                    vectorwise=vectorwise,
                 )
                 if cfg.regularization == "direct":
                     normfunc = partial(divide_norm, **norm_cfg)
                 elif cfg.regularization == "project":
                     normfunc = partial(project_norm, **norm_cfg)
-
-                if kind == "nn-inf":
-                  normfunc_first = partial(normfunc, kind="one-inf")
                 else:
-                  normfunc_first = partial(normfunc, kind=kind)
-                
+                    raise ValueError(
+                        f"Please specify regularization as either 'direct' or 'project'"
+                    )
+
+                if kind == "inf":
+                    normfunc_first = partial(normfunc, kind="one-inf")
+                elif kind == "one":
+                    normfunc_first = partial(normfunc, kind=kind)
+
                 normfunc = partial(normfunc, kind=kind)
 
                 self.sigmanet = SigmaNet(
-                    build_module(nlayers=depth,
-                                 in_features=nfeatures,
-                                 norm=normfunc,
-                                 norm_first=normfunc_first,
-                                 # nn.ReLU(),  # GroupSort(num_units=1),
-                                 activation=GroupSort(num_units=1)
-                                 ),
-                    sigma=sigma, monotonic_in=be_monotonic_in,
-                    nfeatures=nfeatures)
+                    build_module(
+                        nlayers=depth,
+                        nunits = nunits,
+                        in_features=nfeatures,
+                        norm=normfunc,
+                        norm_first=normfunc_first,
+                        # nn.ReLU(),  # GroupSort(num_units=1),
+                        activation=GroupSort(num_units=1),
+                    ),
+                    sigma=sigma,
+                    monotonic_in=be_monotonic_in,
+                    nfeatures=nfeatures,
+                )
 
             def forward(self, x):
-                x = self.sigmanet(x)
+                x = self.sigmanet.nn(x)
                 x = torch.sigmoid(x)
                 return x
 
@@ -149,9 +175,14 @@ def get_model(cfg: config.Configuration) -> Union[nn.Module, lgb.Booster]:
         # regular full dim model for comparison
         regular_model = torch.nn.Sequential(
             build_module(
-                in_features=nfeatures, norm=None,
-                activation=GroupSort(num_units=1)),
-            nn.Sigmoid(),)
+                nlayers=depth,
+                nunits=nunits,
+                in_features=nfeatures,
+                norm=None,
+                activation=GroupSort(num_units=1),
+            ),
+            nn.Sigmoid(),
+        )
         return regular_model
 
     elif cfg.model == "bdt":
@@ -172,22 +203,27 @@ def get_model(cfg: config.Configuration) -> Union[nn.Module, lgb.Booster]:
         model = QuadraticDiscriminantAnalysis()
         return model
 
-    elif cfg.model == 'gnb':
+    elif cfg.model == "gnb":
         model = GaussianNB()
         return model
 
 
-def load_model(cfg: config.Configuration) -> Union[nn.Module, lgb.Booster,
-                                                   LinearDiscriminantAnalysis,
-                                                   QuadraticDiscriminantAnalysis,
-                                                   GaussianNB]:
+def load_model(
+    cfg: config.Configuration,
+) -> Union[
+    nn.Module,
+    lgb.Booster,
+    LinearDiscriminantAnalysis,
+    QuadraticDiscriminantAnalysis,
+    GaussianNB,
+]:
     location = config.format_location(config.Locations.model, cfg)
     if cfg.model.startswith("nn"):
         m = get_model(cfg)
         m.load_state_dict(torch.load(location))
-    elif cfg.model == 'bdt':
+    elif cfg.model == "bdt":
         m = lgb.Booster(model_file=location)
     else:
-        with open(location, 'rb') as f:
+        with open(location, "rb") as f:
             m = pickle.load(f)
     return m

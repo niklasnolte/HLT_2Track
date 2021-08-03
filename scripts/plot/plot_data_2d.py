@@ -5,11 +5,11 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 from hlt2trk.utils import dirs
-from hlt2trk.utils.config import Configuration
+from hlt2trk.utils.config import get_config
 from hlt2trk.utils.data import get_data, get_data_for_training
 from matplotlib import pyplot as plt
 
-cfg = Configuration()
+cfg = get_config()
 cfg.plot_style = "dark"
 if cfg.plot_style in ["dark", "light"]:
     plt.style.use(join(dirs.project_root, f'scripts/plot/paper-{cfg.plot_style}'))

@@ -1,7 +1,7 @@
 lines.color: white
 patch.edgecolor: white
 
-text.usetex : True
+text.usetex : False
 text.color: white
 font.serif: Computer Modern Roman #Bitstream Vera Serif
 font.family: sans-serif
