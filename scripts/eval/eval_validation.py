@@ -9,7 +9,7 @@ from evaluate import eval_bdt, eval_simple, eval_torch_network
 cfg = config.get_config()
 model = load_model(cfg)
 
-x_train, y_train, x_val, y_val = get_data_for_training(cfg)
+_, _, x_val, y_val = get_data_for_training(cfg)
 
 if cfg.model == "bdt":
     eval_fun = eval_bdt

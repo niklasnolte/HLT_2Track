@@ -124,7 +124,7 @@ def get_model(cfg: config.Configuration) -> Union[nn.Module, lgb.Booster]:
                     )
 
                 if not isinstance(cfg.max_norm, bool):
-                    raise TypeError("please specify max_norm as bool.")
+                    raise TypeError("please specify max_norm (True, False).")
 
                 norm_cfg = dict(
                     always_norm=not cfg.max_norm,
@@ -163,7 +163,7 @@ def get_model(cfg: config.Configuration) -> Union[nn.Module, lgb.Booster]:
                 )
 
             def forward(self, x):
-                x = self.sigmanet.nn(x)
+                x = self.sigmanet(x)
                 x = torch.sigmoid(x)
                 return x
 
@@ -192,6 +192,7 @@ def get_model(cfg: config.Configuration) -> Union[nn.Module, lgb.Booster]:
             is_unbalance=True,
             num_leaves=15,
             boosting_type="gbdt",
+            monotone_constraints=[1,1,0,1][:len(cfg.features)],
         )
         return clf
 

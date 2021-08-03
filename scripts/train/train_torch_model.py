@@ -81,6 +81,7 @@ def train_torch_model(
             desc = f"epoch {i}, loss: {loss.item():.4f}, auc: {auc:.4f}, acc: {acc:.4f}"
             if cfg.model in ["nn-one", "nn-inf"]:
                 desc += f" sigma: {model.sigmanet.sigma.item(): .2f}"
+                desc += f" lr: {optimizer.param_groups[0]['lr']:.2e}"
             pbar.set_description(desc)
 
             if make_gif:
@@ -109,10 +110,10 @@ def train_torch_model(
                     os.remove(fn)
             plt.close()
 
-    EPOCHS = 20
-    LR = 5e-2
+    EPOCHS = 40
+    LR = 1e-1
 
-    torch.manual_seed(2)
+    torch.manual_seed(1)
     from hlt2trk.models import get_model
 
     model = get_model(cfg)
@@ -120,7 +121,7 @@ def train_torch_model(
     nparams = sum([x.view(-1).shape[0] for x in model.parameters()])
     print(f"model has {nparams} parameters")
     optimizer = torch.optim.Adam(model.parameters(), lr=LR)
-    scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer=optimizer, gamma=0.99)
+    scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer=optimizer, gamma=0.996)
 
     def weighted_mse_loss(input, target, weight=None):
         if weight is None:
