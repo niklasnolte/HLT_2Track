@@ -36,7 +36,7 @@ def get_data(cfg: config.Configuration) -> pd.DataFrame:
         x = mc[cfg.features]
         mc[cfg.features] = (x - x.min(axis=0)) / (x.max(axis=0) - x.min(axis=0))
     # test kink
-    # mc = mc[mc["minipchi2"] < 6]
+    mc = mc[mc["minipchi2"] < 6]
     return mc.reset_index(drop=True)
 
 

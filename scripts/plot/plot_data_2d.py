@@ -95,7 +95,7 @@ def plot_scatter(X, y):
     df = pd.DataFrame(X, columns=['minipchi2', 'sumpt'])
     plt.scatter(X[y == 0][:, 0], X[y == 0][:, 1], label='0', s=1, alpha=.5, c='crimson')
     plt.scatter(X[y == 1][:, 0], X[y == 1][:, 1], label='1', s=1, alpha=.5, c='royalblue')
-    plt.legend()
+    plt.legend(markerscale=10, framealpha=.9)
     plt.xlabel('minipchi2')
     plt.ylabel('sumpt')
     name = 'scatter_train.pdf' if TRAIN_ONLY else 'scatter.pdf'

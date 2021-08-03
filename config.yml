@@ -12,9 +12,9 @@ nn_args:
  - regularization: ["project", "diffable"]
 
 model :
-  - "nn-one"
+  # - "nn-one"
   - "nn-regular"
-  - "nn-inf"
+  # - "nn-inf"
   # - "bdt"
   # - "lda"
   # - "qda"

@@ -136,7 +136,7 @@ def train_torch_model(
         optimizer,
         scheduler,
         filename=format_location(Locations.train_distribution_gif, cfg),
-        loss_fun=weighted_mse_loss,
+        loss_fun=F.binary_cross_entropy  # weighted_mse_loss,
     )
 
     torch.save(model.state_dict(), format_location(Locations.model, cfg))
