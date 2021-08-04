@@ -5,11 +5,9 @@ from typing import Callable, Iterable, Union
 import lightgbm as lgb
 import torch
 from hlt2trk.utils import config
-from InfinityNorm import SigmaNet, project_norm, divide_norm, GroupSort
-from sklearn.discriminant_analysis import (
-    LinearDiscriminantAnalysis,
-    QuadraticDiscriminantAnalysis,
-)
+from InfinityNorm import SigmaNet, project_norm, direct_norm, GroupSort
+from sklearn.discriminant_analysis import (LinearDiscriminantAnalysis,
+                                           QuadraticDiscriminantAnalysis)
 from sklearn.naive_bayes import GaussianNB
 from torch import nn
 
@@ -132,7 +130,7 @@ def get_model(cfg: config.Configuration) -> Union[nn.Module, lgb.Booster]:
                     vectorwise=vectorwise,
                 )
                 if cfg.regularization == "direct":
-                    normfunc = partial(divide_norm, **norm_cfg)
+                    normfunc = partial(direct_norm, **norm_cfg)
                 elif cfg.regularization == "project":
                     normfunc = partial(project_norm, **norm_cfg)
                 else:
@@ -150,7 +148,7 @@ def get_model(cfg: config.Configuration) -> Union[nn.Module, lgb.Booster]:
                 self.sigmanet = SigmaNet(
                     build_module(
                         nlayers=depth,
-                        nunits = nunits,
+                        nunits=nunits,
                         in_features=nfeatures,
                         norm=normfunc,
                         norm_first=normfunc_first,
@@ -192,7 +190,7 @@ def get_model(cfg: config.Configuration) -> Union[nn.Module, lgb.Booster]:
             is_unbalance=True,
             num_leaves=15,
             boosting_type="gbdt",
-            monotone_constraints=[1,1,0,1][:len(cfg.features)],
+            monotone_constraints=[1, 1, 0, 1][:len(cfg.features)],
         )
         return clf
 

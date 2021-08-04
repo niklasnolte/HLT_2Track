@@ -23,6 +23,7 @@ regularization:
   - "direct"
 
 model :
+
   # - "nn-one"
   - "nn-regular"
   # - "nn-inf"
