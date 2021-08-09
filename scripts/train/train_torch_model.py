@@ -15,6 +15,12 @@ plt.style.use(join(dirs.project_root, 'scripts/plot/paper-dark'))
 plt.switch_backend("TkAgg")
 
 
+BATCH_SIZE = 4096
+EPOCHS = 40
+LR = 1e-2
+LR_end = 1e-4
+
+
 def train_torch_model(
     cfg: Configuration,
     x_train: np.ndarray,
@@ -22,7 +28,6 @@ def train_torch_model(
     x_val: np.ndarray,
     y_val: np.ndarray,
 ):
-    breakpoint()
     assert cfg.model.startswith("nn")
 
     x_train: torch.Tensor = torch.from_numpy(x_train).float()
@@ -31,7 +36,8 @@ def train_torch_model(
     y_val: torch.Tensor = torch.from_numpy(y_val).float()[:, None]
 
     data = TensorDataset(x_train, y_train)
-    loader = DataLoader(data, batch_size=128, shuffle=False)
+    loader = DataLoader(data, batch_size=BATCH_SIZE, shuffle=False)
+    GAMMA = (LR_end / LR)**(1 / len(loader) / EPOCHS)
 
     def train(
             model, optimizer, scheduler, filename, loss_fun=F.binary_cross_entropy,
@@ -111,9 +117,6 @@ def train_torch_model(
                     os.remove(fn)
             plt.close()
 
-    EPOCHS = 40
-    LR = 1e-2
-
     torch.manual_seed(1)
     from hlt2trk.models import get_model
 
@@ -122,7 +125,7 @@ def train_torch_model(
     nparams = sum([x.view(-1).shape[0] for x in model.parameters()])
     print(f"model has {nparams} parameters")
     optimizer = torch.optim.Adam(model.parameters(), lr=LR)
-    scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer=optimizer, gamma=0.999)
+    scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer=optimizer, gamma=GAMMA)
 
     def weighted_mse_loss(input, target, weight=None):
         if weight is None:

@@ -36,9 +36,9 @@ columns = [
 ]
 
 # the order of these is important
-# [0[,1]] -> minbias
-# [i] -> magdown
-# [i+1] -> mag up for the same sample
+# [0] -> minbias
+# [2i] -> magdown
+# [2i+1] -> mag up for the same sample
 tupleTrees = [
     "2018MinBias_MVATuple.root",
     "MagDown_up08_30000000_MVATuple.root",  # minbias

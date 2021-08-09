@@ -233,12 +233,15 @@ class Configuration:
             )
         )
 
+    def __repr__(self):
+        return self.__str__()
+
 
 def expand_with_rules(location, **cfg):
     for k, v in cfg.items():
         cfg[k] = list(v)
         if cfg[k] == []:
-          return []
+            return []
 
     def valid_config(cfg: dict, key: str, value):
         # rules for combinations
@@ -291,3 +294,13 @@ def get_config() -> Configuration:
     from fire import Fire
 
     return Fire(Configuration)
+
+
+def get_config_from_file(file):
+    obj = load_config(file)
+
+    def default(x):
+        return x[0] if type(x) == list else x
+
+    obj_default = {k: default(v) for k, v in obj.__dict__.items()}
+    return Configuration(**obj_default)

@@ -27,9 +27,9 @@ model :
   - "nn-regular"
   - "nn-inf"
   - "bdt"
-  - "lda"
-  - "qda"
-  - "gnb"
+  # - "lda"
+  # - "qda"
+  # - "gnb"
 
 data_type:
   - "lhcb"
