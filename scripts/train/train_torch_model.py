@@ -22,6 +22,7 @@ def train_torch_model(
     x_val: np.ndarray,
     y_val: np.ndarray,
 ):
+    breakpoint()
     assert cfg.model.startswith("nn")
 
     x_train: torch.Tensor = torch.from_numpy(x_train).float()
@@ -30,7 +31,7 @@ def train_torch_model(
     y_val: torch.Tensor = torch.from_numpy(y_val).float()[:, None]
 
     data = TensorDataset(x_train, y_train)
-    loader = DataLoader(data, batch_size=4096, shuffle=False)
+    loader = DataLoader(data, batch_size=128, shuffle=False)
 
     def train(
             model, optimizer, scheduler, filename, loss_fun=F.binary_cross_entropy,
@@ -111,7 +112,7 @@ def train_torch_model(
             plt.close()
 
     EPOCHS = 40
-    LR = 1e-1
+    LR = 1e-2
 
     torch.manual_seed(1)
     from hlt2trk.models import get_model
@@ -121,7 +122,7 @@ def train_torch_model(
     nparams = sum([x.view(-1).shape[0] for x in model.parameters()])
     print(f"model has {nparams} parameters")
     optimizer = torch.optim.Adam(model.parameters(), lr=LR)
-    scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer=optimizer, gamma=0.996)
+    scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer=optimizer, gamma=0.999)
 
     def weighted_mse_loss(input, target, weight=None):
         if weight is None:

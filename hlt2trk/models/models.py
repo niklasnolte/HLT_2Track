@@ -185,10 +185,10 @@ def get_model(cfg: config.Configuration) -> Union[nn.Module, lgb.Booster]:
 
     elif cfg.model == "bdt":
         clf = lgb.LGBMClassifier(
-            n_estimators=300,
+            n_estimators=1000,
             learning_rate=0.05,
             is_unbalance=True,
-            num_leaves=15,
+            num_leaves=25,
             boosting_type="gbdt",
             monotone_constraints=[1, 1, 0, 1][:len(cfg.features)],
         )

@@ -12,6 +12,7 @@ def train_simple_model(
     x_val: np.ndarray,
     y_val: np.ndarray,
 ):
+    breakpoint()
     assert cfg.model in ["lda", "qda", "gnb"]
 
     model = get_model(cfg)

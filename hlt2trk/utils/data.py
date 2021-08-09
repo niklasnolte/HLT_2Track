@@ -45,6 +45,7 @@ def get_data_for_training(cfg: config.Configuration) -> Tuple[np.ndarray]:
     sig = df[is_signal(cfg, df.signal_type)]
 
     if cfg.data_type == "lhcb":
+        breakpoint()
         bkg = bkg[bkg.eventtype == 0]  # only take minbias as bkg for now
         sig = sig[sig.eventtype != 0]  # why is there signal in minbias?
     X = np.concatenate((bkg[cfg.features].values, sig[cfg.features].values))

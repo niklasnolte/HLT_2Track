@@ -23,35 +23,39 @@ regularization:
   - "direct"
 
 model :
-
-  # - "nn-one"
+  - "nn-one"
   - "nn-regular"
-  # - "nn-inf"
-  # - "bdt"
-  # - "lda"
-  # - "qda"
-  # - "gnb"
+  - "nn-inf"
+  - "bdt"
+  - "lda"
+  - "qda"
+  - "gnb"
 
-data_type :
+data_type:
   - "lhcb"
   # - "standalone"
 
-features :
+features:
   - ["minipchi2", "sumpt"]
   # - ["fdchi2", "sumpt"]
   # - ["fdchi2", "sumpt", "vchi2", "minipchi2"]
 
-signal_type :
+signal_type:
   - "heavy-flavor"
   # - "beauty"
   # - "charm"
 
-normalize :
+normalize:
   - False
   # - True
 
-presel_conf :
+presel_conf:
   - svPT : 2000 # [MeV]
     trkPT : 500 # [MeV]
-  - svPT : 1000 # [MeV]
-    trkPT : 500 # [MeV]
+    svchi2 : 10 # [unitless]
+  # - svPT : 1000 # [MeV]
+  #   trkPT : 500 # [MeV]
+  #   svchi2 : 10 # [unitless]
+  # - svPT : 1000 # [MeV]
+  #   trkPT : 200 # [MeV]
+  #   svchi2 : 100 # [unitless]
