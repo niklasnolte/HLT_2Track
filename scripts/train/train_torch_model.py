@@ -15,10 +15,10 @@ plt.style.use(join(dirs.project_root, 'scripts/plot/paper-dark'))
 plt.switch_backend("TkAgg")
 
 
-BATCH_SIZE = 4096
+BATCH_SIZE = 128
 EPOCHS = 40
-LR = 1e-2
-LR_end = 1e-4
+LR = 3e-2
+LR_end = 3e-4
 
 
 def train_torch_model(
@@ -36,7 +36,7 @@ def train_torch_model(
     y_val: torch.Tensor = torch.from_numpy(y_val).float()[:, None]
 
     data = TensorDataset(x_train, y_train)
-    loader = DataLoader(data, batch_size=BATCH_SIZE, shuffle=False)
+    loader = DataLoader(data, batch_size=BATCH_SIZE, shuffle=True)
     GAMMA = (LR_end / LR)**(1 / len(loader) / EPOCHS)
 
     def train(

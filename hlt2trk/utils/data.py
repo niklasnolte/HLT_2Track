@@ -35,29 +35,30 @@ def get_data(cfg: config.Configuration) -> pd.DataFrame:
     if cfg.normalize:
         x = mc[cfg.features]
         mc[cfg.features] = (x - x.min(axis=0)) / (x.max(axis=0) - x.min(axis=0))
+    mc["validation"] = mc.EventInSequence % 4 == 0
     return mc.reset_index(drop=True)
 
 
 def get_data_for_training(cfg: config.Configuration) -> Tuple[np.ndarray]:
     df = get_data(cfg)
-    #df = df[df["minipchi2"] < 6]
+    df = df[df["minipchi2"] < 6]
     bkg = df[df.signal_type == 0]
     sig = df[is_signal(cfg, df.signal_type)]
 
     if cfg.data_type == "lhcb":
-        bkg = bkg[bkg.eventtype == 0]  # only take minbias as bkg for now
-        sig = sig[sig.eventtype != 0]  # why is there signal in minbias?
-    X = np.concatenate((bkg[cfg.features].values, sig[cfg.features].values))
-    y = np.concatenate((np.zeros(len(bkg)), np.ones(len(sig))))
+        # minbias + svs of which the tracks associated pvs are at least 10mm away from the signal pv
+        bkg = bkg[(bkg.eventtype == 0)]# | (bkg.trk1_fromHFPV + bkg.trk2_fromHFPV == 0)]
+        sig = sig[sig.eventtype != 0]
+        sig = sig.groupby(sig.eventtype).head(len(bkg)//sig.eventtype.max())
+    
+    bkg_train = bkg[~bkg.validation][cfg.features].values
+    sig_train = sig[~sig.validation][cfg.features].values
+    bkg_valid = bkg[bkg.validation][cfg.features].values
+    sig_valid = sig[sig.validation][cfg.features].values
+    
+    X_train = np.concatenate((bkg_train, sig_train))
+    y_train = np.concatenate((np.zeros(len(bkg_train)), np.ones(len(sig_train))))
+    X_valid = np.concatenate((bkg_valid, sig_valid))
+    y_valid = np.concatenate((np.zeros(len(bkg_valid)), np.ones(len(sig_valid))))
 
-    np.random.seed(cfg.seed)
-    shuffle_idx: np.ndarray = np.random.permutation(np.arange(len(X)))
-    X = X[shuffle_idx]
-    y = y[shuffle_idx]
-
-    split = (len(X) * 3) // 4
-    X_train = X[:split]
-    X_test = X[split:]
-    y_train = y[:split]
-    y_test = y[split:]
-    return X_train, y_train, X_test, y_test
+    return X_train, y_train, X_valid, y_valid

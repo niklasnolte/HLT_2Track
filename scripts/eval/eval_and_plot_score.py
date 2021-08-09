@@ -12,7 +12,7 @@ cfg = get_config()
 evt_grp = ["eventtype", "EventInSequence"]
 
 
-def eval(data):
+def eval_(data):
     X = data[cfg.features].to_numpy()
 
     model = load_model(cfg)
@@ -41,7 +41,6 @@ def plot_rates_vs_effs(data, presel_effs):
     cutrange = np.linspace(1, 0, 100)
     tos_preds = data.groupby(evt_grp).tos_pred.agg(max).reset_index()
     preds = data.groupby(evt_grp).pred.agg(max).reset_index()
-    # truths = (data.groupby(evt_grp).signal_type.agg(max) > 0).reset_index()
 
     # minimum bias rates (per event)
     minbias_preds = preds[preds.eventtype == 0].pred.values
@@ -56,7 +55,6 @@ def plot_rates_vs_effs(data, presel_effs):
     for mode in data.eventtype.unique():
         tos_pred = tos_preds[tos_preds.eventtype == mode].tos_pred.values
         pred = preds[preds.eventtype == mode].pred.values
-        # truth = truths[data.eventtype == mode]
         if mode != 0:
             eff = [presel_effs[mode] * (pred > i).mean() for i in cutrange]
             tos_eff = [presel_effs[mode] * (tos_pred > i).mean() for i in cutrange]
@@ -75,8 +73,9 @@ def plot_rates_vs_effs(data, presel_effs):
 
 
 data = get_data(cfg)
+data = data[data.validation]
 
-data["pred"] = eval(data)
+data["pred"] = eval_(data)
 
 # per event performance evaluation
 data = data[evt_grp + ["pred", "signal_type"]]

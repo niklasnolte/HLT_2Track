@@ -8,12 +8,16 @@ from hlt2trk.utils.config import get_config, Locations, format_location, dirs
 cfg = get_config()
 
 
-def from_root(path: str, columns="*", evttuple=False) -> pd.DataFrame:
+def from_root(path: str, columns="*", evttuple=False, maxEvt = None) -> pd.DataFrame:
     ttree = u.open(join(dirs.raw_data, path))
     if evttuple:
-        return ttree["EventTuple/Evt"].pandas.df(columns)
+        df = ttree["EventTuple/Evt"].pandas.df(columns)
     else:
-        return ttree["DecayTreeTuple#1/N2Trk"].pandas.df(columns)
+        df = ttree["DecayTreeTuple#1/N2Trk"].pandas.df(columns)
+    if maxEvt is None:
+      return df
+    else:
+      return df[df.EventInSequence < maxEvt].copy()
 
 
 columns = [
@@ -28,30 +32,28 @@ columns = [
     "trk1_PT",
     "trk1_P",
     "trk1_signal_type",
+    "trk1_fromHFPV",
     "trk2_IPCHI2_OWNPV",
     "trk2_PT",
     "trk2_P",
     "trk2_signal_type",
+    "trk2_fromHFPV",
     "EventInSequence",
 ]
 
-# the order of these is important
-# [0] -> minbias
-# [2i] -> magdown
-# [2i+1] -> mag up for the same sample
-tupleTrees = [
+mb_tupleTrees = [
     "2018MinBias_MVATuple.root",
     "MagDown_up08_30000000_MVATuple.root",  # minbias
     "upgrade_magup_sim10_up08_30000000_digi_MVATuple.root",  # minbias
+]
+sig_tupleTrees = [
     "MagDown_up05_11104054_MVATuple.root",
     "MagDown_up05_23103042_MVATuple.root",
-    #"MagDown_up08_16103330_MVATuple.root",
     "MagDown_up05_11104055_MVATuple.root",
     "MagDown_up05_23103062_MVATuple.root",
     "MagDown_up08_16103332_MVATuple.root",
     "MagDown_up05_11104056_MVATuple.root",
     "MagDown_up05_23163003_MVATuple.root",
-    #"MagDown_up08_21101402_MVATuple.root",
     "MagDown_up05_11104057_MVATuple.root",
     "MagDown_up05_23163052_MVATuple.root",
     "MagDown_up08_21101411_MVATuple.root",
@@ -60,20 +62,13 @@ tupleTrees = [
     "MagDown_up08_21103100_MVATuple.root",
     "MagDown_up05_11164063_MVATuple.root",
     "MagDown_up08_11264001_MVATuple.root",
-    #"MagDown_up08_21103110_MVATuple.root",
     "MagDown_up05_11166107_MVATuple.root",
     "MagDown_up08_11264011_MVATuple.root",
     "MagDown_up08_21113000_MVATuple.root",
     "MagDown_up05_11196000_MVATuple.root",
     "MagDown_up08_11874004_MVATuple.root",
-    #"MagDown_up08_21113016_MVATuple.root",
     "MagDown_up05_11196011_MVATuple.root",
-    #"MagDown_up08_12101401_MVATuple.root",
-    #"MagDown_up08_21123203_MVATuple.root",
     "MagDown_up05_11196099_MVATuple.root",
-    #"MagDown_up08_12103110_MVATuple.root",
-    #"MagDown_up08_21123240_MVATuple.root",
-    #"MagDown_up05_11264001_MVATuple.root",
     "MagDown_up08_12103406_MVATuple.root",
     "MagDown_up08_23103100_MVATuple.root",
     "MagDown_up05_12103009_MVATuple.root",
@@ -81,33 +76,21 @@ tupleTrees = [
     "MagDown_up08_23103110_MVATuple.root",
     "MagDown_up05_12103019_MVATuple.root",
     "MagDown_up08_12103423_MVATuple.root",
-    #"MagDown_up08_25103102_MVATuple.root",
     "MagDown_up05_12103028_MVATuple.root",
     "MagDown_up08_12103443_MVATuple.root",
     "MagDown_up08_25113000_MVATuple.root",
     "MagDown_up05_12103038_MVATuple.root",
-    #"MagDown_up08_12103444_MVATuple.root",
-    #"MagDown_up08_25123000_MVATuple.root",
     "MagDown_up05_12103041_MVATuple.root",
     "MagDown_up08_12103445_MVATuple.root",
     "MagDown_up08_26104186_MVATuple.root",
     "MagDown_up05_12103051_MVATuple.root",
-    #"MagDown_up08_12163001_MVATuple.root",
     "MagDown_up08_26104187_MVATuple.root",
-    "MagDown_up05_15104142_MVATuple.root",
-    #"MagDown_up08_12163021_MVATuple.root",
     "MagDown_up08_26106182_MVATuple.root",
     "MagDown_up05_15364010_MVATuple.root",
-    #"MagDown_up08_12165106_MVATuple.root",
     "MagDown_up08_27163003_MVATuple.root",
     "MagDown_up05_21163002_MVATuple.root",
-    #"MagDown_up08_13264021_MVATuple.root",
-    #"MagDown_up08_27163206_MVATuple.root",
     "MagDown_up05_21163012_MVATuple.root",
-    #"MagDown_up08_13264031_MVATuple.root",
-    #"MagDown_up08_27163207_MVATuple.root",
     "MagDown_up05_21163022_MVATuple.root",
-    #"MagDown_up08_15102320_MVATuple.root",
     "MagDown_up08_27173002_MVATuple.root",
     "MagDown_up05_21163032_MVATuple.root",
     "MagDown_up08_15364010_MVATuple.root",
@@ -116,7 +99,30 @@ tupleTrees = [
     "MagDown_up08_16103130_MVATuple.root",
     "MagDown_up08_27375075_MVATuple.root",
     "MagDown_up05_23103012_MVATuple.root",
+    # the next ones are buggy
+    #"MagDown_up05_15104142_MVATuple.root",
+    #"MagDown_up08_12163001_MVATuple.root",
+    #"MagDown_up08_16103330_MVATuple.root",
+    #"MagDown_up08_21101402_MVATuple.root",
+    #"MagDown_up08_21103110_MVATuple.root",
+    #"MagDown_up08_21113016_MVATuple.root",
+    #"MagDown_up08_12101401_MVATuple.root",
+    #"MagDown_up08_21123203_MVATuple.root",
+    #"MagDown_up08_12103110_MVATuple.root",
+    #"MagDown_up08_21123240_MVATuple.root",
+    #"MagDown_up05_11264001_MVATuple.root",
+    #"MagDown_up08_25103102_MVATuple.root",
+    #"MagDown_up08_12103444_MVATuple.root",
+    #"MagDown_up08_25123000_MVATuple.root",
+    #"MagDown_up08_12163021_MVATuple.root",
+    #"MagDown_up08_12165106_MVATuple.root",
+    #"MagDown_up08_13264021_MVATuple.root",
+    #"MagDown_up08_27163206_MVATuple.root",
+    #"MagDown_up08_13264031_MVATuple.root",
+    #"MagDown_up08_27163207_MVATuple.root",
+    #"MagDown_up08_15102320_MVATuple.root",
     #"MagDown_up08_16103131_MVATuple.root",
+    # old ones
     # "upgrade_magdown_sim10_up08_11102202_digi_MVATuple.root",  # Bd -> (Kst -> K pi) gamma
     # "upgrade_magup_sim10_up08_11102202_digi_MVATuple.root",  # Bd -> (Kst -> K pi) gamma
     # "upgrade_magdown_sim10_up08_11124001_digi_MVATuple.root",  # Bd -> (Kst -> K pi) ee
@@ -162,16 +168,11 @@ def presel(df: pd.DataFrame, evttuple: pd.DataFrame) -> pd.DataFrame:
     # for the rate, we just look how many events we ran over.
     n_events_before.loc[0] = evttuple[evttuple.eventtype == 0].EventInSequence.max()
 
-    n_events_after = {
-        et: selt[selt.eventtype == et].EventInSequence.nunique()
-        for et in n_events_before.index
-    }
-    # eff = after / before
-    effs = {
-        et: n_events_after[et] / int(n_events_before.loc[et]) for et in n_events_after
-    }
+    n_events_after = selt.groupby("eventtype").EventInSequence.nunique()
+
+    effs = n_events_after / n_events_before["EventInSequence"]
     with open(format_location(Locations.presel_efficiencies, cfg), "w") as f:
-        json.dump(effs, f)
+        json.dump(effs.to_dict(), f)
 
     return selt
 
@@ -211,8 +212,10 @@ def preprocess(df: pd.DataFrame, evttuple: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-unprocessed = [from_root(x, columns) for x in tupleTrees]
-evttuples = [from_root(x, evttuple=True) for x in tupleTrees]
+unprocessed = [from_root(x, columns) for x in mb_tupleTrees]
+unprocessed += [from_root(x, columns, maxEvt=6000) for x in sig_tupleTrees]
+evttuples = [from_root(x, evttuple=True) for x in mb_tupleTrees]
+evttuples += [from_root(x, evttuple=True,maxEvt=6000) for x in sig_tupleTrees]
 
 
 last_evt_mb2018 = evttuples[0].EventInSequence.max()

@@ -10,7 +10,8 @@ from evaluate import eval_bdt, eval_simple, eval_torch_network
 
 cfg = config.get_config()
 
-X = get_data(cfg)[cfg.features].values
+X = get_data(cfg)
+X = X[X.validation][cfg.features].values
 
 nfeats = len(cfg.features)
 

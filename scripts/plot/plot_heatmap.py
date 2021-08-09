@@ -24,7 +24,6 @@ def plot_heatmap(
     fig = plt.figure()
     ax: plt.Axes = fig.add_subplot()
 
-    c = plt.cm.RdBu(y)
     sc = ax.scatter(x0, x1, c=y, cmap=plt.cm.RdBu, s=150, marker="s", **(params or {}))
     eps = 1e-2
     mask = (y < cut + eps) & (y > cut - eps)
