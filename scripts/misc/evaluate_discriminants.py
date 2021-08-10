@@ -1,4 +1,4 @@
-from hlt2trk.utils.config import Configs, Configuration, dirs, get_config
+from hlt2trk.utils.config import Configuration, dirs, get_config_from_file, Configs
 import pickle
 from collections import defaultdict
 from os.path import join
@@ -51,9 +51,12 @@ def main(save_model: bool = True, save_path: str = None, latex: bool = False):
     for model_name in model_names:
         model = eval(model_name + "()")
         print(model_name)
+        cfg = get_config_from_file(join(dirs.project_root, "config.yml"))
+        cfg.__dict__.pop('features')
+        cfg.__dict__.pop('device')
         for i, features in enumerate(Configs.features):
             acc, auc = get_metrics(
-                *get_data_for_training(Configuration(features=features, normalize=True)),
+                *get_data_for_training(Configuration(**cfg.__dict__, features=features)),
                 model)
             print(f"{acc:.3f}")
             print(f"{auc:.3f}")

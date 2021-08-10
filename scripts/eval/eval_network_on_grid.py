@@ -20,7 +20,7 @@ torch.manual_seed(2)
 model = load_model(cfg)
 
 limits = [np.quantile(X[:, i], (0.02, 0.98)) for i in range(nfeats)]
-linspaces = [np.linspace(*xi, 100 if nfeats == 2 else 20) for xi in limits]
+linspaces = [np.linspace(*xi, 100 if nfeats == 2 else 60) for xi in limits]
 grid = np.array(tuple(product(*linspaces)))
 
 

@@ -72,6 +72,11 @@ class Locations:
         "metrics_{model}_{features}_{data_type}_{normalize}"
         "_{signal_type}_{presel_conf}_{max_norm}_{regularization}_{division}.json",
     )
+    eff_table = join(
+        dirs.results,
+        "eff-table_{model}_{features}_{data_type}_{normalize}"
+        "_{signal_type}_{presel_conf}_{max_norm}_{regularization}_{division}.txt",
+    )
 
 
 def to_string_features(features: Optional[list]) -> str:
@@ -238,6 +243,12 @@ class Configuration:
 
 
 def expand_with_rules(location, **cfg):
+    """
+    snakemake like expand function,
+    but conditional expansion based on the rules in valid_config.
+    The location is expanded with None for a key if no rule in the
+    current expansion is valid with the key configuration
+    """
     for k, v in cfg.items():
         cfg[k] = list(v)
         if cfg[k] == []:
@@ -304,3 +315,13 @@ def get_config_from_file(file):
 
     obj_default = {k: default(v) for k, v in obj.__dict__.items()}
     return Configuration(**obj_default)
+
+def feature_repr(feature):
+    if feature == "minipchi2":
+      return "log(min($\chi^2_{IP}$))"
+    elif feature == "sumpt":
+      return "$\sum_{tracks}p_{T}$ [GeV]"
+    elif feature == "fdchi2":
+      return "log($\chi^2_{FD}$)"
+    elif feature == "vchi2":
+      return "$\chi^2_{Vertex}$"

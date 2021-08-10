@@ -41,21 +41,22 @@ def get_data(cfg: config.Configuration) -> pd.DataFrame:
 
 def get_data_for_training(cfg: config.Configuration) -> Tuple[np.ndarray]:
     df = get_data(cfg)
-    df = df[df["minipchi2"] < 6]
+    df = df[df["minipchi2"] < cfg.presel_conf["ipcuttrain"]]
     bkg = df[df.signal_type == 0]
     sig = df[is_signal(cfg, df.signal_type)]
 
     if cfg.data_type == "lhcb":
-        # minbias + svs of which the tracks associated pvs are at least 10mm away from the signal pv
-        bkg = bkg[(bkg.eventtype == 0)]# | (bkg.trk1_fromHFPV + bkg.trk2_fromHFPV == 0)]
+        # minbias + svs of which the tracks associated pvs
+        # are at least 10mm away from the signal pv
+        bkg = bkg[(bkg.eventtype == 0)]  # | (bkg.trk1_fromHFPV + bkg.trk2_fromHFPV == 0)]
         sig = sig[sig.eventtype != 0]
-        sig = sig.groupby(sig.eventtype).head(len(bkg)//sig.eventtype.max())
-    
+        sig = sig.groupby(sig.eventtype).head(len(bkg) // sig.eventtype.max())
+
     bkg_train = bkg[~bkg.validation][cfg.features].values
     sig_train = sig[~sig.validation][cfg.features].values
     bkg_valid = bkg[bkg.validation][cfg.features].values
     sig_valid = sig[sig.validation][cfg.features].values
-    
+
     X_train = np.concatenate((bkg_train, sig_train))
     y_train = np.concatenate((np.zeros(len(bkg_train)), np.ones(len(sig_train))))
     X_valid = np.concatenate((bkg_valid, sig_valid))

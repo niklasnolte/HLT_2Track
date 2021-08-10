@@ -16,8 +16,8 @@ plt.switch_backend("TkAgg")
 
 
 BATCH_SIZE = 128
-EPOCHS = 40
-LR = 3e-2
+EPOCHS = 100
+LR = 5e-2
 LR_end = 3e-4
 
 

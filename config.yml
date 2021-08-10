@@ -38,7 +38,7 @@ data_type:
 features:
   - ["minipchi2", "sumpt"]
   # - ["fdchi2", "sumpt"]
-  # - ["fdchi2", "sumpt", "vchi2", "minipchi2"]
+  - ["fdchi2", "sumpt", "vchi2", "minipchi2"]
 
 signal_type:
   - "heavy-flavor"
@@ -50,12 +50,17 @@ normalize:
   # - True
 
 presel_conf:
-  - svPT : 2000 # [MeV]
-    trkPT : 500 # [MeV]
-    svchi2 : 10 # [unitless]
-  # - svPT : 1000 # [MeV]
+  # - svPT : 2000 # [MeV]
   #   trkPT : 500 # [MeV]
   #   svchi2 : 10 # [unitless]
   # - svPT : 1000 # [MeV]
-  #   trkPT : 200 # [MeV]
-  #   svchi2 : 100 # [unitless]
+  #   trkPT : 500 # [MeV]
+  #   svchi2 : 10 # [unitless]
+  - svPT : 1000 # [MeV]
+    trkPT : 200 # [MeV]
+    svchi2 : 100 # [unitless]
+    ipcuttrain : 6
+  - svPT : 1000 # [MeV]
+    trkPT : 200 # [MeV]
+    svchi2 : 100 # [unitless]
+    ipcuttrain : 10

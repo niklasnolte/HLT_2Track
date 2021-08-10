@@ -1,9 +1,12 @@
+from re import M
 import typing as t
 from os.path import join
 
 import numpy as np
-from hlt2trk.utils.config import Locations, dirs, format_location, get_config
+import itertools
+from hlt2trk.utils.config import Locations, dirs, format_location, get_config, feature_repr
 from matplotlib import pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
 
 cfg = get_config()
 if cfg.plot_style == "dark":
@@ -19,25 +22,33 @@ def plot_heatmap(
         y: np.ndarray,
         params: t.Optional[dict] = None,
 ):
-    x0 = x[:, 0]
-    x1 = x[:, 1]
-    fig = plt.figure()
-    ax: plt.Axes = fig.add_subplot()
+    with PdfPages(format_location(Locations.heatmap, cfg)) as pdf:
+      for idxs in itertools.combinations(range(x.shape[1]), 2):
+        x0u = np.unique(x[:, idxs[0]])
+        x1u = np.unique(x[:, idxs[1]])
+        y_meaned = [y[(x[:,idxs[0]] == x0i) & (x[:,idxs[1]] == x1i)].mean() for x0i in x0u for x1i in x1u]
+        y_meaned = np.array(y_meaned)
 
-    sc = ax.scatter(x0, x1, c=y, cmap=plt.cm.RdBu, s=150, marker="s", **(params or {}))
-    eps = 1e-2
-    mask = (y < cut + eps) & (y > cut - eps)
-    ax.scatter(x0[mask], x1[mask], c="purple", s=10, marker=".")
-    ax.set_xlabel(cfg.features[0])
-    ax.set_ylabel(cfg.features[1])
-    ax.set_title(cfg.model)
-    ax.text(0, 0, f"auc: {auc:.3f}\nacc: {acc:.3f}\ncut: {cut:.3f}",
-            transform=ax.transAxes,
-            horizontalalignment="left",
-            verticalalignment="top")
+        xs = np.array([list(x) for x in itertools.product(x0u, x1u)])
+        x0 = xs[:,0]
+        x1 = xs[:,1]
 
-    plt.colorbar(sc)
-    plt.savefig(format_location(Locations.heatmap, cfg))
+        fig = plt.figure()
+        ax: plt.Axes = fig.add_subplot()
 
+        sc = ax.scatter(x0, x1, c=y_meaned, cmap=plt.cm.RdBu, s=150, marker="s", **(params or {}))
+        eps = 1e-2
+        mask = (y_meaned < cut + eps) & (y_meaned > cut - eps)
+        ax.scatter(x0[mask], x1[mask], c="purple", s=10, marker=".")
+        ax.set_xlabel(feature_repr(cfg.features[idxs[0]]))
+        ax.set_ylabel(feature_repr(cfg.features[idxs[1]]))
+        ax.set_title(cfg.model)
+        ax.text(0, 1.13, f"auc: {auc:.3f}\nacc: {acc:.3f}\ncut: {cut:.3f}",
+                transform=ax.transAxes,
+                horizontalalignment="left",
+                verticalalignment="top")
+        plt.colorbar(sc)
+        pdf.savefig()
+        plt.close()
 
 plot_heatmap(X, Y)

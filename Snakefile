@@ -42,7 +42,7 @@ rule all:
             data_type=Configs.data_type,
             features=map(
                 config.to_string_features,
-                [feats for feats in Configs.features if len(feats) == 2],
+                Configs.features,
             ),
             normalize=map(config.to_string_normalize, Configs.normalize),
             signal_type=Configs.signal_type,
@@ -85,8 +85,8 @@ rule plot_heatmap:
         script = "scripts/plot/plot_heatmap.py",
     output:
         Locations.heatmap,
-    wildcard_constraints:
-        features = "\w+\+\w+",
+    # wildcard_constraints:
+    #     features = "\w+\+\w+",
     run:
         args = config.get_cli_args(wildcards)
         shell(f"python {input.script} {args}")

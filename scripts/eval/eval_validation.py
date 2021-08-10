@@ -24,7 +24,7 @@ else:
 ypred = eval_fun(model, x_val).flatten()
 
 # evalutation
-cuts = np.linspace(0, 1, 100)
+cuts = np.linspace(0, 1, 500)
 accs = [balanced_accuracy_score(y_val.reshape(-1), ypred > cut) for cut in cuts]
 idx = np.argmax(accs)
 
