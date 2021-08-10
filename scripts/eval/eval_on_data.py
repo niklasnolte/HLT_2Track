@@ -121,7 +121,7 @@ def rates_vs_effs(data, presel_effs):
             modes.append(int_to_evttype[int(mode)])
 
     df = pd.DataFrame(np.stack([modes, target_effs, target_tos_effs]).T)
-    df.columns = ["mode", "$\epsilon$", "$\epsilon_\rm{tos}$"]
+    df.columns = ["mode", "eff", "tos_eff"]
     df = df.astype({"mode": int})
     return df, efficiencies
 

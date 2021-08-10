@@ -271,11 +271,16 @@ def expand_with_rules(location, **cfg):
                 return False
         if key in ["max_norm", "regularization", "division"]:
             # only regularized nn models have these keywords
-            if cfg["model"] not in ["nn-inf", "nn-inf-oc", "nn-inf-mon-vchi2", "nn-one"]:
+            if cfg["model"] not in [
+                "nn-inf",
+                "nn-inf-oc",
+                "nn-inf-mon-vchi2",
+                "nn-one",
+            ]:
                 return False
         if key == "features" and cfg["model"] == "nn-inf-mon-vchi2":
-          if len(from_string_features(value)) == 2:
-            return False
+            if len(from_string_features(value)) == 2:
+                return False
         return True
 
     def expand(These: Iterable[dict], key: str, With: Iterable):
@@ -337,3 +342,85 @@ def feature_repr(feature):
         return "log($\chi^2_{FD}$)"
     elif feature == "vchi2":
         return "$\chi^2_{Vertex}$"
+
+
+# signal sample eventtypes
+evttypes = [
+    11104054,
+    23103042,
+    11104055,
+    23103062,
+    16103332,
+    11104056,
+    23163003,
+    11104057,
+    23163052,
+    21101411,
+    11104058,
+    11102521,
+    21103100,
+    11164063,
+    11264001,
+    11166107,
+    11264011,
+    21113000,
+    11196000,
+    11874004,
+    11196011,
+    11196099,
+    12103406,
+    23103100,
+    12103009,
+    12103422,
+    23103110,
+    12103019,
+    12103423,
+    12103028,
+    12103443,
+    25113000,
+    12103038,
+    12103041,
+    12103445,
+    26104186,
+    12103051,
+    26104187,
+    26106182,
+    15364010,
+    27163003,
+    21163002,
+    21163012,
+    21163022,
+    27173002,
+    21163032,
+    15364010,
+    27225003,
+    21163042,
+    16103130,
+    27375075,
+    23103012,
+    # buggy
+    # 15104142
+    # 12163001
+    # 16103330
+    # 21101402
+    # 21103110
+    # 21113016
+    # 12101401
+    # 21123203
+    # 12103110
+    # 21123240
+    # 11264001
+    # 25103102
+    # 12103444
+    # 25123000
+    # 12163021
+    # 12165106
+    # 13264021
+    # 27163206
+    # 13264031
+    # 27163207
+    # 15102320
+    # 16103131
+]
+
+evttypes = {i+1:evttype for i, evttype in enumerate(evttypes)}
