@@ -263,7 +263,7 @@ def expand_with_rules(location, **cfg):
                 return False
         if key in ["max_norm", "regularization", "division"]:
             # only regularized nn models have these keywords
-            if cfg["model"] not in ["nn-inf", "nn-one"]:
+            if cfg["model"] not in ["nn-inf", "nn-inf-oc", "nn-one"]:
                 return False
         return True
 

@@ -45,12 +45,16 @@ def plot_heatmap(
             sc = ax.scatter(x0, x1, c=y_meaned, cmap=plt.cm.RdBu,
                             s=150, marker="s", **(params or {}))
             eps = 1e-2
-            mask = (y_meaned < cut + eps) & (y_meaned > cut - eps)
-            ax.scatter(x0[mask], x1[mask], c="purple", s=10, marker=".")
+            # mask = (y_meaned < cut + eps) & (y_meaned > cut - eps)
+            # ax.scatter(x0[mask], x1[mask], c="purple", s=10, marker=".")
             ax.set_xlabel(feature_repr(cfg.features[idxs[0]]))
             ax.set_ylabel(feature_repr(cfg.features[idxs[1]]))
             ax.set_title(cfg.model)
-            ax.text(0, 1.13, f"auc: {auc:.3f}\nacc: {acc:.3f}\ncut: {cut:.3f}",
+            # ax.text(0, 1.13, f"auc: {auc:.3f}\nacc: {acc:.3f}\ncut: {cut:.3f}",
+            #         transform=ax.transAxes,
+            #         horizontalalignment="left",
+            #         verticalalignment="top")
+            ax.text(0, 1.05, f"auc: {auc:.3f}",
                     transform=ax.transAxes,
                     horizontalalignment="left",
                     verticalalignment="top")

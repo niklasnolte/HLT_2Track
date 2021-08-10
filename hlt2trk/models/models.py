@@ -96,7 +96,7 @@ def get_model(cfg: config.Configuration) -> Union[nn.Module, lgb.Booster]:
     depth = 2
     nunits = 16
 
-    if cfg.model in ["nn-one", "nn-inf"]:
+    if cfg.model in ["nn-one", "nn-inf", "nn-inf-oc"]:
         be_monotonic_in = list(range(len(cfg.features)))
         try:
             be_monotonic_in.pop(cfg.features.index("vchi2"))
@@ -108,7 +108,7 @@ def get_model(cfg: config.Configuration) -> Union[nn.Module, lgb.Booster]:
             def __init__(self, sigma):
                 super().__init__()
 
-                if cfg.model == "nn-inf":
+                if cfg.model in ["nn-inf", "nn-inf-oc"]:
                     kind = "inf"
                 elif cfg.model == "nn-one":
                     kind = "one"
@@ -167,8 +167,10 @@ def get_model(cfg: config.Configuration) -> Union[nn.Module, lgb.Booster]:
                 x = self.sigmanet(x)
                 x = torch.sigmoid(x)
                 return x
-
-        sigma = cfg.sigma_init if cfg.sigma_init is not None else 1
+        if cfg.model == "nn-inf-oc":
+          sigma = .5
+        else:
+          sigma = cfg.sigma_init if cfg.sigma_init is not None else 1
         sigma_network = Sigma(sigma=sigma)
         return sigma_network
 

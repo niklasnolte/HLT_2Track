@@ -86,7 +86,7 @@ def train_torch_model(
                       for x in np.linspace(0.1, .9, 5)])
 
             desc = f"epoch {i}, loss: {loss.item():.4f}, auc: {auc:.4f}, acc: {acc:.4f}"
-            if cfg.model in ["nn-one", "nn-inf"]:
+            if cfg.model in ["nn-one", "nn-inf", "nn-inf-oc"]:
                 desc += f" sigma: {model.sigmanet.sigma.item(): .2f}"
                 desc += f" lr: {optimizer.param_groups[0]['lr']:.2e}"
             pbar.set_description(desc)

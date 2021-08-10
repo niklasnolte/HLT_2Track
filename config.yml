@@ -26,6 +26,7 @@ model :
   - "nn-one"
   - "nn-regular"
   - "nn-inf"
+  - "nn-inf-oc" # sigma of .5 hardcoded
   - "bdt"
   # - "lda"
   # - "qda"
@@ -58,9 +59,9 @@ presel_conf:
   #   svchi2 : 10 # [unitless]
   - svPT : 1000 # [MeV]
     trkPT : 200 # [MeV]
-    svchi2 : 100 # [unitless]
+    svchi2 : 20 # [unitless]
     ipcuttrain : 6
   - svPT : 1000 # [MeV]
     trkPT : 200 # [MeV]
-    svchi2 : 100 # [unitless]
+    svchi2 : 20 # [unitless]
     ipcuttrain : 10
