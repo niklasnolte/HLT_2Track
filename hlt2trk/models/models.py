@@ -97,10 +97,10 @@ def get_model(cfg: config.Configuration) -> Union[nn.Module, lgb.Booster]:
     nunits = 16
     # for monotonic models
     # WARNING: requires features to be in the right order
-    monotone_constraints=[1, 1, 0, 1][:len(cfg.features)]
+    monotone_constraints = [1, 1, 0, 1][:len(cfg.features)]
     if cfg.model == "nn-inf-mon-vchi2" and len(cfg.features) == 4:
-      # decreasing monotonicity on vchi2
-      monotone_constraints[2] = -1
+        # decreasing monotonicity on vchi2
+        monotone_constraints[2] = -1
 
     if cfg.model in ["nn-one", "nn-inf", "nn-inf-oc", "nn-inf-mon-vchi2"]:
         class Sigma(nn.Module):
@@ -166,9 +166,9 @@ def get_model(cfg: config.Configuration) -> Union[nn.Module, lgb.Booster]:
                 x = torch.sigmoid(x)
                 return x
         if cfg.model == "nn-inf-oc":
-          sigma = .5
+            sigma = .2
         else:
-          sigma = cfg.sigma_init if cfg.sigma_init is not None else 1
+            sigma = cfg.sigma_init if cfg.sigma_init is not None else 1
         sigma_network = Sigma(sigma=sigma)
         return sigma_network
 

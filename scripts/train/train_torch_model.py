@@ -11,8 +11,8 @@ from hlt2trk.utils.config import Locations, format_location, Configuration, dirs
 from os.path import join
 from tqdm import tqdm
 
-plt.style.use(join(dirs.project_root, 'scripts/plot/paper-dark'))
-plt.switch_backend("TkAgg")
+plt.style.use(join(dirs.project_root, "scripts/plot/paper-dark"))
+# plt.switch_backend("TkAgg")
 
 
 BATCH_SIZE = 128
@@ -37,11 +37,16 @@ def train_torch_model(
 
     data = TensorDataset(x_train, y_train)
     loader = DataLoader(data, batch_size=BATCH_SIZE, shuffle=True)
-    GAMMA = (LR_end / LR)**(1 / len(loader) / EPOCHS)
+    GAMMA = (LR_end / LR) ** (1 / len(loader) / EPOCHS)
 
     def train(
-            model, optimizer, scheduler, filename, loss_fun=F.binary_cross_entropy,
-            make_gif=False):
+        model,
+        optimizer,
+        scheduler,
+        filename,
+        loss_fun=F.binary_cross_entropy,
+        make_gif=False,
+    ):
         device = cfg.device
         print(f"training on {device}")
 
@@ -57,8 +62,13 @@ def train_torch_model(
         model.to(device)
         pbar = tqdm(range(EPOCHS))
         for i in pbar:
-            if cfg.model in ["nn-one", "nn-inf", "nn-inf-mon-vchi2"] and cfg.sigma_final is not None:
-                model.sigmanet.sigma *= (cfg.sigma_final / cfg.sigma_init)**(1 / EPOCHS)
+            if (
+                cfg.model in ["nn-one", "nn-inf", "nn-inf-mon-vchi2"]
+                and cfg.sigma_final is not None
+            ):
+                model.sigmanet.sigma *= (cfg.sigma_final / cfg.sigma_init) ** (
+                    1 / EPOCHS
+                )
                 model.sigmanet.gamma += (cfg.gamma_final - cfg.gamma_init) / EPOCHS
             # Train
             model.train()
@@ -81,9 +91,13 @@ def train_torch_model(
                 pred = y_pred.squeeze().cpu().numpy()
                 val = y_val.squeeze().numpy()
 
-            auc = roc_auc_score(val, np.clip(pred, 0., 1.))
-            acc = max([balanced_accuracy_score(val, pred > x)
-                      for x in np.linspace(0.1, .9, 5)])
+            auc = roc_auc_score(val, np.clip(pred, 0.0, 1.0))
+            acc = max(
+                [
+                    balanced_accuracy_score(val, pred > x)
+                    for x in np.linspace(0.1, 0.9, 5)
+                ]
+            )
 
             desc = f"epoch {i}, loss: {loss.item():.4f}, auc: {auc:.4f}, acc: {acc:.4f}"
             if cfg.model in ["nn-one", "nn-inf", "nn-inf-oc", "nn-inf-mon-vchi2"]:
@@ -93,13 +107,29 @@ def train_torch_model(
 
             if make_gif:
                 range_ = None  # (0, 1)
-                ax.hist(pred[val == 1], bins=100, alpha=0.5,
-                        density=True, label="sig preds", range=range_,)
-                ax.hist(pred[val == 0], bins=100, alpha=0.5,
-                        density=True, label="bkg preds", range=range_, )
-                ax.text(0, 0.965,
-                        f"Epoch {i + 1}/{EPOCHS}, loss {loss.item():.3f}, auc {auc:.3f}",
-                        transform=ax.transAxes, fontsize=20,)
+                ax.hist(
+                    pred[val == 1],
+                    bins=100,
+                    alpha=0.5,
+                    density=True,
+                    label="sig preds",
+                    range=range_,
+                )
+                ax.hist(
+                    pred[val == 0],
+                    bins=100,
+                    alpha=0.5,
+                    density=True,
+                    label="bkg preds",
+                    range=range_,
+                )
+                ax.text(
+                    0,
+                    0.965,
+                    f"Epoch {i + 1}/{EPOCHS}, loss {loss.item():.3f}, auc {auc:.3f}",
+                    transform=ax.transAxes,
+                    fontsize=20,
+                )
 
                 f = tmp_file.format(i)
                 files.append(f)
@@ -132,14 +162,14 @@ def train_torch_model(
         optimizer,
         scheduler,
         filename=format_location(Locations.train_distribution_gif, cfg),
-        loss_fun=F.binary_cross_entropy  # weighted_mse_loss,
+        loss_fun=F.binary_cross_entropy,  # weighted_mse_loss,
     )
 
     torch.save(model.state_dict(), format_location(Locations.model, cfg))
 
     with torch.no_grad():
         preds = model.to(torch.device("cpu"))(x_val)
-    auc = roc_auc_score(y_val, np.clip(preds, 0., 1.))
+    auc = roc_auc_score(y_val, np.clip(preds, 0.0, 1.0))
     acc = max(balanced_accuracy_score(y_val, preds > i) for i in np.linspace(0, 1, 100))
     print(f"Final Validation Results: \nroc: {auc:.6f}, acc: {acc:.6f}")
     return model

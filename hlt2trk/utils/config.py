@@ -21,6 +21,7 @@ class dirs:
     savepoints = join(project_root, "savepoints")
     results = join(project_root, "results")
     results_eff = join(results, "eff")
+    results_latex = join(results, "latex")
 
 
 class Locations:
@@ -92,7 +93,7 @@ class Locations:
         "_{signal_type}_{presel_conf}_{max_norm}_{regularization}_{division}.pdf",
     )
     eff_table = join(
-        dirs.results,
+        dirs.results_latex,
         "eff_table_{features}_{data_type}_{normalize}"
         "_{signal_type}_{presel_conf}_{max_norm}_{regularization}_{division}.txt",
     )
@@ -363,58 +364,58 @@ def feature_repr(feature):
 
 # signal sample eventtypes
 evttypes = [
+    # 11102521,
     11104054,
-    23103042,
     11104055,
-    23103062,
-    16103332,
     11104056,
-    23163003,
     11104057,
-    23163052,
-    21101411,
     11104058,
-    11102521,
-    21103100,
     11164063,
-    11264001,
     11166107,
-    11264011,
-    21113000,
     11196000,
-    11874004,
     11196011,
     11196099,
-    12103406,
-    23103100,
+    11264001,
+    11264011,
+    11874004,
     12103009,
-    12103422,
-    23103110,
     12103019,
-    12103423,
     12103028,
-    12103443,
-    25113000,
     12103038,
     12103041,
-    12103445,
-    26104186,
     12103051,
-    26104187,
-    26106182,
+    12103406,
+    12103422,
+    12103423,
+    12103443,
+    12103445,
     15364010,
-    27163003,
+    15364010,
+    # 16103130,
+    # 16103332,
+    # 21101411,
+    # 21103100,
+    21113000,
     21163002,
     21163012,
     21163022,
-    27173002,
     21163032,
-    15364010,
-    27225003,
     21163042,
-    16103130,
-    27375075,
     23103012,
+    23103042,
+    23103062,
+    # 23103100,
+    # 23103110,
+    23163003,
+    23163052,
+    25113000,
+    # 26104186,
+    26104187,
+    26106182,
+    27163003,
+    27173002,
+    27225003,
+    27375075
     # buggy
     # 15104142
     # 12163001
@@ -441,4 +442,3 @@ evttypes = [
 ]
 
 evttypes = {i + 1: evttype for i, evttype in enumerate(evttypes)}
-

@@ -1,29 +1,37 @@
-import pickle
-from copy import copy
 
+from os.path import join
+import os
+from hlt2trk.utils.config import dirs
 import pandas as pd
-from hlt2trk.utils.config import (Configs, Locations, dirs, format_location,
-                                  get_config)
+import numpy as np
+import pickle
 
-cfg = get_config()
+strings = ["fdchi2+sumpt+vchi2+minipchi2",
+           "ipcuttrain:6",
+           #    "ipcuttrain:10",
+           "unnormed",
+           "svchi2:20",
+           ]
 
 
-def add_model(model, cfg):
-    cpy = copy(cfg)
-    cpy.model = model
-    return cpy
+def conditions(f):
+    return all([string in f for string in strings])
 
 
-locations = [format_location(Locations.target_effs, add_model(m, cfg))
-             for m in Configs.model]
+files = os.listdir(dirs.results_eff)
+subset = [f for f in files if f.startswith("target-eff") and conditions(f)]
+
+order = ["bdt", "nn-regular", "nn-inf", "nn-one", ]  # "qda", "lda", "gnb", ]
 
 models = {}
-for file, model in zip(locations, Configs.model):
-    with open(file, "rb") as f:
-        models[model] = pickle.load(f)
+if len(subset) > 0:
+    for fname in subset:
+        file = join(dirs.results_eff, fname)
+        with open(file, "rb") as f:
+            models[fname.split("_")[1]] = pickle.load(f)
 
 dfs = []
-for model, df in models.items():
+for df, model in [(models[name], name)for name in order if name in models.keys()]:
     df.set_index("mode", inplace=True)
     df.columns = pd.MultiIndex.from_product(
         ([model], ["dec", "tos"]), names=["model", r"$\epsilon_{660}$"])
@@ -47,7 +55,6 @@ df = df.append(idxmin)
 
 
 def make_table(df):
-    df
     table = df.to_latex(
         column_format="c" * len(models) * 2 + "c",
         multicolumn=True,
@@ -61,5 +68,7 @@ def make_table(df):
     return table
 
 
-with open(format_location(Locations.eff_table, cfg), "w") as f:
-    f.writelines(make_table(df))
+with open(join(dirs.results_eff, f"table_{'_'.join(strings)}.txt"), "w") as f:
+    table = make_table(df)
+    print(table)
+    f.writelines(table)
