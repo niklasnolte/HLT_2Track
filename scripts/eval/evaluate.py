@@ -34,3 +34,17 @@ def eval_simple(
         grid: np.ndarray) -> np.ndarray:
     y: np.ndarray = model.predict_proba(grid)[:, 1]
     return y
+
+
+def get_evaluator(cfg):
+    if cfg.model == "bdt":
+        eval_fun = eval_bdt
+    elif cfg.model.startswith("nn"):
+        eval_fun = eval_torch_network
+    elif cfg.model in ["lda", "qda", "gnb"]:
+        eval_fun = eval_simple
+    else:
+        raise ValueError(f"Unknown model: {cfg.model}, please specify eval function\
+            in case this is a new model")
+    return eval_fun
+

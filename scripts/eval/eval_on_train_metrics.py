@@ -4,22 +4,12 @@ from hlt2trk.utils import Locations, config
 from hlt2trk.utils.data import get_data_for_training
 from sklearn.metrics import balanced_accuracy_score, roc_auc_score
 
-from evaluate import eval_bdt, eval_simple, eval_torch_network
+from evaluate import get_evaluator
 
 cfg = config.get_config()
+eval_fun = get_evaluator(cfg)
 model = load_model(cfg)
-
 _, _, x_val, y_val = get_data_for_training(cfg)
-
-if cfg.model == "bdt":
-    eval_fun = eval_bdt
-elif cfg.model.startswith("nn"):
-    eval_fun = eval_torch_network
-elif cfg.model in ["lda", "qda", "gnb"]:
-    eval_fun = eval_simple
-else:
-    raise ValueError(f"Unknown model: {cfg.model}, please specify eval function in case\
-         this is a new model")
 
 ypred = eval_fun(model, x_val).flatten()
 

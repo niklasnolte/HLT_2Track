@@ -70,7 +70,8 @@ rule plot_rate_vs_eff:
         Locations.data,
         Locations.model,
         Locations.presel_efficiencies,
-        script = "scripts/eval/eval_and_plot_score.py",
+        Locations.full_effs,
+        script = "scripts/plot/plot_rates_vs_effs.py",
     output:
         Locations.rate_vs_eff,
     run:
@@ -81,6 +82,7 @@ rule plot_rate_vs_eff:
 rule plot_heatmap:
     input:
         Locations.auc_acc,
+        Locations.target_effs,
         Locations.gridXY,
         script = "scripts/plot/plot_heatmap.py",
     output:
@@ -104,19 +106,30 @@ rule plot_feat_vs_output:
 rule eval_on_grid:
     input:
         Locations.model,
-        script = "scripts/eval/eval_network_on_grid.py",
+        script = "scripts/eval/eval_on_grid.py",
     output:
         Locations.gridXY,
     run:
         args = config.get_cli_args(wildcards)
         shell(f"python {input.script} {args}")
 
-rule eval_validation:
+rule eval_on_train_metrics:
     input:
         Locations.model,
-        script = "scripts/eval/eval_validation.py",
+        script = "scripts/eval/eval_on_train_metrics.py",
     output:
         Locations.auc_acc,
+    run:
+        args = config.get_cli_args(wildcards)
+        shell(f"python {input.script} {args}")
+
+rule eval_on_data:
+    input:
+        Locations.model,
+        script = "scripts/eval/eval_on_data.py",
+    output:
+        Locations.full_effs,
+        Locations.target_effs,
     run:
         args = config.get_cli_args(wildcards)
         shell(f"python {input.script} {args}")

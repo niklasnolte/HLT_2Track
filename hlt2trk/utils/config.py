@@ -19,13 +19,15 @@ class dirs:
     raw_data = join(data, "raw")
     savepoints = join(project_root, "savepoints")
     results = join(project_root, "results")
+    results_eff = join(results, "eff")
 
 
 class Locations:
     project_root = abspath(dirname(__file__) + "/../..")
     model = join(
         dirs.models,
-        "{model}_{features}_{data_type}_{normalize}_{signal_type}_{presel_conf}_{max_norm}_{regularization}_{division}.pkl",
+        "{model}_{features}_{data_type}_{normalize}_{signal_type}_{presel_conf}"
+        "_{max_norm}_{regularization}_{division}.pkl",
     )
     data = join(dirs.data, "MC_{data_type}_{presel_conf}.pkl")
     # grid evaluation
@@ -57,7 +59,8 @@ class Locations:
     )
     roc = join(
         dirs.scatter,
-        "roc_{model}_{features}_{data_type}_{normalize}_{signal_type}_{presel_conf}_{max_norm}_{regularization}_{division}.pdf",
+        "roc_{model}_{features}_{data_type}_{normalize}_{signal_type}_{presel_conf}"
+        "_{max_norm}_{regularization}_{division}.pdf",
     )
     rate_vs_eff = join(
         dirs.scatter,
@@ -69,13 +72,18 @@ class Locations:
     )
     auc_acc = join(
         dirs.results,
-        "metrics_{model}_{features}_{data_type}_{normalize}"
+        "auc_acc_{model}_{features}_{data_type}_{normalize}"
         "_{signal_type}_{presel_conf}_{max_norm}_{regularization}_{division}.json",
     )
-    eff_table = join(
-        dirs.results,
-        "eff-table_{model}_{features}_{data_type}_{normalize}"
-        "_{signal_type}_{presel_conf}_{max_norm}_{regularization}_{division}.txt",
+    target_effs = join(
+        dirs.results_eff,
+        "target-eff_{model}_{features}_{data_type}_{normalize}"
+        "_{signal_type}_{presel_conf}_{max_norm}_{regularization}_{division}.pkl",
+    )
+    full_effs = join(
+        dirs.results_eff,
+        "full-eff_{model}_{features}_{data_type}_{normalize}"
+        "_{signal_type}_{presel_conf}_{max_norm}_{regularization}_{division}.pkl",
     )
 
 
@@ -319,12 +327,13 @@ def get_config_from_file(file):
     obj_default = {k: default(v) for k, v in obj.__dict__.items()}
     return Configuration(**obj_default)
 
+
 def feature_repr(feature):
     if feature == "minipchi2":
-      return "log(min($\chi^2_{IP}$))"
+        return "log(min($\chi^2_{IP}$))"
     elif feature == "sumpt":
-      return "$\sum_{tracks}p_{T}$ [GeV]"
+        return "$\sum_{tracks}p_{T}$ [GeV]"
     elif feature == "fdchi2":
-      return "log($\chi^2_{FD}$)"
+        return "log($\chi^2_{FD}$)"
     elif feature == "vchi2":
-      return "$\chi^2_{Vertex}$"
+        return "$\chi^2_{Vertex}$"
