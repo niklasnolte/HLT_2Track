@@ -1,4 +1,4 @@
-from hlt2trk.utils.config import Configuration
+from hlt2trk.utils.config import Configuration, dirs
 from os.path import join, abspath, dirname
 from sys import argv
 
@@ -12,36 +12,52 @@ from sklearn.metrics import roc_auc_score
 from torch.utils.data import DataLoader, TensorDataset
 
 from hlt2trk.utils.data import get_data_for_training
-from InfinityNorm import infnorm
+from InfinityNorm import project_norm, direct_norm, GroupSort
 
-DEVICE = torch.device("cuda:0")
+DEVICE = "cpu"  # torch.device("cuda:0")
 BATCHSIZE = 64
 CLASSES = 1
 EPOCHS = 50
 TIMEOUT = 60 * 60 * .2
-TRIALS = 1
+TRIALS = 100
 LOG_INTERVAL = 10
 N_TRAIN_EXAMPLES = BATCHSIZE * 10
 N_VALID_EXAMPLES = BATCHSIZE * 10
 NORMALIZE = True
+SAVE_PATH = join(dirs.results, 'regular-tuned.txt')
+# try:
+#     SAVE_PATH = [x.split('=')[1] for x in argv if 'save_to=' in x][0]
+# except IndexError:
+#     SAVE_PATH = None
+
 try:
-    SAVE_PATH = [x.split('=')[1] for x in argv if 'save_to=' in x][0]
+    nn_norm = eval([x.split('=')[1] for x in argv if 'norm=' in x][0])
 except IndexError:
-    SAVE_PATH = None
+    def nn_norm(x):
+        return x
 
-nn_norm = infnorm if 'infnorm' in argv else lambda x: x
+# nn_norm = infnorm if 'infnorm' in argv else lambda x: x
 
 
-def define_model(trial):
+def define_model(trial: optuna.trial.Trial):
     # We optimize the number of layers, hidden units and dropout ratio in each layer.
     n_layers = trial.suggest_int("n_layers", 1, 3)
+    n_units = trial.suggest_int("n_units", 2, 32, 2)
+    n_groupsort = n_units // trial.suggest_int("n_groupsort", 1, 2)
     layers = []
 
     in_features = 4
+    # for i in range(n_layers):
+    #     out_features = trial.suggest_int("n_units_l{}".format(i), 4, 128)
+    #     layers.append(nn_norm(nn.Linear(in_features, out_features)))
+    #     layers.append(nn.ReLU())
+    #     p = trial.suggest_float("dropout_l{}".format(i), 0.1, 0.5)
+    #     layers.append(nn.Dropout(p))
+    #     in_features = out_features
     for i in range(n_layers):
-        out_features = trial.suggest_int("n_units_l{}".format(i), 4, 128)
+        out_features = n_units
         layers.append(nn_norm(nn.Linear(in_features, out_features)))
-        layers.append(nn.ReLU())
+        layers.append(GroupSort(num_units=n_groupsort))
         p = trial.suggest_float("dropout_l{}".format(i), 0.1, 0.5)
         layers.append(nn.Dropout(p))
         in_features = out_features
@@ -55,7 +71,14 @@ def get_loaders():
     # Load Data
     X_train, y_train, X_val, y_val = [
         torch.from_numpy(x).float().view(len(x), -1)
-        for x in get_data_for_training(Configuration(normalize=NORMALIZE))
+        for x in get_data_for_training(
+            Configuration(normalize=NORMALIZE,
+                          features=['fdchi2', 'sumpt', 'minipchi2', 'vchi2'],
+                          data_type='lhcb',
+                          signal_type='heavy-flavor',
+                          presel_conf={'svPT': 1000, 'trkPT': 200, 'svchi2': 100,
+                                       'ipcuttrain': 10},
+                          ))
     ]
 
     train_loader = DataLoader(
@@ -74,7 +97,7 @@ def get_loaders():
     return train_loader, val_loader
 
 
-def objective(trial):
+def objective(trial: optuna.trial.Trial):
     # Generate the model.
     model = define_model(trial).to(DEVICE)
 
@@ -84,7 +107,7 @@ def objective(trial):
     lr = trial.suggest_float("lr", 1e-5, 1e-1, log=True)
     optimizer = getattr(optim, optimizer_name)(model.parameters(), lr=lr)
 
-    # Get the FashionMNIST dataset.
+    # Get the dataset.
     train_loader, val_loader = get_loaders()
 
     # Training of the model.

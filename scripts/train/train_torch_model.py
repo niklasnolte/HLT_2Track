@@ -16,9 +16,9 @@ plt.switch_backend("TkAgg")
 
 
 BATCH_SIZE = 128
-EPOCHS = 100
-LR = 5e-2
-LR_end = 3e-4
+EPOCHS = 200
+LR = 9e-2
+LR_end = 1e-3
 
 
 def train_torch_model(

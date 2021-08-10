@@ -15,7 +15,7 @@ from torch import nn
 def build_module(
     in_features: int = 1,
     nclasses: int = 1,
-    nunits: Union[int, Iterable] = 15,
+    nunits: Union[int, Iterable] = 6,
     biases: Union[bool, Iterable] = True,
     nlayers: int = 3,
     layer: Callable = nn.Linear,
@@ -24,6 +24,7 @@ def build_module(
     activation: Callable = nn.LeakyReLU(),
     out_activation: Callable = None,
     bn_layer: int = None,
+    drop_out: float = None,
 ) -> nn.Module:
     """
 
@@ -71,6 +72,8 @@ def build_module(
     layers.append(norm_func(layer(in_features, nclasses, biases[-1])))
     if bn_layer is not None:
         layers.insert(bn_layer, nn.BatchNorm1d(nunits[bn_layer - 1]))
+    if drop_out is not None:
+        layers.insert(-1, nn.Dropout(drop_out))
     if out_activation is not None:
         layers.append(out_activation)
     return nn.Sequential(*layers)
@@ -91,7 +94,7 @@ def to_iter(nunits, nlayers):
 def get_model(cfg: config.Configuration) -> Union[nn.Module, lgb.Booster]:
     nfeatures = len(cfg.features)
     depth = 2
-    nunits = 64
+    nunits = 16
 
     if cfg.model in ["nn-one", "nn-inf"]:
         be_monotonic_in = list(range(len(cfg.features)))
@@ -153,7 +156,7 @@ def get_model(cfg: config.Configuration) -> Union[nn.Module, lgb.Booster]:
                         norm=normfunc,
                         norm_first=normfunc_first,
                         # nn.ReLU(),  # GroupSort(num_units=1),
-                        activation=GroupSort(num_units=1),
+                        activation=GroupSort(num_units=nunits // 2),
                     ),
                     sigma=sigma,
                     monotonic_in=be_monotonic_in,
