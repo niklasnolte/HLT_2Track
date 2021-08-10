@@ -64,6 +64,32 @@ rule all:
             regularization=Configs.regularization,
             division=Configs.division,
         ),
+        # violin plots
+        expand_with_rules(
+            Locations.violins,
+            data_type=["lhcb"],  # only for lhcb data
+            features=map(config.to_string_features, Configs.features),
+            normalize=map(config.to_string_normalize, Configs.normalize),
+            signal_type=Configs.signal_type,
+            presel_conf=map(config.to_string_presel_conf, Configs.presel_conf),
+            max_norm=map(config.to_string_max_norm, Configs.max_norm),
+            regularization=Configs.regularization,
+            division=Configs.division,
+        ),
+
+rule plot_violins:
+    input:
+        expand(
+            Locations.target_effs,
+            model=Configs.model,
+            allow_missing=True,
+        ),
+        script = "scripts/plot/plot_violins.py"
+    output:
+        Locations.violins
+    run:
+      args = config.get_cli_args(wildcards)
+      shell(f"python {input.script} {args}")
 
 rule plot_rate_vs_eff:
     input:
@@ -71,6 +97,7 @@ rule plot_rate_vs_eff:
         Locations.model,
         Locations.presel_efficiencies,
         Locations.full_effs,
+        Locations.target_effs,
         script = "scripts/plot/plot_rates_vs_effs.py",
     output:
         Locations.rate_vs_eff,

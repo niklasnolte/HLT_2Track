@@ -85,6 +85,11 @@ class Locations:
         "full-eff_{model}_{features}_{data_type}_{normalize}"
         "_{signal_type}_{presel_conf}_{max_norm}_{regularization}_{division}.pkl",
     )
+    violins = join(
+        dirs.plots,
+        "violins_{features}_{data_type}_{normalize}"
+        "_{signal_type}_{presel_conf}_{max_norm}_{regularization}_{division}.pkl",
+    )
 
 
 def to_string_features(features: Optional[list]) -> str:
@@ -271,16 +276,17 @@ def expand_with_rules(location, **cfg):
                 return False
         if key in ["max_norm", "regularization", "division"]:
             # only regularized nn models have these keywords
-            if cfg["model"] not in [
+            if cfg.get("model") not in [
                 "nn-inf",
                 "nn-inf-oc",
                 "nn-inf-mon-vchi2",
                 "nn-one",
             ]:
                 return False
-        if key == "features" and cfg["model"] == "nn-inf-mon-vchi2":
-            if len(from_string_features(value)) == 2:
-                return False
+        if key == "features":
+            if cfg.get("model") in [None,"nn-inf-mon-vchi2"]:
+                if len(from_string_features(value)) == 2:
+                    return False
         return True
 
     def expand(These: Iterable[dict], key: str, With: Iterable):
@@ -423,4 +429,5 @@ evttypes = [
     # 16103131
 ]
 
-evttypes = {i+1:evttype for i, evttype in enumerate(evttypes)}
+evttypes = {i + 1: evttype for i, evttype in enumerate(evttypes)}
+

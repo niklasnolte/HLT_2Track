@@ -23,11 +23,11 @@ regularization:
   - "direct"
 
 model :
-  - "nn-regular"
   - "nn-inf"
-  - "nn-one"
-  # - "nn-inf-oc" # sigma of .5 hardcoded
+  - "nn-inf-oc" # sigma of .5 hardcoded
   - "nn-inf-mon-vchi2"
+  - "nn-one"
+  - "nn-regular"
   - "bdt"
   - "lda"
   - "qda"
@@ -38,7 +38,7 @@ data_type:
   # - "standalone"
 
 features:
-  # - ["minipchi2", "sumpt"]
+  - ["minipchi2", "sumpt"]
   # - ["fdchi2", "sumpt"]
   - ["fdchi2", "sumpt", "vchi2", "minipchi2"]
 
@@ -62,7 +62,7 @@ presel_conf:
     trkPT : 200 # [MeV]
     svchi2 : 20 # [unitless]
     ipcuttrain : 6
-  # - svPT : 1000 # [MeV]
-  #   trkPT : 200 # [MeV]
-  #   svchi2 : 20 # [unitless]
-  #   ipcuttrain : 10
+  - svPT : 1000 # [MeV]
+    trkPT : 200 # [MeV]
+    svchi2 : 20 # [unitless]
+    ipcuttrain : 10
