@@ -23,13 +23,15 @@ regularization:
   - "direct"
 
 model :
-  # - "nn-inf"
+  - "nn-regular"
+  - "nn-inf"
+  - "nn-one"
   # - "nn-inf-oc" # sigma of .5 hardcoded
-  # - "nn-inf-mon-vchi2"
+  - "nn-inf-mon-vchi2"
   - "bdt"
-  # - "lda"
-  # - "qda"
-  # - "gnb"
+  - "lda"
+  - "qda"
+  - "gnb"
 
 data_type:
   - "lhcb"
