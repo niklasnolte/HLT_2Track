@@ -25,8 +25,10 @@ def plot_heatmap(
 ):
     with PdfPages(format_location(Locations.heatmap, cfg)) as pdf:
         combinations = list(itertools.combinations(range(x.shape[1]), 2))
-        combinations.pop(combinations.index((1, 3)))
-        combinations.insert(0, (3, 1))
+        if x.shape[1] == 4:
+          # put minipchi2 vs sumpt in front
+          combinations.pop(combinations.index((1, 3)))
+          combinations.insert(0, (3, 1))
         for idxs in combinations:
             x0u = np.unique(x[:, idxs[0]])
             x1u = np.unique(x[:, idxs[1]])
