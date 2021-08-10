@@ -35,7 +35,7 @@ rule all:
             regularization=Configs.regularization,
             division=Configs.division,
         ),
-        # heatmap plots for 2d trainings
+        # heatmap plots
         expand_with_rules(
             Locations.heatmap,
             model=Configs.model,
@@ -85,8 +85,6 @@ rule plot_heatmap:
         script = "scripts/plot/plot_heatmap.py",
     output:
         Locations.heatmap,
-    # wildcard_constraints:
-    #     features = "\w+\+\w+",
     run:
         args = config.get_cli_args(wildcards)
         shell(f"python {input.script} {args}")

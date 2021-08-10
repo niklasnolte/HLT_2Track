@@ -57,7 +57,7 @@ def train_torch_model(
         model.to(device)
         pbar = tqdm(range(EPOCHS))
         for i in pbar:
-            if cfg.model in ["nn-one", "nn-inf"] and cfg.sigma_final is not None:
+            if cfg.model in ["nn-one", "nn-inf", "nn-inf-mon-vchi2"] and cfg.sigma_final is not None:
                 model.sigmanet.sigma *= (cfg.sigma_final / cfg.sigma_init)**(1 / EPOCHS)
                 model.sigmanet.gamma += (cfg.gamma_final - cfg.gamma_init) / EPOCHS
             # Train
@@ -86,7 +86,7 @@ def train_torch_model(
                       for x in np.linspace(0.1, .9, 5)])
 
             desc = f"epoch {i}, loss: {loss.item():.4f}, auc: {auc:.4f}, acc: {acc:.4f}"
-            if cfg.model in ["nn-one", "nn-inf", "nn-inf-oc"]:
+            if cfg.model in ["nn-one", "nn-inf", "nn-inf-oc", "nn-inf-mon-vchi2"]:
                 desc += f" sigma: {model.sigmanet.sigma.item(): .2f}"
                 desc += f" lr: {optimizer.param_groups[0]['lr']:.2e}"
             pbar.set_description(desc)
@@ -127,14 +127,6 @@ def train_torch_model(
     optimizer = torch.optim.Adam(model.parameters(), lr=LR)
     scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer=optimizer, gamma=GAMMA)
 
-    def weighted_mse_loss(input, target, weight=None):
-        if weight is None:
-            weight = 1
-        else:
-            if weight.shape != input.shape or target.shape != input.shape:
-                raise ValueError("weight [{weight.shape}], input [{input.shape}],\
-                target [{target.shape}] must all have the same shape")
-        return (weight * (input - target) ** 2).mean()
     train(
         model,
         optimizer,

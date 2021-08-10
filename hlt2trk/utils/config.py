@@ -263,8 +263,11 @@ def expand_with_rules(location, **cfg):
                 return False
         if key in ["max_norm", "regularization", "division"]:
             # only regularized nn models have these keywords
-            if cfg["model"] not in ["nn-inf", "nn-inf-oc", "nn-one"]:
+            if cfg["model"] not in ["nn-inf", "nn-inf-oc", "nn-inf-mon-vchi2", "nn-one"]:
                 return False
+        if key == "features" and cfg["model"] == "nn-inf-mon-vchi2":
+          if len(from_string_features(value)) == 2:
+            return False
         return True
 
     def expand(These: Iterable[dict], key: str, With: Iterable):

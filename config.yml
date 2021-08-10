@@ -27,6 +27,7 @@ model :
   - "nn-regular"
   - "nn-inf"
   - "nn-inf-oc" # sigma of .5 hardcoded
+  - "nn-inf-mon-vchi2"
   - "bdt"
   # - "lda"
   # - "qda"

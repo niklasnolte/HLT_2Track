@@ -95,20 +95,19 @@ def get_model(cfg: config.Configuration) -> Union[nn.Module, lgb.Booster]:
     nfeatures = len(cfg.features)
     depth = 2
     nunits = 16
+    # for monotonic models
+    # WARNING: requires features to be in the right order
+    monotone_constraints=[1, 1, 0, 1][:len(cfg.features)]
+    if cfg.model == "nn-inf-mon-vchi2" and len(cfg.features) == 4:
+      # decreasing monotonicity on vchi2
+      monotone_constraints[2] = -1
 
-    if cfg.model in ["nn-one", "nn-inf", "nn-inf-oc"]:
-        be_monotonic_in = list(range(len(cfg.features)))
-        try:
-            be_monotonic_in.pop(cfg.features.index("vchi2"))
-        except ValueError:
-            # if vchi2 is not in there, we don't need to remove it
-            pass
-
+    if cfg.model in ["nn-one", "nn-inf", "nn-inf-oc", "nn-inf-mon-vchi2"]:
         class Sigma(nn.Module):
             def __init__(self, sigma):
                 super().__init__()
 
-                if cfg.model in ["nn-inf", "nn-inf-oc"]:
+                if cfg.model in ["nn-inf", "nn-inf-oc", "nn-inf-mon-vchi2"]:
                     kind = "inf"
                 elif cfg.model == "nn-one":
                     kind = "one"
@@ -159,8 +158,7 @@ def get_model(cfg: config.Configuration) -> Union[nn.Module, lgb.Booster]:
                         activation=GroupSort(num_units=nunits // 2),
                     ),
                     sigma=sigma,
-                    monotonic_in=be_monotonic_in,
-                    nfeatures=nfeatures,
+                    monotone_constraints=monotone_constraints,
                 )
 
             def forward(self, x):
@@ -195,7 +193,7 @@ def get_model(cfg: config.Configuration) -> Union[nn.Module, lgb.Booster]:
             is_unbalance=True,
             num_leaves=25,
             boosting_type="gbdt",
-            monotone_constraints=[1, 1, 0, 1][:len(cfg.features)],
+            monotone_constraints=monotone_constraints,
         )
         return clf
 
