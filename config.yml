@@ -25,13 +25,13 @@ regularization:
 model :
   - "nn-inf"
   - "nn-inf-oc" # sigma of .5 hardcoded
-  - "nn-inf-mon-vchi2"
+  - "nn-inf-mon-vchi2" # monotonically decreasing in vchi2
   - "nn-one"
   - "nn-regular"
   - "bdt"
-  - "lda"
-  - "qda"
-  - "gnb"
+  # - "lda"
+  # - "qda"
+  # - "gnb"
 
 data_type:
   - "lhcb"
@@ -61,8 +61,8 @@ presel_conf:
   - svPT : 1000 # [MeV]
     trkPT : 200 # [MeV]
     svchi2 : 20 # [unitless]
-    ipcuttrain : 6
+    ipcuttrain : 6 # ip cut in for training
   - svPT : 1000 # [MeV]
     trkPT : 200 # [MeV]
     svchi2 : 20 # [unitless]
-    ipcuttrain : 10
+    ipcuttrain : 10 # (effectively no cut)
