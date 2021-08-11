@@ -15,6 +15,7 @@ class dirs:
     heatmaps = join(plots, "heatmaps")
     scatter = join(plots, "scatter")
     gifs = join(plots, "gifs")
+    violins = join(plots, "violins")
     data = join(project_root, "data")
     raw_data = join(data, "raw")
     savepoints = join(project_root, "savepoints")
@@ -86,9 +87,9 @@ class Locations:
         "_{signal_type}_{presel_conf}_{max_norm}_{regularization}_{division}.pkl",
     )
     violins = join(
-        dirs.plots,
+        dirs.violins,
         "violins_{features}_{data_type}_{normalize}"
-        "_{signal_type}_{presel_conf}_{max_norm}_{regularization}_{division}.pkl",
+        "_{signal_type}_{presel_conf}_{max_norm}_{regularization}_{division}.pdf",
     )
 
 
@@ -277,6 +278,7 @@ def expand_with_rules(location, **cfg):
         if key in ["max_norm", "regularization", "division"]:
             # only regularized nn models have these keywords
             if cfg.get("model") not in [
+                None, # we include all models
                 "nn-inf",
                 "nn-inf-oc",
                 "nn-inf-mon-vchi2",
@@ -284,7 +286,7 @@ def expand_with_rules(location, **cfg):
             ]:
                 return False
         if key == "features":
-            if cfg.get("model") in [None,"nn-inf-mon-vchi2"]:
+            if cfg.get("model") in ["nn-inf-mon-vchi2"]:
                 if len(from_string_features(value)) == 2:
                     return False
         return True

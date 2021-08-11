@@ -1,33 +1,21 @@
-import numpy as np
 import matplotlib.pyplot as plt
-
-from os.path import join
-import os
-from hlt2trk.utils.config import dirs, format_location, get_config, Configs, format_location, Locations
-import numpy as np
+from hlt2trk.utils.config import format_location, get_config, Configs, format_location, Locations
 import pickle
+from copy import copy
 
-# cfg = get_config()
+cfg = get_config()
 
-# locations = [format_location(cfg, Locations.target_effs) + ]
+def add_model(model, cfg):
+  cpy = copy(cfg)
+  cpy.model = model
+  return cpy
 
-def conditions(f):
-    strings = ["fdchi2+sumpt+vchi2+minipchi2",
-               "ipcuttrain:6",
-               "unnormed",
-               "svchi2:20",
-               ]
-    return all([string in f for string in strings])
+locations = [format_location(Locations.target_effs, add_model(m, cfg)) for m in Configs.model]
 
-files = os.listdir(dirs.results_eff)
-subset = [f for f in files if f.startswith("target-eff") and conditions(f)]
-order = ["qda", "lda", "gnb", "nn-inf", "nn-one", "nn-regular", "bdt"]
 models = {}
-if len(subset) > 0:
-    for fname in subset:
-        file = join(dirs.results_eff, fname)
-        with open(file, "rb") as f:
-            models[fname.split("_")[1]] = pickle.load(f)
+for file,model in zip(locations, Configs.model):
+    with open(file, "rb") as f:
+        models[model] = pickle.load(f)
 
 tos_effs = {}
 effs = {}
@@ -38,12 +26,12 @@ for model in models:
 
 fig, ax = plt.subplots(1,1)
 
-violins = [effs["bdt"] - effs["nn-regular"], effs["nn-inf"] - effs["nn-regular"], effs["nn-one"]-effs["nn-regular"]]
+violins = {model:effs[model] - effs["nn-regular"] for model in models if model != "nn-regular"}
 
-ax.violinplot(violins, vert=False, showextrema=True, showmedians=True)
-for y, xs in enumerate(violins):
+ax.violinplot(violins.values(), vert=False, showextrema=True, showmedians=True)
+for y, xs in enumerate(violins.values()):
   ax.scatter(xs, [y+1]*len(xs))
 ax.set_yticks(range(1,len(violins) + 1))
-ax.set_yticklabels(["bdt", "nn-inf", "nn-one"])
+ax.set_yticklabels(violins.keys())
 ax.set_xlabel("efficiency difference ($\epsilon_{\mathrm{unconstrained}} - \epsilon_{x}$)")
-plt.show()
+plt.savefig(format_location(Locations.violins, cfg))
