@@ -2,7 +2,7 @@ import pickle
 from copy import copy
 
 import pandas as pd
-from hlt2trk.utils.config import (Configs, Locations, dirs, format_location,
+from hlt2trk.utils.config import (Configs, Locations, format_location,
                                   get_config)
 
 cfg = get_config()

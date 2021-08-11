@@ -2,6 +2,7 @@ from functools import lru_cache
 import re
 from os.path import abspath, dirname, join
 from typing import Iterable, Optional
+from collections import OrderedDict
 from warnings import warn
 from .utils import load_config
 
@@ -441,4 +442,4 @@ evttypes = [
     # 16103131
 ]
 
-evttypes = {i + 1: evttype for i, evttype in enumerate(evttypes)}
+evttypes = OrderedDict((i + 1, evttype) for i, evttype in enumerate(evttypes))

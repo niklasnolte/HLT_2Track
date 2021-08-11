@@ -2,7 +2,7 @@ import numpy as np
 import json
 import pickle
 
-from hlt2trk.utils.config import get_config, Locations, format_location
+from hlt2trk.utils.config import get_config, Locations, format_location, evttypes
 from hlt2trk.utils.data import get_data
 from hlt2trk.models import load_model
 from evaluate import get_evaluator
@@ -13,62 +13,6 @@ cfg = get_config()
 eval_fun = get_evaluator(cfg)
 model = load_model(cfg)
 data = get_data(cfg)
-
-# Dictionary for events
-int_to_evttype = {
-    1: 11104054,
-    2: 23103042,
-    3: 11104055,
-    4: 23103062,
-    5: 16103332,
-    6: 11104056,
-    7: 23163003,
-    8: 11104057,
-    9: 23163052,
-    10: 21101411,
-    11: 11104058,
-    12: 11102521,
-    13: 21103100,
-    14: 11164063,
-    15: 11264001,
-    16: 11166107,
-    17: 11264011,
-    18: 21113000,
-    19: 11196000,
-    20: 11874004,
-    21: 11196011,
-    22: 11196099,
-    23: 12103406,
-    24: 23103100,
-    25: 12103009,
-    26: 12103422,
-    27: 23103110,
-    28: 12103019,
-    29: 12103423,
-    30: 12103028,
-    31: 12103443,
-    32: 25113000,
-    33: 12103038,
-    34: 12103041,
-    35: 12103445,
-    36: 26104186,
-    37: 12103051,
-    38: 26104187,
-    39: 26106182,
-    40: 15364010,
-    41: 27163003,
-    42: 21163002,
-    43: 21163012,
-    44: 21163022,
-    45: 27173002,
-    46: 21163032,
-    47: 15364010,
-    48: 27225003,
-    49: 21163042,
-    50: 16103130,
-    51: 27375075,
-    52: 23103012,
-}
 
 evt_grp = ["eventtype", "EventInSequence"]
 
@@ -118,7 +62,7 @@ def rates_vs_effs(data, presel_effs):
             # save target efficiencies
             target_effs.append(eff[target_rate_idx])
             target_tos_effs.append(tos_eff[target_rate_idx])
-            modes.append(int_to_evttype[int(mode)])
+            modes.append(evttypes[int(mode)])
 
     df = pd.DataFrame(np.stack([modes, target_effs, target_tos_effs]).T)
     df.columns = ["mode", "eff", "tos_eff"]

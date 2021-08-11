@@ -33,7 +33,7 @@ with PdfPages(format_location(Locations.rate_vs_eff, cfg)) as pdf:
         )
     charm_eff = target_effs[eff_keyword][is_charm(target_effs["mode"])].mean()
     beauty_eff = target_effs[eff_keyword][~is_charm(target_effs["mode"])].mean()
-
+    ax.scatter([660] * len(target_effs), target_effs[eff_keyword])
     ax.plot([0],[0], c="C0", label=f"beauty: {beauty_eff:.4f}")
     ax.plot([0],[0], c="C1", label=f"charm: {charm_eff:.4f}")
     ax.set_xlabel("rate (kHz)")
