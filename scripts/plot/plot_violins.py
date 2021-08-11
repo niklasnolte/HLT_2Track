@@ -36,10 +36,7 @@ def frac(x):
     return (x - effs["nn-regular"]) / effs["nn-regular"]
 
 
-submodels = ["bdt", "nn-inf", "nn-one", "nn-inf-oc"]
-valid_models = [model for model in submodels if model in models.keys()]
-# valid_models = [model for model in models.keys() if model != "nn-regular"]
-violins = {model: frac(effs[model]) for model in valid_models}
+violins = {model: frac(effs[model]) for model in Configs.model if model != "nn-regular"}
 
 inds = np.arange(1, len(violins) + 1)
 means = {name: np.mean(v) for name, v in violins.items()}
@@ -53,7 +50,7 @@ with PdfPages(format_location(Locations.violins, cfg)) as pdf:
         ax.scatter(xs, [y + 1] * len(xs))
     ax.scatter(means.values(), inds, marker='o', color='white', s=30, zorder=3)
     ax.set_yticks(range(1, len(violins) + 1))
-    ax.set_yticklabels(valid_models)
+    ax.set_yticklabels(violins.keys())
     ax.set_xlabel(
         r"$\frac{\epsilon_{x} - \epsilon_{\mathrm{NN}}}"
         r"{\epsilon_{\mathrm{NN}}}$")
