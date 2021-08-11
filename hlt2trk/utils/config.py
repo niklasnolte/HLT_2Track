@@ -91,6 +91,11 @@ class Locations:
         "violins_{features}_{data_type}_{normalize}"
         "_{signal_type}_{presel_conf}_{max_norm}_{regularization}_{division}.pdf",
     )
+    eff_table = join(
+        dirs.results,
+        "eff_table_{features}_{data_type}_{normalize}"
+        "_{signal_type}_{presel_conf}_{max_norm}_{regularization}_{division}.txt",
+    )
 
 
 def to_string_features(features: Optional[list]) -> str:
@@ -277,16 +282,20 @@ def expand_with_rules(location, **cfg):
                 return False
         if key in ["max_norm", "regularization", "division"]:
             # only regularized nn models have these keywords
-            if cfg.get("model") not in [
-                None, # we include all models
+            regularized_models = [
                 "nn-inf",
                 "nn-inf-oc",
                 "nn-inf-mon-vchi2",
                 "nn-one",
-            ]:
+            ]
+            if "model" not in cfg:
+                # only consider the keywords if a regularized model is used
+                if not any([m in regularized_models for m in Configs.model]):
+                    return False
+            elif cfg.get("model") not in regularized_models:
                 return False
         if key == "features":
-            if cfg.get("model") in ["nn-inf-mon-vchi2"]:
+            if cfg.get("model") == "nn-inf-mon-vchi2":
                 if len(from_string_features(value)) == 2:
                     return False
         return True

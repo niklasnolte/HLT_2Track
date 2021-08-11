@@ -76,6 +76,18 @@ rule all:
             regularization=Configs.regularization,
             division=Configs.division,
         ),
+        # efficiency tables for all models
+        expand_with_rules(
+            Locations.eff_table,
+            data_type=["lhcb"],  # only for lhcb data
+            features=map(config.to_string_features, Configs.features),
+            normalize=map(config.to_string_normalize, Configs.normalize),
+            signal_type=Configs.signal_type,
+            presel_conf=map(config.to_string_presel_conf, Configs.presel_conf),
+            max_norm=map(config.to_string_max_norm, Configs.max_norm),
+            regularization=Configs.regularization,
+            division=Configs.division,
+        ),
 
 rule plot_violins:
     input:
@@ -87,6 +99,20 @@ rule plot_violins:
         script = "scripts/plot/plot_violins.py"
     output:
         Locations.violins
+    run:
+      args = config.get_cli_args(wildcards)
+      shell(f"python {input.script} {args}")
+
+rule build_eff_table:
+    input:
+        expand(
+            Locations.target_effs,
+            model=Configs.model,
+            allow_missing=True,
+        ),
+        script = "scripts/eval/merge_table.py"
+    output:
+        Locations.eff_table
     run:
       args = config.get_cli_args(wildcards)
       shell(f"python {input.script} {args}")
