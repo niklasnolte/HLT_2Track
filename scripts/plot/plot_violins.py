@@ -1,4 +1,5 @@
 import pickle
+from matplotlib import transforms
 import numpy as np
 from copy import copy
 from matplotlib.backends.backend_pdf import PdfPages
@@ -40,7 +41,7 @@ violins = {model: frac(effs[model]) for model in Configs.model if model != "nn-r
 
 inds = np.arange(1, len(violins) + 1)
 means = {name: np.mean(v) for name, v in violins.items()}
-
+mins = {name: np.min(v) for name, v in violins.items()}
 
 with PdfPages(format_location(Locations.violins, cfg)) as pdf:
     fig, ax = plt.subplots(1, 1)
@@ -50,7 +51,12 @@ with PdfPages(format_location(Locations.violins, cfg)) as pdf:
         ax.scatter(xs, [y + 1] * len(xs))
     ax.scatter(means.values(), inds, marker='o', color='white', s=30, zorder=3)
     ax.set_yticks(range(1, len(violins) + 1))
-    ax.set_yticklabels(violins.keys())
+    ax.set_yticklabels([])
+    x0, x1 = ax.get_xlim()
+    for i, model in enumerate(violins.keys()):
+        x0 = mins[model]
+        # ax.text(x0 + 0.05 * abs(x0), i + 1.1, model)
+        ax.text(x0 + 0.05 * abs(x0), i + 1.08, model)
     ax.set_xlabel(
         r"$\frac{\epsilon_{x} - \epsilon_{\mathrm{NN}}}"
         r"{\epsilon_{\mathrm{NN}}}$")
