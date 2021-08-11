@@ -47,3 +47,7 @@ cp plots/scatter/rate_vs_eff_nn-inf-oc_fdchi2+sumpt+vchi2+minipchi2_lhcb_unnorme
 cp plots/scatter/rate_vs_eff_nn-inf-oc_fdchi2+sumpt+vchi2+minipchi2_lhcb_unnormed_heavy-flavor_svPT:1000+trkPT:200+svchi2:20+ipcuttrain:10_max-norm_direct_vector.pdf for_mike/4d/rate_vs_eff_nn-inf-oc_noipcut.pdf
 cp plots/scatter/rate_vs_eff_nn-inf-mon-vchi2_fdchi2+sumpt+vchi2+minipchi2_lhcb_unnormed_heavy-flavor_svPT:1000+trkPT:200+svchi2:20+ipcuttrain:6_max-norm_direct_vector.pdf for_mike/4d/rate_vs_eff_nn-inf-mon-vchi2_withipcut.pdf
 cp plots/scatter/rate_vs_eff_nn-inf-mon-vchi2_fdchi2+sumpt+vchi2+minipchi2_lhcb_unnormed_heavy-flavor_svPT:1000+trkPT:200+svchi2:20+ipcuttrain:10_max-norm_direct_vector.pdf for_mike/4d/rate_vs_eff_nn-inf-mon-vchi2_noipcut.pdf
+
+tar -cvzf for_mike.tar.gz for_mike
+
+rm -r for_mike
