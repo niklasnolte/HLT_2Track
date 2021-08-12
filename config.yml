@@ -27,7 +27,7 @@ model :
   - "nn-regular"
   - "nn-inf-small"
   - "nn-inf"
-  - "nn-inf-oc" # sigma of .5 hardcoded
+  - "nn-inf-oc" # sigma of .2 hardcoded
   - "nn-inf-mon-vchi2" # monotonically decreasing in vchi2
   - "nn-one"
   # - "lda"

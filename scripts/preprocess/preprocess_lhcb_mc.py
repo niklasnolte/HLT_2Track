@@ -69,6 +69,7 @@ def presel(df: pd.DataFrame, evttuple: pd.DataFrame) -> pd.DataFrame:
     sel &= df.trk1_PT > cfg.presel_conf["trkPT"]
     sel &= df.trk2_PT > cfg.presel_conf["trkPT"]
     sel &= df.sv_ENDVERTEX_CHI2 < cfg.presel_conf["svchi2"]
+    sel &= df.sv_MCORR > 1000
 
     selt = df[sel].copy()
     # for signal samples, the denominator for the efficiency
