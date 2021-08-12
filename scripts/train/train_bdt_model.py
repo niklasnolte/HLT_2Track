@@ -5,6 +5,7 @@ from sklearn.metrics import roc_auc_score, balanced_accuracy_score
 plt.style.use("seaborn")
 from hlt2trk.utils.config import Locations, format_location, Configuration
 from hlt2trk.models import get_model
+from lightgbm import LGBMClassifier
 
 
 def train_bdt_model(
@@ -16,7 +17,7 @@ def train_bdt_model(
 ):
     assert cfg.model == "bdt"
 
-    clf = get_model(cfg)
+    clf: LGBMClassifier = get_model(cfg)
 
     clf.fit(
         x_train,

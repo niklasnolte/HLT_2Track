@@ -1,8 +1,13 @@
-import numpy as np
-from sklearn.metrics import roc_auc_score, balanced_accuracy_score
-from hlt2trk.utils.config import Locations, format_location, Configuration
-from hlt2trk.models import get_model
 import pickle
+from typing import Union
+
+import numpy as np
+from hlt2trk.models import get_model
+from hlt2trk.utils.config import Configuration, Locations, format_location
+from sklearn.discriminant_analysis import (LinearDiscriminantAnalysis,
+                                           QuadraticDiscriminantAnalysis)
+from sklearn.metrics import balanced_accuracy_score, roc_auc_score
+from sklearn.naive_bayes import GaussianNB
 
 
 def train_simple_model(
@@ -14,7 +19,8 @@ def train_simple_model(
 ):
     assert cfg.model in ["lda", "qda", "gnb"]
 
-    model = get_model(cfg)
+    model: Union[QuadraticDiscriminantAnalysis,
+                 LinearDiscriminantAnalysis, GaussianNB] = get_model(cfg)
     model.fit(x_train, y_train.reshape(-1))
 
     file_name = format_location(Locations.model, cfg)

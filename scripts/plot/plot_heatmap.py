@@ -49,7 +49,11 @@ def plot_heatmap(
             sc = ax.scatter(x0, x1, c=y_meaned, cmap=plt.cm.RdBu,
                             s=150, marker="s", **(params or {}))
             shape_ = int(np.sqrt(len(x0)))
-            ax.contour(x0.reshape(-1,shape_) ,x1.reshape(-1,shape_), y_meaned.reshape(-1,shape_), levels=[target_cut])
+            ax.contour(
+                x0.reshape(-1, shape_),
+                x1.reshape(-1, shape_),
+                y_meaned.reshape(-1, shape_),
+                levels=[target_cut])
             ax.set_xlabel(feature_repr(cfg.features[idxs[0]]))
             ax.set_ylabel(feature_repr(cfg.features[idxs[1]]))
             ax.set_title(cfg.model)

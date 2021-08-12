@@ -3,6 +3,7 @@ import pickle
 from typing import Callable, Iterable, Union
 
 import lightgbm as lgb
+import numpy as np
 import torch
 from hlt2trk.utils import config
 from InfinityNorm import SigmaNet, project_norm, direct_norm, GroupSort
@@ -91,28 +92,35 @@ def to_iter(nunits, nlayers):
     return nunits
 
 
-def get_model(cfg: config.Configuration) -> Union[nn.Module, lgb.Booster]:
+def get_model(cfg: config.Configuration) -> Union[nn.Module, lgb.Booster,
+                                                  LinearDiscriminantAnalysis,
+                                                  QuadraticDiscriminantAnalysis,
+                                                  GaussianNB]:
+    np.random.seed(cfg.seed)
+    torch.manual_seed(cfg.seed)
+
     nfeatures = len(cfg.features)
     if cfg.model == "nn-inf-large":
-      depth = 3
+        depth = 3
     else:
-      depth = 2
+        depth = 2
     nunits = 16
     # for monotonic models
     # WARNING: requires features to be in the right order
     if cfg.model == "nn-inf-mon-vchi2" and len(cfg.features) == 4:
-      # decreasing monotonicity on vchi2
-      monotone_constraints = [1, 1, -1, 1][:len(cfg.features)]
+        # decreasing monotonicity on vchi2
+        monotone_constraints = [1, 1, -1, 1][:len(cfg.features)]
     else:
-      # default case, no constraint on vchi2 monotonicity
-      monotone_constraints = [1, 1, 0, 1][:len(cfg.features)]
+        # default case, no constraint on vchi2 monotonicity
+        monotone_constraints = [1, 1, 0, 1][:len(cfg.features)]
 
     if cfg.model in ["nn-one", "nn-inf", "nn-inf-large", "nn-inf-oc", "nn-inf-mon-vchi2"]:
         class Sigma(nn.Module):
             def __init__(self, sigma):
                 super().__init__()
 
-                if cfg.model in ["nn-inf", "nn-inf-large", "nn-inf-oc", "nn-inf-mon-vchi2"]:
+                if cfg.model in ["nn-inf", "nn-inf-large", "nn-inf-oc",
+                                 "nn-inf-mon-vchi2"]:
                     kind = "inf"
                 elif cfg.model == "nn-one":
                     kind = "one"
@@ -199,6 +207,7 @@ def get_model(cfg: config.Configuration) -> Union[nn.Module, lgb.Booster]:
             num_leaves=25,
             boosting_type="gbdt",
             monotone_constraints=monotone_constraints,
+            random_state=cfg.seed
         )
         return clf
 

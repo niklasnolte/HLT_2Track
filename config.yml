@@ -1,4 +1,4 @@
-seed: 100
+seed: 0
 use_cuda: False
 sigma_final: 2
 sigma_init: 2
@@ -23,12 +23,13 @@ regularization:
   - "direct"
 
 model :
+  - "bdt"
+  - "nn-regular"
+  - "nn-inf-large"
   - "nn-inf"
   - "nn-inf-oc" # sigma of .5 hardcoded
   - "nn-inf-mon-vchi2" # monotonically decreasing in vchi2
   - "nn-one"
-  - "nn-regular"
-  - "bdt"
   # - "lda"
   # - "qda"
   # - "gnb"
