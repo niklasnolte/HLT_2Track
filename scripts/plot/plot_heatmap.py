@@ -15,7 +15,9 @@ if cfg.plot_style == "dark":
 
 X, Y = np.load(format_location(Locations.gridXY, cfg)).values()
 with open(format_location(Locations.auc_acc, cfg), "r") as f:
-    auc, acc, cut = map(float, f.read().split(","))
+    auc, _, _ = map(float, f.read().split(","))
+with open(format_location(Locations.target_cut, cfg), "r") as f:
+    target_cut = float(f.read())
 
 
 def plot_heatmap(
@@ -46,16 +48,11 @@ def plot_heatmap(
 
             sc = ax.scatter(x0, x1, c=y_meaned, cmap=plt.cm.RdBu,
                             s=150, marker="s", **(params or {}))
-            eps = 1e-2
-            # mask = (y_meaned < cut + eps) & (y_meaned > cut - eps)
-            # ax.scatter(x0[mask], x1[mask], c="purple", s=10, marker=".")
+            shape_ = int(np.sqrt(len(x0)))
+            ax.contour(x0.reshape(-1,shape_) ,x1.reshape(-1,shape_), y_meaned.reshape(-1,shape_), levels=[target_cut])
             ax.set_xlabel(feature_repr(cfg.features[idxs[0]]))
             ax.set_ylabel(feature_repr(cfg.features[idxs[1]]))
             ax.set_title(cfg.model)
-            # ax.text(0, 1.13, f"auc: {auc:.3f}\nacc: {acc:.3f}\ncut: {cut:.3f}",
-            #         transform=ax.transAxes,
-            #         horizontalalignment="left",
-            #         verticalalignment="top")
             ax.text(0, 1.05, f"auc: {auc:.3f}",
                     transform=ax.transAxes,
                     horizontalalignment="left",

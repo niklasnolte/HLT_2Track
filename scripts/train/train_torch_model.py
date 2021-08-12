@@ -63,7 +63,7 @@ def train_torch_model(
         pbar = tqdm(range(EPOCHS))
         for i in pbar:
             if (
-                cfg.model in ["nn-one", "nn-inf", "nn-inf-mon-vchi2"]
+                cfg.model in ["nn-one", "nn-inf", "nn-inf-large", "nn-inf-mon-vchi2"]
                 and cfg.sigma_final is not None
             ):
                 model.sigmanet.sigma *= (cfg.sigma_final / cfg.sigma_init) ** (
@@ -100,7 +100,7 @@ def train_torch_model(
             )
 
             desc = f"epoch {i}, loss: {loss.item():.4f}, auc: {auc:.4f}, acc: {acc:.4f}"
-            if cfg.model in ["nn-one", "nn-inf", "nn-inf-oc", "nn-inf-mon-vchi2"]:
+            if cfg.model in ["nn-one", "nn-inf", "nn-inf-large", "nn-inf-oc", "nn-inf-mon-vchi2"]:
                 desc += f" sigma: {model.sigmanet.sigma.item(): .2f}"
                 desc += f" lr: {optimizer.param_groups[0]['lr']:.2e}"
             pbar.set_description(desc)

@@ -93,21 +93,26 @@ def to_iter(nunits, nlayers):
 
 def get_model(cfg: config.Configuration) -> Union[nn.Module, lgb.Booster]:
     nfeatures = len(cfg.features)
-    depth = 2
+    if cfg.model == "nn-inf-large":
+      depth = 3
+    else:
+      depth = 2
     nunits = 16
     # for monotonic models
     # WARNING: requires features to be in the right order
-    monotone_constraints = [1, 1, 0, 1][:len(cfg.features)]
     if cfg.model == "nn-inf-mon-vchi2" and len(cfg.features) == 4:
-        # decreasing monotonicity on vchi2
-        monotone_constraints[2] = -1
+      # decreasing monotonicity on vchi2
+      monotone_constraints = [1, 1, -1, 1][:len(cfg.features)]
+    else:
+      # default case, no constraint on vchi2 monotonicity
+      monotone_constraints = [1, 1, 0, 1][:len(cfg.features)]
 
-    if cfg.model in ["nn-one", "nn-inf", "nn-inf-oc", "nn-inf-mon-vchi2"]:
+    if cfg.model in ["nn-one", "nn-inf", "nn-inf-large", "nn-inf-oc", "nn-inf-mon-vchi2"]:
         class Sigma(nn.Module):
             def __init__(self, sigma):
                 super().__init__()
 
-                if cfg.model in ["nn-inf", "nn-inf-oc", "nn-inf-mon-vchi2"]:
+                if cfg.model in ["nn-inf", "nn-inf-large", "nn-inf-oc", "nn-inf-mon-vchi2"]:
                     kind = "inf"
                 elif cfg.model == "nn-one":
                     kind = "one"

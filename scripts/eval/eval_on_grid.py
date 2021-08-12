@@ -18,7 +18,7 @@ nfeats = len(cfg.features)
 
 
 limits = [np.quantile(X[:, i], (0.02, 0.98)) for i in range(nfeats)]
-linspaces = [np.linspace(*xi, 100 if nfeats == 2 else 40) for xi in limits]
+linspaces = [np.linspace(*xi, 100 if nfeats == 2 else 30) for xi in limits]
 grid = np.array(tuple(product(*linspaces)))
 
 

@@ -67,10 +67,13 @@ def rates_vs_effs(data, presel_effs):
     df = pd.DataFrame(np.stack([modes, target_effs, target_tos_effs]).T)
     df.columns = ["mode", "eff", "tos_eff"]
     df = df.astype({"mode": int})
-    return df, efficiencies
+    return df, efficiencies, cutrange[target_rate_idx]
 
 
-df, efficiencies = rates_vs_effs(data, presel_effs)
+df, efficiencies, cut = rates_vs_effs(data, presel_effs)
+
+with open(format_location(Locations.target_cut, cfg), "w") as f:
+    f.write(str(cut))
 
 with open(format_location(Locations.full_effs, cfg), "wb") as f:
     pickle.dump(efficiencies, f)

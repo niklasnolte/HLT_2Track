@@ -83,6 +83,11 @@ class Locations:
         "target-eff_{model}_{features}_{data_type}_{normalize}"
         "_{signal_type}_{presel_conf}_{max_norm}_{regularization}_{division}.pkl",
     )
+    target_cut = join(
+        dirs.results_eff,
+        "target-cut_{model}_{features}_{data_type}_{normalize}"
+        "_{signal_type}_{presel_conf}_{max_norm}_{regularization}_{division}.txt",
+    )
     full_effs = join(
         dirs.results_eff,
         "full-eff_{model}_{features}_{data_type}_{normalize}"
@@ -287,6 +292,7 @@ def expand_with_rules(location, **cfg):
             regularized_models = [
                 "nn-inf",
                 "nn-inf-oc",
+                "nn-inf-large",
                 "nn-inf-mon-vchi2",
                 "nn-one",
             ]

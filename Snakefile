@@ -135,7 +135,7 @@ rule plot_rate_vs_eff:
 rule plot_heatmap:
     input:
         Locations.auc_acc,
-        Locations.target_effs,
+        Locations.target_cut,
         Locations.gridXY,
         script = "scripts/plot/plot_heatmap.py",
     output:
@@ -183,6 +183,7 @@ rule eval_on_data:
     output:
         Locations.full_effs,
         Locations.target_effs,
+        Locations.target_cut
     run:
         args = config.get_cli_args(wildcards)
         shell(f"python {input.script} {args}")
