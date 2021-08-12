@@ -292,7 +292,7 @@ def expand_with_rules(location, **cfg):
             regularized_models = [
                 "nn-inf",
                 "nn-inf-oc",
-                "nn-inf-large",
+                "nn-inf-small",
                 "nn-inf-mon-vchi2",
                 "nn-one",
             ]

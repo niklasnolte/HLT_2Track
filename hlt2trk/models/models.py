@@ -100,11 +100,12 @@ def get_model(cfg: config.Configuration) -> Union[nn.Module, lgb.Booster,
     torch.manual_seed(cfg.seed)
 
     nfeatures = len(cfg.features)
-    if cfg.model == "nn-inf-large":
-        depth = 3
-    else:
+    if cfg.model == "nn-inf-small":
         depth = 2
-    nunits = 16
+        nunits = 16
+    else:
+        depth = 4
+        nunits = 32
     # for monotonic models
     # WARNING: requires features to be in the right order
     if cfg.model == "nn-inf-mon-vchi2" and len(cfg.features) == 4:
@@ -114,12 +115,12 @@ def get_model(cfg: config.Configuration) -> Union[nn.Module, lgb.Booster,
         # default case, no constraint on vchi2 monotonicity
         monotone_constraints = [1, 1, 0, 1][:len(cfg.features)]
 
-    if cfg.model in ["nn-one", "nn-inf", "nn-inf-large", "nn-inf-oc", "nn-inf-mon-vchi2"]:
+    if cfg.model in ["nn-one", "nn-inf", "nn-inf-small", "nn-inf-oc", "nn-inf-mon-vchi2"]:
         class Sigma(nn.Module):
             def __init__(self, sigma):
                 super().__init__()
 
-                if cfg.model in ["nn-inf", "nn-inf-large", "nn-inf-oc",
+                if cfg.model in ["nn-inf", "nn-inf-small", "nn-inf-oc",
                                  "nn-inf-mon-vchi2"]:
                     kind = "inf"
                 elif cfg.model == "nn-one":

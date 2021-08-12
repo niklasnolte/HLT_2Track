@@ -14,8 +14,8 @@ cp plots/heatmaps/heatmap_nn-one_minipchi2+sumpt_lhcb_unnormed_heavy-flavor_svPT
 cp plots/heatmaps/heatmap_nn-one_minipchi2+sumpt_lhcb_unnormed_heavy-flavor_svPT:1000+trkPT:200+svchi2:20+ipcuttrain:10_max-norm_direct_vector.pdf for_mike/2d/heatmap_nn-one_noipcut.pdf
 cp plots/heatmaps/heatmap_nn-inf-oc_minipchi2+sumpt_lhcb_unnormed_heavy-flavor_svPT:1000+trkPT:200+svchi2:20+ipcuttrain:6_max-norm_direct_vector.pdf for_mike/2d/heatmap_nn-inf-oc_withipcut.pdf
 cp plots/heatmaps/heatmap_nn-inf-oc_minipchi2+sumpt_lhcb_unnormed_heavy-flavor_svPT:1000+trkPT:200+svchi2:20+ipcuttrain:10_max-norm_direct_vector.pdf for_mike/2d/heatmap_nn-inf-oc_noipcut.pdf
-cp plots/heatmaps/heatmap_nn-inf-large_minipchi2+sumpt_lhcb_unnormed_heavy-flavor_svPT:1000+trkPT:200+svchi2:20+ipcuttrain:6_max-norm_direct_vector.pdf for_mike/2d/heatmap_nn-inf-large_withipcut.pdf
-cp plots/heatmaps/heatmap_nn-inf-large_minipchi2+sumpt_lhcb_unnormed_heavy-flavor_svPT:1000+trkPT:200+svchi2:20+ipcuttrain:10_max-norm_direct_vector.pdf for_mike/2d/heatmap_nn-inf-large_noipcut.pdf
+cp plots/heatmaps/heatmap_nn-inf-small_minipchi2+sumpt_lhcb_unnormed_heavy-flavor_svPT:1000+trkPT:200+svchi2:20+ipcuttrain:6_max-norm_direct_vector.pdf for_mike/2d/heatmap_nn-inf-small_withipcut.pdf
+cp plots/heatmaps/heatmap_nn-inf-small_minipchi2+sumpt_lhcb_unnormed_heavy-flavor_svPT:1000+trkPT:200+svchi2:20+ipcuttrain:10_max-norm_direct_vector.pdf for_mike/2d/heatmap_nn-inf-small_noipcut.pdf
 
 
 #results
@@ -33,8 +33,8 @@ cp plots/heatmaps/heatmap_nn-one_fdchi2+sumpt+vchi2+minipchi2_lhcb_unnormed_heav
 cp plots/heatmaps/heatmap_nn-one_fdchi2+sumpt+vchi2+minipchi2_lhcb_unnormed_heavy-flavor_svPT:1000+trkPT:200+svchi2:20+ipcuttrain:10_max-norm_direct_vector.pdf for_mike/4d/heatmap_nn-one_noipcut.pdf
 cp plots/heatmaps/heatmap_nn-inf-oc_fdchi2+sumpt+vchi2+minipchi2_lhcb_unnormed_heavy-flavor_svPT:1000+trkPT:200+svchi2:20+ipcuttrain:6_max-norm_direct_vector.pdf for_mike/4d/heatmap_nn-inf-oc_withipcut.pdf
 cp plots/heatmaps/heatmap_nn-inf-oc_fdchi2+sumpt+vchi2+minipchi2_lhcb_unnormed_heavy-flavor_svPT:1000+trkPT:200+svchi2:20+ipcuttrain:10_max-norm_direct_vector.pdf for_mike/4d/heatmap_nn-inf-oc_noipcut.pdf
-cp plots/heatmaps/heatmap_nn-inf-large_fdchi2+sumpt+vchi2+minipchi2_lhcb_unnormed_heavy-flavor_svPT:1000+trkPT:200+svchi2:20+ipcuttrain:6_max-norm_direct_vector.pdf for_mike/4d/heatmap_nn-inf-large_withipcut.pdf
-cp plots/heatmaps/heatmap_nn-inf-large_fdchi2+sumpt+vchi2+minipchi2_lhcb_unnormed_heavy-flavor_svPT:1000+trkPT:200+svchi2:20+ipcuttrain:10_max-norm_direct_vector.pdf for_mike/4d/heatmap_nn-inf-large_noipcut.pdf
+cp plots/heatmaps/heatmap_nn-inf-small_fdchi2+sumpt+vchi2+minipchi2_lhcb_unnormed_heavy-flavor_svPT:1000+trkPT:200+svchi2:20+ipcuttrain:6_max-norm_direct_vector.pdf for_mike/4d/heatmap_nn-inf-small_withipcut.pdf
+cp plots/heatmaps/heatmap_nn-inf-small_fdchi2+sumpt+vchi2+minipchi2_lhcb_unnormed_heavy-flavor_svPT:1000+trkPT:200+svchi2:20+ipcuttrain:10_max-norm_direct_vector.pdf for_mike/4d/heatmap_nn-inf-small_noipcut.pdf
 cp plots/heatmaps/heatmap_nn-inf-mon-vchi2_fdchi2+sumpt+vchi2+minipchi2_lhcb_unnormed_heavy-flavor_svPT:1000+trkPT:200+svchi2:20+ipcuttrain:6_max-norm_direct_vector.pdf for_mike/4d/heatmap_nn-inf-mon-vchi2_withipcut.pdf
 cp plots/heatmaps/heatmap_nn-inf-mon-vchi2_fdchi2+sumpt+vchi2+minipchi2_lhcb_unnormed_heavy-flavor_svPT:1000+trkPT:200+svchi2:20+ipcuttrain:10_max-norm_direct_vector.pdf for_mike/4d/heatmap_nn-inf-mon-vchi2_noipcut.pdf
 
@@ -56,8 +56,8 @@ cp plots/scatter/rate_vs_eff_nn-one_fdchi2+sumpt+vchi2+minipchi2_lhcb_unnormed_h
 cp plots/scatter/rate_vs_eff_nn-one_fdchi2+sumpt+vchi2+minipchi2_lhcb_unnormed_heavy-flavor_svPT:1000+trkPT:200+svchi2:20+ipcuttrain:10_max-norm_direct_vector.pdf for_mike/4d/rate_vs_eff_nn-one_noipcut.pdf
 cp plots/scatter/rate_vs_eff_nn-inf-oc_fdchi2+sumpt+vchi2+minipchi2_lhcb_unnormed_heavy-flavor_svPT:1000+trkPT:200+svchi2:20+ipcuttrain:6_max-norm_direct_vector.pdf for_mike/4d/rate_vs_eff_nn-inf-oc_withipcut.pdf
 cp plots/scatter/rate_vs_eff_nn-inf-oc_fdchi2+sumpt+vchi2+minipchi2_lhcb_unnormed_heavy-flavor_svPT:1000+trkPT:200+svchi2:20+ipcuttrain:10_max-norm_direct_vector.pdf for_mike/4d/rate_vs_eff_nn-inf-oc_noipcut.pdf
-cp plots/scatter/rate_vs_eff_nn-inf-large_fdchi2+sumpt+vchi2+minipchi2_lhcb_unnormed_heavy-flavor_svPT:1000+trkPT:200+svchi2:20+ipcuttrain:6_max-norm_direct_vector.pdf for_mike/4d/rate_vs_eff_nn-inf-large_withipcut.pdf
-cp plots/scatter/rate_vs_eff_nn-inf-large_fdchi2+sumpt+vchi2+minipchi2_lhcb_unnormed_heavy-flavor_svPT:1000+trkPT:200+svchi2:20+ipcuttrain:10_max-norm_direct_vector.pdf for_mike/4d/rate_vs_eff_nn-inf-large_noipcut.pdf
+cp plots/scatter/rate_vs_eff_nn-inf-small_fdchi2+sumpt+vchi2+minipchi2_lhcb_unnormed_heavy-flavor_svPT:1000+trkPT:200+svchi2:20+ipcuttrain:6_max-norm_direct_vector.pdf for_mike/4d/rate_vs_eff_nn-inf-small_withipcut.pdf
+cp plots/scatter/rate_vs_eff_nn-inf-small_fdchi2+sumpt+vchi2+minipchi2_lhcb_unnormed_heavy-flavor_svPT:1000+trkPT:200+svchi2:20+ipcuttrain:10_max-norm_direct_vector.pdf for_mike/4d/rate_vs_eff_nn-inf-small_noipcut.pdf
 cp plots/scatter/rate_vs_eff_nn-inf-mon-vchi2_fdchi2+sumpt+vchi2+minipchi2_lhcb_unnormed_heavy-flavor_svPT:1000+trkPT:200+svchi2:20+ipcuttrain:6_max-norm_direct_vector.pdf for_mike/4d/rate_vs_eff_nn-inf-mon-vchi2_withipcut.pdf
 cp plots/scatter/rate_vs_eff_nn-inf-mon-vchi2_fdchi2+sumpt+vchi2+minipchi2_lhcb_unnormed_heavy-flavor_svPT:1000+trkPT:200+svchi2:20+ipcuttrain:10_max-norm_direct_vector.pdf for_mike/4d/rate_vs_eff_nn-inf-mon-vchi2_noipcut.pdf
 

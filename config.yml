@@ -25,7 +25,7 @@ regularization:
 model :
   - "bdt"
   - "nn-regular"
-  - "nn-inf-large"
+  - "nn-inf-small"
   - "nn-inf"
   - "nn-inf-oc" # sigma of .5 hardcoded
   - "nn-inf-mon-vchi2" # monotonically decreasing in vchi2
