@@ -2,13 +2,16 @@ import pickle
 from matplotlib import transforms
 import numpy as np
 from copy import copy
+from os.path import join
 from matplotlib.backends.backend_pdf import PdfPages
 
 import matplotlib.pyplot as plt
 from hlt2trk.utils.config import (Configs, Locations, format_location,
-                                  get_config)
+                                  get_config, dirs)
 
 cfg = get_config()
+if cfg.plot_style == "dark":
+    plt.style.use(join(dirs.project_root, 'scripts/plot/paper-dark'))
 
 
 def add_model(model, cfg):
@@ -54,12 +57,17 @@ with PdfPages(format_location(Locations.violins, cfg)) as pdf:
             mins = {name: np.min(v) for name, v in violins.items()}
 
             fig, ax = plt.subplots(1, 1)
-            ax.axvline(0, ls='--', c='k', alpha=.8)
-            ax.violinplot(violins.values(), vert=False, showextrema=True,
-                          showmedians=True, showmeans=False)
+            ax.axvline(0, ls=':', c='red', alpha=.8)
+            parts = ax.violinplot(violins.values(), vert=False, showextrema=True,
+                                  showmedians=True, showmeans=False)
             for y, xs in enumerate(violins.values()):
                 ax.scatter(xs, [y + 1] * len(xs))
             ax.scatter(means.values(), inds, marker='o', color='white', s=30, zorder=3)
+
+            for pc in parts['bodies']:
+                pc.set_facecolor('#7751ae')
+                pc.set_edgecolor('black')
+                pc.set_alpha(.8)
             ax.set_yticks(range(1, len(violins) + 1))
             ax.set_yticklabels([])
             ax.set_title(" - ".join([eff_kind[j], mask_kind[k]]))
@@ -71,6 +79,7 @@ with PdfPages(format_location(Locations.violins, cfg)) as pdf:
             xlabel = r"$\epsilon_{x} - \epsilon_{\mathrm{NN}}$"
             ax.set_xlabel(xlabel)
             pdf.savefig()
+            plt.close()
 
             for model, violin in violins.items():
                 fig, ax = plt.subplots(1, 1)
@@ -84,10 +93,11 @@ with PdfPages(format_location(Locations.violins, cfg)) as pdf:
                 ax.set_yticks([1])
                 ax.set_yticklabels([])
                 ax.set_title(" - ".join([eff_kind[j], mask_kind[k]]))
-                # xlabel = r"$\frac{\epsilon_{" + model + r"} - \epsilon_{\mathrm{NN}}}" +\
+                # xlabel = r"$\frac{\epsilon_{" + model + r"} - \epsilon_{\mathrm{NN}}}"
                 #     r"{\epsilon_{\mathrm{NN}}}$"
                 xlabel = r"$\epsilon_{" + model + r"} - \epsilon_{\mathrm{NN}}$"
                 ax.set_xlabel(xlabel)
                 pdf.savefig()
+                plt.close()
 
 # plt.savefig(join(dirs.plots, f"candle-plot_{'_'.join(strings)}.pdf"))
