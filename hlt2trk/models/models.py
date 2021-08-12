@@ -104,8 +104,8 @@ def get_model(cfg: config.Configuration) -> Union[nn.Module, lgb.Booster,
         depth = 2
         nunits = 16
     else:
-        depth = 4
-        nunits = 32
+        depth = 3
+        nunits = 20
     # for monotonic models
     # WARNING: requires features to be in the right order
     if cfg.model == "nn-inf-mon-vchi2" and len(cfg.features) == 4:
@@ -194,7 +194,8 @@ def get_model(cfg: config.Configuration) -> Union[nn.Module, lgb.Booster,
                 nunits=nunits,
                 in_features=nfeatures,
                 norm=None,
-                activation=GroupSort(num_units=1),
+                # GroupSort(num_units=nunits // 2),
+                activation=GroupSort(num_units=nunits // 2)  # LeakyReLU()  # Swish()
             ),
             nn.Sigmoid(),
         )
@@ -223,6 +224,8 @@ def get_model(cfg: config.Configuration) -> Union[nn.Module, lgb.Booster,
     elif cfg.model == "gnb":
         model = GaussianNB()
         return model
+    else:
+        raise ValueError(f"unrecognized model: {cfg.model}")
 
 
 def load_model(
@@ -244,3 +247,8 @@ def load_model(
         with open(location, "rb") as f:
             m = pickle.load(f)
     return m
+
+
+class Swish(nn.Module):
+    def forward(self, x):
+        return x * torch.sigmoid(x)
