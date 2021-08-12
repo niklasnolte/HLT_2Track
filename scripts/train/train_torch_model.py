@@ -166,7 +166,6 @@ def train_torch_model(
     )
 
     torch.save(model.state_dict(), format_location(Locations.model, cfg))
-
     with torch.no_grad():
         preds = model.to(torch.device("cpu"))(x_val)
     auc = roc_auc_score(y_val, np.clip(preds, 0.0, 1.0))
