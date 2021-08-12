@@ -15,12 +15,6 @@ plt.style.use(join(dirs.project_root, "scripts/plot/paper-dark"))
 # plt.switch_backend("TkAgg")
 
 
-BATCH_SIZE = 128
-EPOCHS = 200
-LR = 9e-2
-LR_end = 1e-3
-
-
 def train_torch_model(
     cfg: Configuration,
     x_train: np.ndarray,
@@ -29,6 +23,14 @@ def train_torch_model(
     y_val: np.ndarray,
 ):
     assert cfg.model.startswith("nn")
+
+    BATCH_SIZE = 128
+    EPOCHS = 200
+    if cfg.model == "nn-regular":
+        LR = 1e-2
+    else:
+        LR = 9e-2
+    LR_end = 1e-3
 
     x_train: torch.Tensor = torch.from_numpy(x_train).float()
     y_train: torch.Tensor = torch.from_numpy(y_train).float()[:, None]
@@ -100,7 +102,8 @@ def train_torch_model(
             )
 
             desc = f"epoch {i}, loss: {loss.item():.4f}, auc: {auc:.4f}, acc: {acc:.4f}"
-            if cfg.model in ["nn-one", "nn-inf", "nn-inf-small", "nn-inf-oc", "nn-inf-mon-vchi2"]:
+            if cfg.model in ["nn-one", "nn-inf", "nn-inf-small", "nn-inf-oc",
+                             "nn-inf-mon-vchi2"]:
                 desc += f" sigma: {model.sigmanet.sigma.item(): .2f}"
                 desc += f" lr: {optimizer.param_groups[0]['lr']:.2e}"
             pbar.set_description(desc)
@@ -147,7 +150,7 @@ def train_torch_model(
                     os.remove(fn)
             plt.close()
 
-    torch.manual_seed(1)
+    torch.manual_seed(cfg.seed)
     from hlt2trk.models import get_model
 
     model = get_model(cfg)
