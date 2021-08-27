@@ -11,7 +11,7 @@ cfg = get_config()
 def from_root(path: str, columns="*", evttuple=False, maxEvt=None) -> pd.DataFrame:
     ttree = u.open(join(dirs.raw_data, path))
     if evttuple:
-        df = ttree["EventTuple/Evt"].pandas.df(columns)
+        df = ttree["EventTuple/Evt"].pandas.df(columns, flatten=False)
     else:
         df = ttree["DecayTreeTuple#1/N2Trk"].pandas.df(columns)
     if maxEvt is None:
@@ -47,23 +47,24 @@ mb_tupleTrees = [
     "upgrade_magup_sim10_up08_30000000_digi_MVATuple.root",  # minbias
 ]
 
-sig_tupleTrees = [f"MagDown_{evttype}_MVATuple.root" for evttype in evttypes.values()]
+sig_tupleTrees = [f"MagDown_{evttype}_MVATuple_true_vtx.root" for evttype in evttypes.values()]
 
 
 def presel(df: pd.DataFrame, evttuple: pd.DataFrame) -> pd.DataFrame:
     evt_grp = ["EventInSequence", "eventtype"]
     # only take the events that have a B candidate with more
     # than 2 GeV PT and more than .2 ps flight distance
-    grpd_truth = evttuple.groupby(evt_grp)
-    is_minbias = grpd_truth.eventtype == 0  # no truth cuts on minbias
-    hasbeauty = grpd_truth.signal_type.max() > 0
-    TRUEPT_cut = grpd_truth.signal_TRUEPT.max() > 2000  # 2 GeV
-    TRUETAU_cut = grpd_truth.signal_TRUETAU.max() > 2e-4  # .2 ps
-    evts_passing_truth_cut = hasbeauty[
-        (hasbeauty & TRUEPT_cut & TRUETAU_cut) | is_minbias
+    signals = evttuple[evttuple.eventtype != 0]
+    signals.set_index(evt_grp, inplace=True)
+    signals = signals[signals.n_signals > 0]
+    hasbeauty = signals.signal_type.apply(max) > 0
+    TRUEPT_cut = signals.signal_TRUEPT.apply(max) > 2000  # 2 GeV
+    TRUETAU_cut = signals.signal_TRUETAU.apply(max) > 2e-4  # .2 ps
+    evts_passing_truth_cut = signals[
+        (hasbeauty & TRUEPT_cut & TRUETAU_cut)
     ].index
 
-    df = df[df.set_index(evt_grp).index.isin(evts_passing_truth_cut)]
+    df = df[df.set_index(evt_grp).index.isin(evts_passing_truth_cut) | (df.eventtype == 0)] # no truth cut on minbias
 
     sel = df.sv_PT > cfg.presel_conf["svPT"]
     sel &= df.trk1_PT > cfg.presel_conf["trkPT"]
@@ -121,13 +122,31 @@ def preprocess(df: pd.DataFrame, evttuple: pd.DataFrame) -> pd.DataFrame:
     df[to_log] = df[to_log].apply(np.log)
     df[to_scale] = df[to_scale].clip(lower_bound, 1e5)
     df[to_scale] = df[to_scale] / 1000  # to GeV
+
+    # # add some truth level info to plot against
+    # evt_grp = ["EventInSequence", "eventtype"]
+    # # truth is per event
+    # evttuple.set_index(evt_grp, inplace=True)
+
+    # #calculate phi
+    # evttuple["DX"] = evttuple["signal_TRUEENDVERTEX_X"] - evttuple["signal_TRUEORIGINVERTEX_X"]
+    # evttuple["DY"] = evttuple["signal_TRUEENDVERTEX_Y"] - evttuple["signal_TRUEORIGINVERTEX_Y"]
+    # evttuple["signal_TRUEPHI"] = np.arctan2(evttuple["DY"], evttuple["DX"])
+
+    # #calculate radial flight distance
+    # evttuple["signal_RADIALFD"] = np.sqrt(evttuple["DX"] ** 2 + evttuple["DY"] ** 2)
+
+    # df = df.join(evttuple["signal_TRUEETA"], on=evt_grp)
+    # df = df.join(evttuple["signal_TRUEPHI"], on=evt_grp)
+    # df = df.join(evttuple["signal_RADIALFD"], on=evt_grp)
+
     return df
 
 
 unprocessed = [from_root(x, columns) for x in mb_tupleTrees]
-unprocessed += [from_root(x, columns, maxEvt=3000) for x in sig_tupleTrees]
+unprocessed += [from_root(x, columns, maxEvt=5000) for x in sig_tupleTrees]
 evttuples = [from_root(x, evttuple=True) for x in mb_tupleTrees]
-evttuples += [from_root(x, evttuple=True, maxEvt=3000) for x in sig_tupleTrees]
+evttuples += [from_root(x, evttuple=True, maxEvt=5000) for x in sig_tupleTrees]
 
 
 last_evt_mb2018 = evttuples[0].EventInSequence.max()
@@ -143,14 +162,6 @@ merged_unprocessed = [
 merged_evttuples = [pd.concat([evttuples[0], evttuples[1], evttuples[2]])] + evttuples[
     3:
 ]
-
-
-# for i in range(3, len(tupleTrees), 2):
-#     last_evt = evttuples[i].EventInSequence.max()
-#     evttuples[i + 1]["EventInSequence"] += last_evt + 1
-#     unprocessed[i + 1]["EventInSequence"] += last_evt + 1
-#     merged_unprocessed.append(pd.concat([unprocessed[i], unprocessed[i + 1]]))
-#     merged_evttuples.append(pd.concat([evttuples[i], evttuples[i + 1]]))
 
 
 for i, df in enumerate(merged_unprocessed):

@@ -64,6 +64,19 @@ rule all:
             regularization=Configs.regularization,
             division=Configs.division,
         ),
+        # efficiency vs hadron kinematics, only for lhcb data
+        # expand_with_rules(
+        #     Locations.eff_vs_kinematics,
+        #     model=Configs.model,
+        #     data_type=["lhcb"],  # only for lhcb data
+        #     features=map(config.to_string_features, Configs.features),
+        #     normalize=map(config.to_string_normalize, Configs.normalize),
+        #     signal_type=Configs.signal_type,
+        #     presel_conf=map(config.to_string_presel_conf, Configs.presel_conf),
+        #     max_norm=map(config.to_string_max_norm, Configs.max_norm),
+        #     regularization=Configs.regularization,
+        #     division=Configs.division,
+        # ),
         # violin plots
         expand_with_rules(
             Locations.violins,
@@ -127,6 +140,17 @@ rule plot_rate_vs_eff:
         script = "scripts/plot/plot_rates_vs_effs.py",
     output:
         Locations.rate_vs_eff,
+    run:
+        args = config.get_cli_args(wildcards)
+        shell(f"python {input.script} {args}")
+
+rule plot_eff_vs_kinematics:
+    input:
+        Locations.data,
+        Locations.model,
+        script = "scripts/plot/plot_eff_vs_kinematics.py",
+    output:
+        Locations.eff_vs_kinematics,
     run:
         args = config.get_cli_args(wildcards)
         shell(f"python {input.script} {args}")

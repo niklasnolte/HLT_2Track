@@ -46,6 +46,6 @@ with PdfPages(format_location(Locations.rate_vs_eff, cfg)) as pdf:
         ax.grid(linestyle="--")
         ax.grid(linestyle=":", which="minor")
         ax.set_title(cfg.model + (" TOS" if tos else ""))
-        ax.legend(loc="lower right", title=f"{' TOS' if tos else ''} eff at 660Hz")
+        ax.legend(loc="lower right", title=f"{' TOS' if tos else ''} eff at 660kHz")
         pdf.savefig()
         plt.close()

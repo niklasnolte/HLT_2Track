@@ -70,6 +70,11 @@ class Locations:
         "rate_vs_eff_{model}_{features}_{data_type}_{normalize}"
         "_{signal_type}_{presel_conf}_{max_norm}_{regularization}_{division}.pdf",
     )
+    eff_vs_kinematics = join(
+        dirs.scatter,
+        "eff_vs_kinematics_{model}_{features}_{data_type}_{normalize}"
+        "_{signal_type}_{presel_conf}_{max_norm}_{regularization}_{division}.pdf",
+    )
     presel_efficiencies = join(
         dirs.results, "presel_efficiencies_{data_type}_{presel_conf}.json",
     )

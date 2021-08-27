@@ -4,8 +4,7 @@ import pickle
 
 from hlt2trk.utils.config import get_config, Locations, format_location, evttypes
 from hlt2trk.utils.data import get_data
-from hlt2trk.models import load_model
-from evaluate import get_evaluator
+from hlt2trk.models import load_model, get_evaluator
 import pandas as pd
 
 # Load configuration

@@ -22,6 +22,7 @@ def train_torch_model(
     x_val: np.ndarray,
     y_val: np.ndarray,
 ):
+    print(x_train.shape)
     assert cfg.model.startswith("nn")
 
     BATCH_SIZE = 128

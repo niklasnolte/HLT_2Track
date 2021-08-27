@@ -5,7 +5,7 @@ from hlt2trk.models import load_model
 from hlt2trk.utils import config
 from hlt2trk.utils.data import get_data
 
-from evaluate import get_evaluator
+from hlt2trk.models import get_evaluator
 
 cfg = config.get_config()
 model = load_model(cfg)

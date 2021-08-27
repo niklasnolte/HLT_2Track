@@ -4,7 +4,7 @@ from hlt2trk.utils import Locations, config
 from hlt2trk.utils.data import get_data_for_training
 from sklearn.metrics import balanced_accuracy_score, roc_auc_score
 
-from evaluate import get_evaluator
+from hlt2trk.models import get_evaluator
 
 cfg = config.get_config()
 eval_fun = get_evaluator(cfg)
