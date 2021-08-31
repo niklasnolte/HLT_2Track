@@ -22,11 +22,10 @@ def train_torch_model(
     x_val: np.ndarray,
     y_val: np.ndarray,
 ):
-    print(x_train.shape)
     assert cfg.model.startswith("nn")
 
     BATCH_SIZE = 128
-    EPOCHS = 200
+    EPOCHS = 50
     if cfg.model == "nn-regular":
         LR = 1e-2
     else:

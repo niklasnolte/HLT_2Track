@@ -14,20 +14,22 @@ __all__ = [
 def signal_type_int(signal_type: str) -> int:
     # this should match with the signal type definition in the root data
     if signal_type == "beauty":
-        return 2
+        return 4 # two tracks with beauty (==2) -> 2*2
     elif signal_type == "charm":
-        return 1
+        return 1 # two tracks with charm (==1) -> 1*1
     else:
         raise ValueError(f"signal_type must be one of (\"charm\", \"beauty\")")
 
 
-def is_signal(cfg, signal_int) -> bool:
+def is_signal(cfg, df): # elementwise
+    same_ev_mask = df.trk1_signal_TRUEENDVERTEX_Z == df.trk2_signal_TRUEENDVERTEX_Z
     if cfg.signal_type == "beauty":
-        return signal_int == signal_type_int("beauty")
+        st_mask = df.signal_type == signal_type_int("beauty")
     elif cfg.signal_type == "charm":
-        return signal_int == signal_type_int("charm")
+        st_mask = df.signal_type == signal_type_int("charm")
     elif cfg.signal_type == "heavy-flavor":
-        return signal_int > 0
+        st_mask = (df.signal_type == signal_type_int("beauty")) | (df.signal_type == signal_type_int("charm"))
+    return same_ev_mask & st_mask
 
 
 def get_data(cfg: config.Configuration) -> pd.DataFrame:
@@ -43,7 +45,7 @@ def get_data_for_training(cfg: config.Configuration) -> Tuple[np.ndarray]:
     df = get_data(cfg)
     df = df[df["minipchi2"] < cfg.presel_conf["ipcuttrain"]]
     bkg = df[df.signal_type == 0]
-    sig = df[is_signal(cfg, df.signal_type)]
+    sig = df[is_signal(cfg, df)]
 
     if cfg.data_type == "lhcb":
         # minbias + svs of which the tracks associated pvs

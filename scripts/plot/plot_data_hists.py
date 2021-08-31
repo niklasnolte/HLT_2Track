@@ -13,7 +13,7 @@ if cfg.plot_style == "dark":
 
 df = get_data()
 bkg = df[df.signal_type == 0]
-sig = df[is_signal(cfg, df.signal_type)]
+sig = df[is_signal(cfg, df)]
 
 fig, axes = plt.subplots(
     int(np.ceil(len(cfg.features) / 2)), 2, dpi=120, figsize=(16, 9)

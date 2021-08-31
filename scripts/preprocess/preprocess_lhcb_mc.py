@@ -33,11 +33,23 @@ columns = [
     "trk1_P",
     "trk1_signal_type",
     "trk1_fromHFPV",
+    "trk1_signal_TRUEENDVERTEX_X",
+    "trk1_signal_TRUEENDVERTEX_Y",
+    "trk1_signal_TRUEENDVERTEX_Z",
+    "trk1_signal_TRUEORIGINVERTEX_X",
+    "trk1_signal_TRUEORIGINVERTEX_Y",
+    "trk1_signal_TRUEORIGINVERTEX_Z",
     "trk2_IPCHI2_OWNPV",
     "trk2_PT",
     "trk2_P",
     "trk2_signal_type",
     "trk2_fromHFPV",
+    "trk2_signal_TRUEENDVERTEX_X",
+    "trk2_signal_TRUEENDVERTEX_Y",
+    "trk2_signal_TRUEENDVERTEX_Z",
+    "trk2_signal_TRUEORIGINVERTEX_X",
+    "trk2_signal_TRUEORIGINVERTEX_Y",
+    "trk2_signal_TRUEORIGINVERTEX_Z",
     "EventInSequence",
 ]
 
@@ -76,7 +88,7 @@ def presel(df: pd.DataFrame, evttuple: pd.DataFrame) -> pd.DataFrame:
     # for signal samples, the denominator for the efficiency
     # is defined with respect to the truth cut
     n_events_before = (
-        evts_passing_truth_cut.to_frame(index=False).groupby("eventtype").nunique()[1:]
+        evts_passing_truth_cut.to_frame(index=False).groupby("eventtype").nunique()
     )
     # for the rate, we just look how many events we ran over.
     n_events_before.loc[0] = evttuple[evttuple.eventtype == 0].EventInSequence.max()
@@ -93,7 +105,7 @@ def presel(df: pd.DataFrame, evttuple: pd.DataFrame) -> pd.DataFrame:
 def preprocess(df: pd.DataFrame, evttuple: pd.DataFrame) -> pd.DataFrame:
     df["sumpt"] = df[["trk1_PT", "trk2_PT"]].sum(axis=1)
     df["minipchi2"] = df[["trk1_IPCHI2_OWNPV", "trk2_IPCHI2_OWNPV"]].min(axis=1)
-    df["signal_type"] = df[["trk1_signal_type", "trk2_signal_type"]].min(axis=1)
+    df["signal_type"] = df["trk1_signal_type"] * df["trk2_signal_type"]
     df = presel(df, evttuple)
     df.rename(
         columns={"sv_FDCHI2_OWNPV": "fdchi2", "sv_ENDVERTEX_CHI2": "vchi2"},
@@ -122,23 +134,6 @@ def preprocess(df: pd.DataFrame, evttuple: pd.DataFrame) -> pd.DataFrame:
     df[to_log] = df[to_log].apply(np.log)
     df[to_scale] = df[to_scale].clip(lower_bound, 1e5)
     df[to_scale] = df[to_scale] / 1000  # to GeV
-
-    # # add some truth level info to plot against
-    # evt_grp = ["EventInSequence", "eventtype"]
-    # # truth is per event
-    # evttuple.set_index(evt_grp, inplace=True)
-
-    # #calculate phi
-    # evttuple["DX"] = evttuple["signal_TRUEENDVERTEX_X"] - evttuple["signal_TRUEORIGINVERTEX_X"]
-    # evttuple["DY"] = evttuple["signal_TRUEENDVERTEX_Y"] - evttuple["signal_TRUEORIGINVERTEX_Y"]
-    # evttuple["signal_TRUEPHI"] = np.arctan2(evttuple["DY"], evttuple["DX"])
-
-    # #calculate radial flight distance
-    # evttuple["signal_RADIALFD"] = np.sqrt(evttuple["DX"] ** 2 + evttuple["DY"] ** 2)
-
-    # df = df.join(evttuple["signal_TRUEETA"], on=evt_grp)
-    # df = df.join(evttuple["signal_TRUEPHI"], on=evt_grp)
-    # df = df.join(evttuple["signal_RADIALFD"], on=evt_grp)
 
     return df
 

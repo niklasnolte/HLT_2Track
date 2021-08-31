@@ -13,7 +13,7 @@ if cfg.plot_style == "dark":
 
 df = get_data(cfg)
 bkg = df[df.signal_type == 0]
-sig = df[is_signal(cfg, df.signal_type)]
+sig = df[is_signal(cfg, df)]
 
 if cfg.data_type == "lhcb":
     # minbias + svs of which the tracks associated pvs are at least 10mm away from the signal pv

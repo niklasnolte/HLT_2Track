@@ -64,6 +64,11 @@ cp plots/scatter/rate_vs_eff_nn-inf-small_fdchi2+sumpt+vchi2+minipchi2_lhcb_unno
 cp plots/scatter/rate_vs_eff_nn-inf-mon-vchi2_fdchi2+sumpt+vchi2+minipchi2_lhcb_unnormed_heavy-flavor_svPT:1000+trkPT:200+svchi2:20+ipcuttrain:6_max-norm_direct_vector.pdf for_mike/4d/rate_vs_eff_nn-inf-mon-vchi2_withipcut.pdf
 cp plots/scatter/rate_vs_eff_nn-inf-mon-vchi2_fdchi2+sumpt+vchi2+minipchi2_lhcb_unnormed_heavy-flavor_svPT:1000+trkPT:200+svchi2:20+ipcuttrain:10_max-norm_direct_vector.pdf for_mike/4d/rate_vs_eff_nn-inf-mon-vchi2_noipcut.pdf
 
+#eff vs kinematics
+cp plots/scatter/eff_vs_kinematics_bdt_fdchi2+sumpt+vchi2+minipchi2_lhcb_unnormed_heavy-flavor_svPT:1000+trkPT:200+svchi2:20+ipcuttrain:10_None_None_None.pdf for_mike/4d/eff_vs_kinematics_bdt_nopicut.pdf
+cp plots/scatter/eff_vs_kinematics_nn-inf_fdchi2+sumpt+vchi2+minipchi2_lhcb_unnormed_heavy-flavor_svPT:1000+trkPT:200+svchi2:20+ipcuttrain:10_max-norm_direct_vector.pdf for_mike/4d/eff_vs_kinematics_nn-inf_nopicut.pdf
+cp plots/scatter/eff_vs_kinematics_nn-regular_fdchi2+sumpt+vchi2+minipchi2_lhcb_unnormed_heavy-flavor_svPT:1000+trkPT:200+svchi2:20+ipcuttrain:10_None_None_None.pdf for_mike/4d/eff_vs_kinematics_nn-regular_nopicut.pdf
+
 tar -cvzf for_mike.tar.gz for_mike
 
 rm -r for_mike

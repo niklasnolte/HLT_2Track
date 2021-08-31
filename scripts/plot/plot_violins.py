@@ -36,9 +36,7 @@ for model in models:
     tos_effs[model] = models[model]["tos_eff"].values
     modes[model] = models[model]["mode"].values
 
-
 def frac(x):
-    # return x
     return (x - effs["nn-regular"])  # / effs["nn-regular"]
 
 

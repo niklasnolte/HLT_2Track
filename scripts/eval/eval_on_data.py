@@ -3,7 +3,7 @@ import json
 import pickle
 
 from hlt2trk.utils.config import get_config, Locations, format_location, evttypes
-from hlt2trk.utils.data import get_data
+from hlt2trk.utils.data import get_data, is_signal
 from hlt2trk.models import load_model, get_evaluator
 import pandas as pd
 
@@ -24,8 +24,7 @@ with open(format_location(Locations.presel_efficiencies, cfg), "r") as f:
 data = data[data.validation]
 data["pred"] = eval_fun(model, data[cfg.features].to_numpy())
 # per event performance evaluation
-data = data[evt_grp + ["pred", "signal_type"]]
-data["tos_pred"] = data.pred * (data.signal_type > 0)
+data["tos_pred"] = data.pred * is_signal(cfg, data)
 
 
 # TODO this only works for heavy-flavor right now
