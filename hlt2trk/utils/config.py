@@ -108,6 +108,12 @@ class Locations:
         "eff_table_{features}_{data_type}_{normalize}"
         "_{signal_type}_{presel_conf}_{max_norm}_{regularization}_{division}.txt",
     )
+    exported_model = join(
+        dirs.models,
+        "exported_{model}_{features}_{data_type}_{normalize}"
+        "_{signal_type}_{presel_conf}_{max_norm}_{regularization}_{division}.json",
+    )
+
 
 
 def to_string_features(features: Optional[list]) -> str:

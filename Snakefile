@@ -101,6 +101,31 @@ rule all:
             regularization=Configs.regularization,
             division=Configs.division,
         ),
+        # exported model
+        expand_with_rules(
+            Locations.exported_model,
+            model=["nn-inf"], # --> nn-inf only for now
+            data_type=["lhcb"],  # only for lhcb data
+            features=map(config.to_string_features, Configs.features),
+            normalize=map(config.to_string_normalize, Configs.normalize),
+            signal_type=Configs.signal_type,
+            presel_conf=map(config.to_string_presel_conf, Configs.presel_conf),
+            max_norm=map(config.to_string_max_norm, Configs.max_norm),
+            regularization=Configs.regularization,
+            division=Configs.division,
+        )
+
+rule export_model_to_json:
+    input:
+        Locations.model,
+        Locations.target_cut,
+        script = "scripts/eval/export_model.py"
+    output:
+        Locations.exported_model
+    run:
+      args = config.get_cli_args(wildcards)
+      shell(f"python {input.script} {args}")
+
 
 rule plot_violins:
     input:
