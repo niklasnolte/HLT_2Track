@@ -22,13 +22,14 @@ elif cfg.model == "nn-inf":
     state_dict = model.state_dict()
     weight_keys = [x for x in state_dict if "weight" in x]
     depth = len(weight_keys)
+    assert depth > 0, "No weights found in model"
     for k in state_dict:
         if k in weight_keys:
             state_dict[k] = get_normed_weights(
                 state_dict[k],
                 # ordered dict -> last weight_key is the one that
                 # needs to be one-inf normed
-                "one-inf" if k == weight_keys[-1] else "inf",
+                "one-inf" if k == weight_keys[0] else "inf",
                 always_norm=not cfg.max_norm,
                 alpha=cfg.sigma_final ** (1.0 / depth),
                 vectorwise=vectorwise,
