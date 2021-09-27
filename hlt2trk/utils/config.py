@@ -30,50 +30,55 @@ class Locations:
     model = join(
         dirs.models,
         "{model}_{features}_{data_type}_{normalize}_{signal_type}_{presel_conf}"
-        "_{max_norm}_{regularization}_{division}.pkl",
+        "_{max_norm}_{regularization}_{division}_{seed}.pkl",
     )
     data = join(dirs.data, "MC_{data_type}_{presel_conf}.pkl")
     # grid evaluation
     gridXY = join(
         dirs.savepoints,
         "gridXY_{model}_{features}_{data_type}_{normalize}"
-        "_{signal_type}_{presel_conf}_{max_norm}_{regularization}_{division}.npz",
+        "_{signal_type}_{presel_conf}_{max_norm}_{regularization}_{division}_{seed}.npz",
     )
     # plots
     train_distribution_gif = join(
         dirs.gifs,
         "training_distributions_{model}_{features}_{data_type}_{normalize}"
-        "_{signal_type}_{presel_conf}_{max_norm}_{regularization}_{division}.gif",
+        "_{signal_type}_{presel_conf}_{max_norm}_{regularization}_{division}_{seed}.gif",
     )
     heatmap = join(
         dirs.heatmaps,
         "heatmap_{model}_{features}_{data_type}_{normalize}"
-        "_{signal_type}_{presel_conf}_{max_norm}_{regularization}_{division}.pdf",
+        "_{signal_type}_{presel_conf}_{max_norm}_{regularization}_{division}_{seed}.pdf",
+    )
+    heatmap_agg = join(
+        dirs.heatmaps,
+        "heatmap-agg_{features}_{data_type}_{normalize}"
+        "_{signal_type}_{presel_conf}_{max_norm}_{regularization}_{division}_{seed}.pdf",
     )
     twodim_vs_output = join(
         dirs.scatter,
         "twodim_vs_output_{model}_{features}_{data_type}_{normalize}"
-        "_{signal_type}_{presel_conf}_{max_norm}_{regularization}_{division}.pdf",
+        "_{signal_type}_{presel_conf}_{max_norm}_{regularization}_{division}_{seed}.pdf",
     )
     feat_vs_output = join(
         dirs.scatter,
         "feat_vs_output_{model}_{features}_{data_type}_{normalize}"
-        "_{signal_type}_{presel_conf}_{max_norm}_{regularization}_{division}.pdf",
+        "_{signal_type}_{presel_conf}_{max_norm}_{regularization}_{division}_{seed}.pdf",
     )
     roc = join(
         dirs.scatter,
         "roc_{model}_{features}_{data_type}_{normalize}_{signal_type}_{presel_conf}"
-        "_{max_norm}_{regularization}_{division}.pdf",
+        "_{max_norm}_{regularization}_{division}_{seed}.pdf",
     )
     rate_vs_eff = join(
         dirs.scatter,
         "rate_vs_eff_{model}_{features}_{data_type}_{normalize}"
-        "_{signal_type}_{presel_conf}_{max_norm}_{regularization}_{division}.pdf",
+        "_{signal_type}_{presel_conf}_{max_norm}_{regularization}_{division}_{seed}.pdf",
     )
     eff_vs_kinematics = join(
         dirs.scatter,
         "eff_vs_kinematics_{model}_{features}_{data_type}_{normalize}"
-        "_{signal_type}_{presel_conf}_{max_norm}_{regularization}_{division}.pdf",
+        "_{signal_type}_{presel_conf}_{max_norm}_{regularization}_{division}_{seed}.pdf",
     )
     presel_efficiencies = join(
         dirs.results, "presel_efficiencies_{data_type}_{presel_conf}.json",
@@ -81,37 +86,42 @@ class Locations:
     auc_acc = join(
         dirs.results,
         "auc_acc_{model}_{features}_{data_type}_{normalize}"
-        "_{signal_type}_{presel_conf}_{max_norm}_{regularization}_{division}.json",
+        "_{signal_type}_{presel_conf}_{max_norm}_{regularization}_{division}_{seed}.json",
     )
     target_effs = join(
         dirs.results_eff,
         "target-eff_{model}_{features}_{data_type}_{normalize}"
-        "_{signal_type}_{presel_conf}_{max_norm}_{regularization}_{division}.pkl",
+        "_{signal_type}_{presel_conf}_{max_norm}_{regularization}_{division}_{seed}.pkl",
     )
     target_cut = join(
         dirs.results_eff,
         "target-cut_{model}_{features}_{data_type}_{normalize}"
-        "_{signal_type}_{presel_conf}_{max_norm}_{regularization}_{division}.txt",
+        "_{signal_type}_{presel_conf}_{max_norm}_{regularization}_{division}_{seed}.txt",
     )
     full_effs = join(
         dirs.results_eff,
         "full-eff_{model}_{features}_{data_type}_{normalize}"
-        "_{signal_type}_{presel_conf}_{max_norm}_{regularization}_{division}.pkl",
+        "_{signal_type}_{presel_conf}_{max_norm}_{regularization}_{division}_{seed}.pkl",
     )
     violins = join(
         dirs.violins,
         "violins_{features}_{data_type}_{normalize}"
-        "_{signal_type}_{presel_conf}_{max_norm}_{regularization}_{division}.pdf",
+        "_{signal_type}_{presel_conf}_{max_norm}_{regularization}_{division}_{seed}.pdf",
     )
     eff_table = join(
         dirs.results_latex,
         "eff_table_{features}_{data_type}_{normalize}"
-        "_{signal_type}_{presel_conf}_{max_norm}_{regularization}_{division}.txt",
+        "_{signal_type}_{presel_conf}_{max_norm}_{regularization}_{division}_{seed}.txt",
     )
     exported_model = join(
         dirs.models,
         "exported_{model}_{features}_{data_type}_{normalize}"
-        "_{signal_type}_{presel_conf}_{max_norm}_{regularization}_{division}.json",
+        "_{signal_type}_{presel_conf}_{max_norm}_{regularization}_{division}_{seed}.json",
+    )
+    seed_violins = join(
+        dirs.violins,
+        "seed_violins_{features}_{data_type}_{normalize}"
+        "_{signal_type}_{presel_conf}_{max_norm}_{regularization}_{division}.pdf",
     )
 
 
@@ -177,6 +187,7 @@ def format_location(location: str, config):
         max_norm=to_string_max_norm(config.max_norm),
         regularization=config.regularization,
         division=config.division,
+        seed=config.seed,
     )
 
 
@@ -208,6 +219,8 @@ def get_cli_args(config) -> str:
         argstr += f"--regularization={config.regularization} "
     if hasattr(config, "division"):
         argstr += f"--division={config.division} "
+    if hasattr(config, "seed"):
+        argstr += f"--seed={config.seed} "
     return argstr
 
 
@@ -226,7 +239,7 @@ class Configuration:
         max_norm: Optional[bool] = None,
         regularization: Optional[str] = None,
         division: Optional[str] = None,
-        seed: int = Configs.seed,
+        seed: int = None,
         use_cuda: bool = Configs.use_cuda,
         sigma_final: float = Configs.sigma_final,
         sigma_init: float = Configs.sigma_init,
@@ -378,6 +391,15 @@ def feature_repr(feature):
         return "log($\chi^2_{FD}$)"
     elif feature == "vchi2":
         return "$\chi^2_{Vertex}$"
+# def feature_repr(feature):
+#     if feature == "minipchi2":
+#         return "log(MIPCHI2)"
+#     elif feature == "sumpt":
+#         return "SUMPT [GeV]"
+#     elif feature == "fdchi2":
+#         return "log(FDCHI2)"
+#     elif feature == "vchi2":
+#         return "VCHI2"
 
 
 # signal sample eventtypes

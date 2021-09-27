@@ -7,6 +7,9 @@ from hlt2trk.utils.data import get_data, is_signal
 from hlt2trk.models import load_model, get_evaluator
 import pandas as pd
 
+input_rate = 30000  # kHz
+target_rate = 2000  # kHz
+
 # Load configuration
 cfg = get_config()
 eval_fun = get_evaluator(cfg)
@@ -35,11 +38,9 @@ def rates_vs_effs(data, presel_effs):
 
     # minimum bias rates (per event)
     minbias_preds = preds[preds.eventtype == 0].pred.values
-    input_rate = 30000  # kHz
     presel_rate = presel_effs[0]  # minbias
     rates = [input_rate * presel_rate * (minbias_preds > i).mean() for i in cutrange]
 
-    target_rate = 660
     target_rate_idx = [i for i, r in enumerate(rates) if r < target_rate][-1]
 
     # save efficiencies at 660hz target rate for each mode

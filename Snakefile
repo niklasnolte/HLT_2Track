@@ -21,6 +21,7 @@ rule all:
                max_norm=map(config.to_string_max_norm, Configs.max_norm),
                regularization=Configs.regularization,
                division=Configs.division,
+               seed=Configs.seed,
                ),
         # feat_vs_output plots
         expand_with_rules(
@@ -34,6 +35,7 @@ rule all:
             max_norm=map(config.to_string_max_norm, Configs.max_norm),
             regularization=Configs.regularization,
             division=Configs.division,
+            seed=Configs.seed[:1], # not for all seeds pls
         ),
         # heatmap plots
         expand_with_rules(
@@ -50,6 +52,23 @@ rule all:
             max_norm=map(config.to_string_max_norm, Configs.max_norm),
             regularization=Configs.regularization,
             division=Configs.division,
+            seed=Configs.seed[:1], # not for all seeds pls
+        ),
+        # heatmap plots aggregated
+        expand_with_rules(
+            Locations.heatmap_agg,
+            data_type=Configs.data_type,
+            features=map(
+                config.to_string_features,
+                Configs.features,
+            ),
+            normalize=map(config.to_string_normalize, Configs.normalize),
+            signal_type=Configs.signal_type,
+            presel_conf=map(config.to_string_presel_conf, Configs.presel_conf),
+            max_norm=map(config.to_string_max_norm, Configs.max_norm),
+            regularization=Configs.regularization,
+            division=Configs.division,
+            seed=Configs.seed[:1], # not for all seeds pls
         ),
         # rates vs efficiencies, only for lhcb data
         expand_with_rules(
@@ -63,6 +82,7 @@ rule all:
             max_norm=map(config.to_string_max_norm, Configs.max_norm),
             regularization=Configs.regularization,
             division=Configs.division,
+            seed=Configs.seed[:1], # not for all seeds pls
         ),
         # efficiency vs hadron kinematics, only for lhcb data
         expand_with_rules(
@@ -76,10 +96,24 @@ rule all:
             max_norm=map(config.to_string_max_norm, Configs.max_norm),
             regularization=Configs.regularization,
             division=Configs.division,
+            seed=Configs.seed[:1], # not for all seeds pls
         ),
         # violin plots
         expand_with_rules(
             Locations.violins,
+            data_type=["lhcb"],  # only for lhcb data
+            features=map(config.to_string_features, Configs.features),
+            normalize=map(config.to_string_normalize, Configs.normalize),
+            signal_type=Configs.signal_type,
+            presel_conf=map(config.to_string_presel_conf, Configs.presel_conf),
+            max_norm=map(config.to_string_max_norm, Configs.max_norm),
+            regularization=Configs.regularization,
+            division=Configs.division,
+            seed=Configs.seed[:1], # not for all seeds pls
+        ),
+        # violin auc/acc with different seeds
+        expand_with_rules(
+            Locations.seed_violins,
             data_type=["lhcb"],  # only for lhcb data
             features=map(config.to_string_features, Configs.features),
             normalize=map(config.to_string_normalize, Configs.normalize),
@@ -100,6 +134,7 @@ rule all:
             max_norm=map(config.to_string_max_norm, Configs.max_norm),
             regularization=Configs.regularization,
             division=Configs.division,
+            seed=Configs.seed[:1], # not for all seeds pls
         ),
         # exported model
         expand_with_rules(
@@ -113,6 +148,7 @@ rule all:
             max_norm=map(config.to_string_max_norm, Configs.max_norm),
             regularization=Configs.regularization,
             division=Configs.division,
+            seed=Configs.seed[:1], # not for all seeds pls
         )
 
 rule export_model_to_json:
@@ -134,12 +170,39 @@ rule plot_violins:
             model=Configs.model,
             allow_missing=True,
         ),
+        expand(
+            Locations.model,
+            model=Configs.model,
+            allow_missing=True,
+        ),
         script = "scripts/plot/plot_violins.py"
     output:
         Locations.violins
     run:
       args = config.get_cli_args(wildcards)
       shell(f"python {input.script} {args}")
+
+rule plot_seed_violins:
+    input:
+        expand(
+            Locations.auc_acc,
+            model=Configs.model,
+            seed=Configs.seed,
+            allow_missing=True,
+        ),
+        expand(
+            Locations.model,
+            model=Configs.model,
+            seed=Configs.seed,
+            allow_missing=True,
+        ),
+        script = "scripts/plot/plot_seed_violins.py"
+    output:
+        Locations.seed_violins
+    run:
+      args = config.get_cli_args(wildcards)
+      shell(f"python {input.script} {args}")
+
 
 rule build_eff_table:
     input:
@@ -195,6 +258,29 @@ rule plot_heatmap:
         args = config.get_cli_args(wildcards)
         shell(f"python {input.script} {args}")
 
+rule plot_heatmap_agg:
+    input:
+        expand(
+        Locations.auc_acc,
+        model=Configs.model,
+        allow_missing=True,
+        ),
+        expand(
+        Locations.target_cut,
+        model=Configs.model,
+        allow_missing=True,
+        ),
+        expand(
+        Locations.gridXY,
+        model=Configs.model,
+        allow_missing=True,
+        ),
+        script = "scripts/plot/plot_multi_heatmap.py",
+    output:
+        Locations.heatmap_agg,
+    run:
+        args = config.get_cli_args(wildcards)
+        shell(f"python {input.script} {args}")
 
 rule plot_feat_vs_output:
     input:

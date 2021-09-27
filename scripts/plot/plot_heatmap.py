@@ -6,6 +6,8 @@ from re import M
 import numpy as np
 from hlt2trk.utils.config import (Locations, dirs, feature_repr,
                                   format_location, get_config)
+import matplotlib
+matplotlib.rcParams.update({'font.size': 15})
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 
@@ -56,12 +58,13 @@ def plot_heatmap(
                 levels=[target_cut])
             ax.set_xlabel(feature_repr(cfg.features[idxs[0]]))
             ax.set_ylabel(feature_repr(cfg.features[idxs[1]]))
-            ax.set_title(cfg.model)
+            #ax.set_title(cfg.model)
             ax.text(0, 1.05, f"auc: {auc:.3f}",
                     transform=ax.transAxes,
                     horizontalalignment="left",
                     verticalalignment="top")
             plt.colorbar(sc)
+            plt.tight_layout()
             pdf.savefig()
             plt.close()
 

@@ -10,9 +10,12 @@ from hlt2trk.utils.data import get_data, get_data_for_training
 from matplotlib import pyplot as plt
 
 cfg = get_config_from_file(join(dirs.project_root, "config.yml"))
-cfg.plot_style = "dark"
+cfg.plot_style = "light"
 if cfg.plot_style in ["dark", "light"]:
     plt.style.use(join(dirs.project_root, f'scripts/plot/paper-{cfg.plot_style}'))
+
+import matplotlib
+matplotlib.rcParams.update({'font.size': 17})
 
 
 TRAIN_ONLY = True
@@ -58,8 +61,8 @@ def plot_hist(X, y):
 
     fig, ax = plt.subplots(1, 1)
     sc = ax.scatter(x0, x1, c=H, cmap=plt.cm.RdBu, s=92, marker="s", alpha=1)
-    ax.set_xlabel(cfg.features[0])
-    ax.set_ylabel(cfg.features[1])
+    plt.xlabel('log(MIPCHI2)')
+    plt.ylabel('SUMPT [GeV]')
     plt.colorbar(sc)
 
     name = 'hist_scatter_train.pdf' if TRAIN_ONLY else 'hist_scatter.pdf'
@@ -86,6 +89,7 @@ def plot_hist(X, y):
 
 def save_fig(name):
     path = join(dirs.plots, name)
+    plt.tight_layout()
     plt.savefig(path)
     print(f"saved hist to {path}")
     plt.close()
@@ -93,19 +97,21 @@ def save_fig(name):
 
 def plot_scatter(X, y):
     df = pd.DataFrame(X, columns=['minipchi2', 'sumpt'])
-    plt.scatter(X[y == 0][:, 0], X[y == 0][:, 1], label='0', s=1, alpha=.5, c='crimson')
-    plt.scatter(X[y == 1][:, 0], X[y == 1][:, 1], label='1', s=1, alpha=.5, c='royalblue')
+    plt.scatter(X[y == 1][:, 0], X[y == 1][:, 1], label='from HF', s=1, alpha=.2, c='royalblue')
+    plt.scatter(X[y == 0][:, 0], X[y == 0][:, 1], label='background', s=1, alpha=.2, c='crimson')
     plt.legend(markerscale=10, framealpha=.9)
-    plt.xlabel('minipchi2')
-    plt.ylabel('sumpt')
+    plt.xlabel('log(MIPCHI2)')
+    plt.ylabel('SUMPT [GeV]')
     name = 'scatter_train.pdf' if TRAIN_ONLY else 'scatter.pdf'
     save_fig(name)
     return df
 
 
 def plot_kde(y, df):
-    sns.kdeplot(data=df[y == 0], x='minipchi2', y='sumpt', label='0', color='crimson')
-    sns.kdeplot(data=df[y == 1], x='minipchi2', y='sumpt', label='1', color='royalblue')
+    sns.kdeplot(data=df[y == 1], x='minipchi2', y='sumpt', label='from HF', color='royalblue')
+    sns.kdeplot(data=df[y == 0], x='minipchi2', y='sumpt', label='background', color='crimson')
+    plt.xlabel('log(MIPCHI2)')
+    plt.ylabel('SUMPT [GeV]')
     plt.legend()
     name = 'kde_train.pdf' if TRAIN_ONLY else 'kde.pdf'
     save_fig(name)

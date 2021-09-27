@@ -93,7 +93,7 @@ with PdfPages(format_location(Locations.violins, cfg)) as pdf:
                 ax.set_title(" - ".join([eff_kind[j], mask_kind[k]]))
                 # xlabel = r"$\frac{\epsilon_{" + model + r"} - \epsilon_{\mathrm{NN}}}"
                 #     r"{\epsilon_{\mathrm{NN}}}$"
-                xlabel = r"$\epsilon_{" + model + r"} - \epsilon_{\mathrm{NN}}$"
+                xlabel = r"$\epsilon_{\mathrm{" + model + r"}} - \epsilon_{\mathrm{NN}}$"
                 ax.set_xlabel(xlabel)
                 pdf.savefig()
                 plt.close()
