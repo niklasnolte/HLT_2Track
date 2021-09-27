@@ -21,7 +21,7 @@ rule all:
                max_norm=map(config.to_string_max_norm, Configs.max_norm),
                regularization=Configs.regularization,
                division=Configs.division,
-               seed=Configs.seed,
+               seed=Configs.seed[:1],
                ),
         # feat_vs_output plots
         expand_with_rules(
@@ -112,17 +112,18 @@ rule all:
             seed=Configs.seed[:1], # not for all seeds pls
         ),
         # violin auc/acc with different seeds
-        expand_with_rules(
-            Locations.seed_violins,
-            data_type=["lhcb"],  # only for lhcb data
-            features=map(config.to_string_features, Configs.features),
-            normalize=map(config.to_string_normalize, Configs.normalize),
-            signal_type=Configs.signal_type,
-            presel_conf=map(config.to_string_presel_conf, Configs.presel_conf),
-            max_norm=map(config.to_string_max_norm, Configs.max_norm),
-            regularization=Configs.regularization,
-            division=Configs.division,
-        ),
+        # takes ages, take care when doing this
+        # expand_with_rules(
+        #     Locations.seed_violins,
+        #     data_type=["lhcb"],  # only for lhcb data
+        #     features=map(config.to_string_features, Configs.features),
+        #     normalize=map(config.to_string_normalize, Configs.normalize),
+        #     signal_type=Configs.signal_type,
+        #     presel_conf=map(config.to_string_presel_conf, Configs.presel_conf),
+        #     max_norm=map(config.to_string_max_norm, Configs.max_norm),
+        #     regularization=Configs.regularization,
+        #     division=Configs.division,
+        # ),
         # efficiency tables for all models
         expand_with_rules(
             Locations.eff_table,

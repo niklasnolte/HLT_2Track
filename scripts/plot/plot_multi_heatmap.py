@@ -34,7 +34,9 @@ XYs = {}
 aucs = {}
 target_cuts = {}
 
-for m in Configs.model:
+models = Configs.model[:3] # exclude everything except nn-regular, bdt, nn-inf
+
+for m in models:
     XYs[m] = np.load(format_location(Locations.gridXY, add_model(m, cfg))).values()
     with open(format_location(Locations.auc_acc, add_model(m, cfg)), "r") as f:
         auc, _, _ = map(float, f.read().split(","))
@@ -53,11 +55,11 @@ with PdfPages(format_location(Locations.heatmap_agg, cfg)) as pdf:
     for idxs in combinations:
         fig, axes = plt.subplots(
             1,
-            len(Configs.model),
+            len(models),
             sharex=True,
             sharey=True,
-            figsize=(5 * len(Configs.model), 5),
-            gridspec_kw={"width_ratios": [1] * (len(Configs.model) - 1) + [1.25]},
+            figsize=(5 * len(models), 5),
+            gridspec_kw={"width_ratios": [1] * (len(models) - 1) + [1.25]},
         )
         fig.supxlabel(feature_repr(cfg.features[idxs[0]]))
         fig.supylabel(feature_repr(cfg.features[idxs[1]]))
@@ -86,11 +88,6 @@ with PdfPages(format_location(Locations.heatmap_agg, cfg)) as pdf:
                 y_meaned.reshape(-1, shape_),
                 levels=[target_cut],
             )
-            # ax.set_title(cfg.model)
-            # ax.text(0, 1.05, f"auc: {auc:.3f}",
-            #         transform=ax.transAxes,
-            #         horizontalalignment="left",
-            #         verticalalignment="top")
             if i > 0:
                 plt.tick_params(top=False, bottom=True, left=True, right=False)
         plt.colorbar(sc)

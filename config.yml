@@ -24,13 +24,13 @@ regularization:
   - "direct"
 
 model :
-  # - "nn-inf-oc" # sigma of .2 hardcoded
-  # - "nn-inf-small"
-  # - "nn-inf-mon-vchi2" # monotonically decreasing in vchi2
-  - "nn-inf"
-  # - "nn-one"
-  - "bdt"
   - "nn-regular"
+  - "bdt"
+  - "nn-inf"
+  # - "nn-inf-oc" # sigma of .2 hardcoded
+  - "nn-inf-small"
+  # - "nn-inf-mon-vchi2" # monotonically decreasing in vchi2
+  # - "nn-one"
   # - "lda"
   # - "qda"
   # - "gnb"
@@ -42,7 +42,7 @@ data_type:
 features:
   - ["minipchi2", "sumpt"]
   # - ["fdchi2", "sumpt"]
-  # - ["fdchi2", "sumpt", "vchi2", "minipchi2"]
+  - ["fdchi2", "sumpt", "vchi2", "minipchi2"]
 
 signal_type:
   - "heavy-flavor"

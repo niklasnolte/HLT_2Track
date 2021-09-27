@@ -8,7 +8,7 @@ from hlt2trk.models import load_model, get_evaluator
 import pandas as pd
 
 input_rate = 30000  # kHz
-target_rate = 2000  # kHz
+target_rate = 660  # kHz
 
 # Load configuration
 cfg = get_config()
