@@ -1,4 +1,6 @@
 import numpy as np
+import matplotlib
+matplotlib.rcParams.update({"font.size": 15})
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 from hlt2trk.utils.config import Locations, format_location, get_config, dirs, Configs
@@ -105,7 +107,7 @@ with PdfPages(format_location(Locations.multi_eff_vs_kinematics, cfg)) as pdf:
                 sharex=True,
                 sharey=True,
                 figsize=(5 * len(models), 5),
-                gridspec_kw={"width_ratios": [1] * (len(models) - 1) + [1.25]},
+                #gridspec_kw={"width_ratios": [1] * (len(models) - 1) + [1.25]},
             )
             if variable == "Lifetime":
               fig.supxlabel("Lifetime [ps]", y = .04)
