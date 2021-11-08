@@ -80,6 +80,11 @@ class Locations:
         "eff_vs_kinematics_{model}_{features}_{data_type}_{normalize}"
         "_{signal_type}_{presel_conf}_{max_norm}_{regularization}_{division}_{seed}.pdf",
     )
+    multi_eff_vs_kinematics = join(
+        dirs.scatter,
+        "multi_eff_vs_kinematics_{features}_{data_type}_{normalize}"
+        "_{signal_type}_{presel_conf}_{max_norm}_{regularization}_{division}_{seed}.pdf",
+    )
     presel_efficiencies = join(
         dirs.results, "presel_efficiencies_{data_type}_{presel_conf}.json",
     )

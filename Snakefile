@@ -98,6 +98,19 @@ rule all:
             division=Configs.division,
             seed=Configs.seed[:1], # not for all seeds pls
         ),
+        # efficiency vs hadron kinematics for different models in one plot, only for lhcb data
+        expand_with_rules(
+            Locations.multi_eff_vs_kinematics,
+            data_type=["lhcb"],  # only for lhcb data
+            features=map(config.to_string_features, Configs.features),
+            normalize=map(config.to_string_normalize, Configs.normalize),
+            signal_type=Configs.signal_type,
+            presel_conf=map(config.to_string_presel_conf, Configs.presel_conf),
+            max_norm=map(config.to_string_max_norm, Configs.max_norm),
+            regularization=Configs.regularization,
+            division=Configs.division,
+            seed=Configs.seed[:1], # not for all seeds pls
+        ),
         # violin plots
         expand_with_rules(
             Locations.violins,
@@ -246,6 +259,25 @@ rule plot_eff_vs_kinematics:
         args = config.get_cli_args(wildcards)
         shell(f"python {input.script} {args}")
 
+rule plot_multi_eff_vs_kinematics:
+    input:
+        expand(
+        Locations.target_cut,
+        model=Configs.model,
+        allow_missing=True,
+        ),
+        expand(
+        Locations.model,
+        model=Configs.model,
+        allow_missing=True,
+        ),
+        Locations.data,
+        script = "scripts/plot/plot_multi_eff_vs_kinematics.py",
+    output:
+        Locations.multi_eff_vs_kinematics,
+    run:
+        args = config.get_cli_args(wildcards)
+        shell(f"python {input.script} {args}")
 
 rule plot_heatmap:
     input:

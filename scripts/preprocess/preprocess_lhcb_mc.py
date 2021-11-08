@@ -39,6 +39,7 @@ columns = [
     "trk1_signal_TRUEORIGINVERTEX_X",
     "trk1_signal_TRUEORIGINVERTEX_Y",
     "trk1_signal_TRUEORIGINVERTEX_Z",
+    "trk1_signal_TRUETAU",
     "trk2_IPCHI2_OWNPV",
     "trk2_PT",
     "trk2_P",
@@ -50,6 +51,7 @@ columns = [
     "trk2_signal_TRUEORIGINVERTEX_X",
     "trk2_signal_TRUEORIGINVERTEX_Y",
     "trk2_signal_TRUEORIGINVERTEX_Z",
+    "trk2_signal_TRUETAU",
     "EventInSequence",
 ]
 
