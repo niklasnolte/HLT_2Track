@@ -61,7 +61,7 @@ with PdfPages(format_location(Locations.heatmap_agg, cfg)) as pdf:
             figsize=(5 * len(models), 5),
             gridspec_kw={"width_ratios": [1] * (len(models) - 1) + [1.25]},
         )
-        fig.supxlabel(feature_repr(cfg.features[idxs[0]]))
+        fig.supxlabel(feature_repr(cfg.features[idxs[0]]), y = .04)
         fig.supylabel(feature_repr(cfg.features[idxs[1]]))
         for i, (m, ax) in enumerate(zip(Configs.model, axes)):
             x, y = XYs[m]
