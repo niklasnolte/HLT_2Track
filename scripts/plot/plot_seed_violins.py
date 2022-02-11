@@ -2,6 +2,11 @@ import pickle
 import numpy as np
 from copy import copy
 from os.path import join
+import matplotlib
+matplotlib.rcParams.update({"font.size": 20,
+                            "text.usetex" : True,
+                            "font.family": "serif",
+                            "font.sans-serif": ["Computer Modern Roman"]})
 from matplotlib.backends.backend_pdf import PdfPages
 import itertools
 from collections import defaultdict

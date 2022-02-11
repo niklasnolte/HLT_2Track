@@ -12,7 +12,7 @@ from sklearn.metrics import roc_auc_score
 from torch.utils.data import DataLoader, TensorDataset
 
 from hlt2trk.utils.data import get_data_for_training
-from InfinityNorm import project_norm, direct_norm, GroupSort
+from monotonenorm import project_norm, direct_norm, GroupSort
 
 DEVICE = "cpu"  # torch.device("cuda:0")
 BATCHSIZE = 64
@@ -57,7 +57,7 @@ def define_model(trial: optuna.trial.Trial):
     for i in range(n_layers):
         out_features = n_units
         layers.append(nn_norm(nn.Linear(in_features, out_features)))
-        layers.append(GroupSort(num_units=n_groupsort))
+        layers.append(GroupSort(n_groupsort))
         p = trial.suggest_float("dropout_l{}".format(i), 0.1, 0.5)
         layers.append(nn.Dropout(p))
         in_features = out_features

@@ -1,6 +1,6 @@
 from hlt2trk.utils.config import Locations, format_location, get_config
 from hlt2trk.models import load_model
-from InfinityNorm import get_normed_weights
+from monotonenorm import get_normed_weights
 import json
 
 cfg = get_config()

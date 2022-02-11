@@ -248,8 +248,6 @@ class Configuration:
         use_cuda: bool = Configs.use_cuda,
         sigma_final: float = Configs.sigma_final,
         sigma_init: float = Configs.sigma_init,
-        gamma_final: float = Configs.gamma_final,
-        gamma_init: float = Configs.gamma_init,
         plot_style: bool = Configs.plot_style,
     ):
 
@@ -265,8 +263,6 @@ class Configuration:
         self.seed = seed
         self.sigma_final = sigma_final
         self.sigma_init = sigma_init
-        self.gamma_final = gamma_final
-        self.gamma_init = gamma_init
         self.plot_style = plot_style
 
         self.device = torch.device("cpu")

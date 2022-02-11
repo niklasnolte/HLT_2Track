@@ -8,7 +8,10 @@ from matplotlib.backends.backend_pdf import PdfPages
 
 import matplotlib.pyplot as plt
 import matplotlib
-matplotlib.rcParams.update({'font.size': 15})
+matplotlib.rcParams.update({"font.size": 20,
+                            "text.usetex" : True,
+                            "font.family": "serif",
+                            "font.sans-serif": ["Computer Modern Roman"]})
 from hlt2trk.utils.config import (Configs, Locations, format_location,
                                   get_config, dirs)
 
@@ -74,10 +77,10 @@ with PdfPages(format_location(Locations.violins, cfg)) as pdf:
             axes[k].set_yticklabels([])
             axes[k].set_title(" ".join([eff_kind[j], mask_kind[k]]))
             x0, x1 = axes[k].get_xlim()
-            # for i, model in enumerate(violins.keys()):
-            #     x0 = mins[model]
-            #     # axes[k].text(x0 + 0.05 * abs(x0), i + 1.1, model)
-            #     axes[k].text(x0 + 0.05 * abs(x0), i + 1.08, model)
+            for i, model in enumerate(violins.keys()):
+                x0 = mins[model]
+                # axes[k].text(x0 + 0.05 * abs(x0), i + 1.1, model)
+                axes[k].text(x0 + 0.05 * abs(x0), i + 1.08, model)
             xlabel = r"$\epsilon_{x} - \epsilon_{\mathrm{NN}}$"
             axes[k].set_xlabel(xlabel)
         plt.tight_layout()

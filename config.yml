@@ -1,8 +1,6 @@
 use_cuda: False
 sigma_final: 2
 sigma_init: 2
-gamma_final: 1
-gamma_init: 1
 plot_style: light
 
 
@@ -26,11 +24,11 @@ regularization:
 model :
   - "nn-regular"
   - "bdt"
+  - "nn-one"
   - "nn-inf"
   # - "nn-inf-oc" # sigma of .2 hardcoded
-  - "nn-inf-small"
+  # - "nn-inf-small"
   # - "nn-inf-mon-vchi2" # monotonically decreasing in vchi2
-  # - "nn-one"
   # - "lda"
   # - "qda"
   # - "gnb"

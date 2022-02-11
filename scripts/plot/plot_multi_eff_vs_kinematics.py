@@ -1,7 +1,10 @@
 import numpy as np
 import matplotlib
 
-matplotlib.rcParams.update({"font.size": 15})
+matplotlib.rcParams.update({"font.size": 20,
+                            "text.usetex" : True,
+                            "font.family": "serif",
+                            "font.sans-serif": ["Computer Modern Roman"]})
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 from hlt2trk.utils.config import Locations, format_location, get_config, dirs, Configs
@@ -32,6 +35,25 @@ for m in models:
 # Load configuration
 eval_funs = {m: get_evaluator(add_model(m, cfg)) for m in models}
 models = {m: load_model(add_model(m, cfg)) for m in models}
+model_repr = {}
+for m in models:
+  if m == "nn-regular":
+    model_repr[m] = "unconstrained NN"
+  elif m == "nn-inf" or m == "nn-one":
+    model_repr[m] = "monotonic\nLipschitz NN"
+  elif m == "bdt":
+    model_repr[m] = "monotonic BDT"
+title_pos = {}
+for m in models:
+  if m == "nn-regular":
+    title_pos[m] = (.25, .3)
+  elif m == "nn-inf" or m == "nn-one":
+    title_pos[m] = (.4, .5)
+  elif m == "bdt":
+    title_pos[m] = (.3, .5)
+
+
+
 data = get_data(cfg)
 
 data = data[data.eventtype != 0]  # need TOS -> no minbias
@@ -114,9 +136,9 @@ with PdfPages(format_location(Locations.multi_eff_vs_kinematics, cfg)) as pdf:
                 # gridspec_kw={"width_ratios": [1] * (len(models) - 1) + [1.25]},
             )
             if variable == "Lifetime":
-                fig.supxlabel("Lifetime [ps]", y=0.04)
+                fig.supxlabel("Lifetime [ps]", y=0.1)
             else:
-                fig.supxlabel(variable, y=0.04)
+                fig.supxlabel(variable, y=0.1)
             for m, ax in zip(models, axes):
                 if ax is axes[0]:
                     ax.set_ylabel("Efficiency", color="tab:blue")
@@ -137,6 +159,7 @@ with PdfPages(format_location(Locations.multi_eff_vs_kinematics, cfg)) as pdf:
 
                 centers = (bins[:-1] + bins[1:]) / 2
                 ax.set_ylim(0, 1)
+                ax.text(*title_pos[m], model_repr[m], transform=ax.transAxes, fontsize=25)
                 counts, _, patches = ax.hist(
                     flavor[variable], bins=50, label="data distribution", alpha=0.6, color="tab:red"
                 )

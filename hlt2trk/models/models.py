@@ -6,7 +6,7 @@ import lightgbm as lgb
 import numpy as np
 import torch
 from hlt2trk.utils import config
-from InfinityNorm import SigmaNet, project_norm, direct_norm, GroupSort
+from monotonenorm import SigmaNet, project_norm, direct_norm, GroupSort
 from sklearn.discriminant_analysis import (LinearDiscriminantAnalysis,
                                            QuadraticDiscriminantAnalysis)
 from sklearn.naive_bayes import GaussianNB
@@ -168,8 +168,8 @@ def get_model(cfg: config.Configuration) -> Union[nn.Module, lgb.Booster,
                         in_features=nfeatures,
                         norm=normfunc,
                         norm_first=normfunc_first,
-                        # nn.ReLU(),  # GroupSort(num_units=1),
-                        activation=GroupSort(num_units=nunits // 2),
+                        # nn.ReLU(),  # GroupSort(1),
+                        activation=GroupSort(nunits // 2),
                     ),
                     sigma=sigma,
                     monotone_constraints=monotone_constraints,
@@ -194,8 +194,7 @@ def get_model(cfg: config.Configuration) -> Union[nn.Module, lgb.Booster,
                 nunits=nunits,
                 in_features=nfeatures,
                 norm=None,
-                # GroupSort(num_units=nunits // 2),
-                activation=GroupSort(num_units=nunits // 2)  # LeakyReLU()  # Swish()
+                activation=GroupSort(nunits // 2)  # LeakyReLU()  # Swish()
             ),
             nn.Sigmoid(),
         )

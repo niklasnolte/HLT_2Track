@@ -71,7 +71,6 @@ def train_torch_model(
                 model.sigmanet.sigma *= (cfg.sigma_final / cfg.sigma_init) ** (
                     1 / EPOCHS
                 )
-                model.sigmanet.gamma += (cfg.gamma_final - cfg.gamma_init) / EPOCHS
             # Train
             model.train()
             for x, y in loader:

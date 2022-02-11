@@ -10,7 +10,6 @@ setup(
     author_email="",
     description="",
     install_requires=[
-        # Github Private Repository
-        'InfinityNorm @ git+ssh://git@github.com/niklasnolte/InfinityNorm.git'
+        'MonotOneNorm @ git+https://github.com/niklasnolte/MonotOneNorm.git'
     ]
 )
