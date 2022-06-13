@@ -7,6 +7,7 @@ from typing import Tuple
 __all__ = [
     "signal_type_int",
     "get_data",
+    "get_data_onetrack",
     "get_data_for_training",
 ]
 
@@ -33,13 +34,16 @@ def is_signal(cfg, df): # elementwise
 
 
 def get_data(cfg: config.Configuration) -> pd.DataFrame:
-    mc = pd.read_pickle(config.format_location(Locations.data, cfg))
+    mc = pd.read_pickle(config.format_location(Locations.data_two, cfg))
     if cfg.normalize:
         x = mc[cfg.features]
         mc[cfg.features] = (x - x.min(axis=0)) / (x.max(axis=0) - x.min(axis=0))
     mc["validation"] = mc.EventInSequence % 4 == 0
     return mc.reset_index(drop=True)
 
+def get_data_onetrack(cfg : config.Configuration) -> pd.DataFrame:
+    mc = pd.read_pickle(config.format_location(Locations.data_one, cfg))
+    return mc.reset_index(drop=True)
 
 def get_data_for_training(cfg: config.Configuration) -> Tuple[np.ndarray]:
     df = get_data(cfg)

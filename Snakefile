@@ -163,6 +163,11 @@ rule all:
             regularization=Configs.regularization,
             division=Configs.division,
             seed=Configs.seed[:1], # not for all seeds pls
+        ),
+        expand_with_rules(
+          Locations.onetrack_rate_vs_eff,
+          data_type=["lhcb"],
+          presel_conf=map(config.to_string_presel_conf, Configs.presel_conf),
         )
 
 rule export_model_to_json:
@@ -234,7 +239,7 @@ rule build_eff_table:
 
 rule plot_rate_vs_eff:
     input:
-        Locations.data,
+        Locations.data_two,
         Locations.model,
         Locations.presel_efficiencies,
         Locations.full_effs,
@@ -247,9 +252,22 @@ rule plot_rate_vs_eff:
         args = config.get_cli_args(wildcards)
         shell(f"python {input.script} {args}")
 
+rule plot_rate_vs_eff_onetrack:
+    input:
+      Locations.data_one,
+      Locations.onetrack_ptshift,
+      Locations.onetrack_full_effs,
+      Locations.onetrack_target_effs,
+      script = "scripts/plot/plot_rates_vs_effs.py",
+    output:
+      Locations.onetrack_rate_vs_eff,
+    run:
+        args = config.get_cli_args(wildcards)
+        shell(f"python {input.script} {args} --onetrack")
+
 rule plot_eff_vs_kinematics:
     input:
-        Locations.data,
+        Locations.data_two,
         Locations.target_cut,
         Locations.model,
         script = "scripts/plot/plot_eff_vs_kinematics.py",
@@ -271,7 +289,7 @@ rule plot_multi_eff_vs_kinematics:
         model=Configs.model,
         allow_missing=True,
         ),
-        Locations.data,
+        Locations.data_two,
         script = "scripts/plot/plot_multi_eff_vs_kinematics.py",
     output:
         Locations.multi_eff_vs_kinematics,
@@ -372,7 +390,7 @@ def get_inputs_train(wildcards):
 
 rule train:
     input:
-        Locations.data,
+        Locations.data_two,
         "hlt2trk/models/models.py",
         get_inputs_train,
         script = "scripts/train/training.py",
@@ -382,6 +400,17 @@ rule train:
         args = config.get_cli_args(wildcards)
         shell(f"python {input.script} {args}")
 
+rule train_onetrack:
+    input:
+        Locations.data_one,
+        script = "scripts/train/train_onetrack.py",
+    output:
+        Locations.onetrack_ptshift,
+        Locations.onetrack_full_effs,
+        Locations.onetrack_target_effs,
+    run:
+        args = config.get_cli_args(wildcards)
+        shell(f"python {input.script} {args}")
 
 rule preprocess_lhcb:
     input:
@@ -389,7 +418,8 @@ rule preprocess_lhcb:
         script = "scripts/preprocess/preprocess_lhcb_mc.py"
     output:
         # format doesn't work because there are other placeholders to be filled
-        Locations.data.replace("{data_type}", "lhcb"),
+        Locations.data_two.replace("{data_type}", "lhcb"),
+        Locations.data_one.replace("{data_type}", "lhcb"),
         Locations.presel_efficiencies.replace("{data_type}", "lhcb"),
     run:
         args = config.get_cli_args(wildcards)
@@ -401,7 +431,7 @@ rule preprocess_standalone:
         raw_data = dirs.raw_data,
         script = "scripts/preprocess/preprocess_standalone_mc.py"
     output:
-        Locations.data.replace("{data_type}", "standalone"),
+        Locations.data_two.replace("{data_type}", "standalone"),
     run:
         args = config.get_cli_args(wildcards)
         shell(f"python {input.script} --data_type=standalone {args}")

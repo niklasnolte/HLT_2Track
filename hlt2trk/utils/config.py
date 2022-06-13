@@ -2,7 +2,6 @@ from functools import lru_cache
 import re
 from os.path import abspath, dirname, join
 from typing import Iterable, Optional
-from collections import OrderedDict
 from warnings import warn
 from .utils import load_config
 
@@ -32,7 +31,8 @@ class Locations:
         "{model}_{features}_{data_type}_{normalize}_{signal_type}_{presel_conf}"
         "_{max_norm}_{regularization}_{division}_{seed}.pkl",
     )
-    data = join(dirs.data, "MC_{data_type}_{presel_conf}.pkl")
+    data_two = join(dirs.data, "MC_{data_type}_{presel_conf}_two.pkl")
+    data_one = join(dirs.data, "MC_{data_type}_{presel_conf}_one.pkl")
     # grid evaluation
     gridXY = join(
         dirs.savepoints,
@@ -88,6 +88,9 @@ class Locations:
     presel_efficiencies = join(
         dirs.results, "presel_efficiencies_{data_type}_{presel_conf}.json",
     )
+    presel_efficiencies_onetrack = join(
+        dirs.results, "presel_efficiencies_{data_type}_{presel_conf}_onetrack.json",
+    )
     auc_acc = join(
         dirs.results,
         "auc_acc_{model}_{features}_{data_type}_{normalize}"
@@ -128,7 +131,22 @@ class Locations:
         "seed_violins_{features}_{data_type}_{normalize}"
         "_{signal_type}_{presel_conf}_{max_norm}_{regularization}_{division}.pdf",
     )
-
+    onetrack_ptshift = join(
+        dirs.results_eff,
+        "ptshift_{data_type}_{presel_conf}_onetrack.txt",
+    )
+    onetrack_target_effs = join(
+        dirs.results_eff,
+        "target-eff_{data_type}_{presel_conf}_onetrack.pkl",
+    )
+    onetrack_full_effs = join(
+        dirs.results_eff,
+        "full-eff_{data_type}_{presel_conf}_onetrack.pkl",
+    )
+    onetrack_rate_vs_eff = join(
+        dirs.results_eff,
+        "rate_vs_eff_{data_type}_{presel_conf}_onetrack.pdf",
+    )
 
 
 def to_string_features(features: Optional[list]) -> str:
@@ -249,6 +267,7 @@ class Configuration:
         sigma_final: float = Configs.sigma_final,
         sigma_init: float = Configs.sigma_init,
         plot_style: bool = Configs.plot_style,
+        onetrack: bool = False,
     ):
 
         self.model = model
@@ -264,6 +283,7 @@ class Configuration:
         self.sigma_final = sigma_final
         self.sigma_init = sigma_init
         self.plot_style = plot_style
+        self.onetrack = onetrack
 
         self.device = torch.device("cpu")
         if use_cuda:
@@ -392,93 +412,72 @@ def feature_repr(feature):
         return "log($\chi^2_{FD}$)"
     elif feature == "vchi2":
         return "$\chi^2_{Vertex}$"
-# def feature_repr(feature):
-#     if feature == "minipchi2":
-#         return "log(MIPCHI2)"
-#     elif feature == "sumpt":
-#         return "SUMPT [GeV]"
-#     elif feature == "fdchi2":
-#         return "log(FDCHI2)"
-#     elif feature == "vchi2":
-#         return "VCHI2"
 
 
-# signal sample eventtypes
 evttypes = [
-    # 11102521,
-    11104054,
-    11104055,
-    11104056,
-    11104057,
-    11104058,
-    11164063,
-    11166107,
-    11196000,
-    11196011,
-    11196099,
+    11102405,
+    12103019,
+    #12103121,
+    12112002,
+    12145111,
+    15104142,
+    21163002,
+    #11102521,
     11264001,
     11264011,
     11874004,
-    12103009,
-    12103019,
-    12103028,
-    12103038,
-    12103041,
-    12103051,
+    #12101401,
+    #12103110,
     12103406,
     12103422,
     12103423,
     12103443,
+    12103444,
     12103445,
+    12163001,
+    12163021,
+    12165106,
+    13264021,
+    13264031,
+    #15102320,
     15364010,
-    # 16103130,
-    # 16103332,
-    # 21101411,
-    # 21103100,
+    #16103130,
+    #16103131,
+    #16103330,
+    #16103332,
+    #21101402,
+    #21101411,
+    #21103100,
+    #21103110,
     21113000,
-    21163002,
-    21163012,
-    21163022,
-    21163032,
-    21163042,
-    23103012,
-    23103042,
-    23103062,
-    # 23103100,
-    # 23103110,
-    23163003,
-    23163052,
+    21113016,
+    21123203,
+    21123240,
+    #23103100,
+    #23103110,
+    #25103102,
     25113000,
-    # 26104186,
-    # 26104187,
+    25123000,
+    #26104186,
+    #26104187,
     26106182,
     27163003,
+    27163206,
+    27163207,
     27173002,
     27225003,
-    27375075
-    # buggy
-    # 15104142
-    # 12163001
-    # 16103330
-    # 21101402
-    # 21103110
-    # 21113016
-    # 12101401
-    # 21123203
-    # 12103110
-    # 21123240
-    # 11264001
-    # 25103102
-    # 12103444
-    # 25123000
-    # 12163021
-    # 12165106
-    # 13264021
-    # 27163206
-    # 13264031
-    # 27163207
-    # 15102320
-    # 16103131
+    27375075,
+    33102102,
+    35103102,
+    36103102,
 ]
 
-evttypes = OrderedDict((i + 1, evttype) for i, evttype in enumerate(evttypes))
+# evttypes = [11102202,
+#             11124001,
+#             11874004,
+#             13104012,
+#             13144011,
+#             21103100,
+#             27163003]
+
+evttypes = dict((i + 1, evttype) for i, evttype in enumerate(evttypes))

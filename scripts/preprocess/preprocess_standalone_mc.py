@@ -30,4 +30,4 @@ bkg["signal_type"] = 0
 
 df = pd.concat([sig_beauty, sig_charm, bkg]).reset_index(drop=True)
 
-df.to_pickle(format_location(Locations.data, cfg))
+df.to_pickle(format_location(Locations.data_two, cfg))
