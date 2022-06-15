@@ -1,13 +1,11 @@
 import json
 from hlt2trk.utils.data import get_data_onetrack
-from hlt2trk.utils.config import get_config, format_location, Locations, evttypes
+from hlt2trk.utils.config import get_config, format_location, Locations, evttypes, onetrack_target_rate, input_rate
 from collections import defaultdict
 import numpy as np
 import pandas as pd
 import pickle
 
-input_rate = 30000
-target_rate = 330  # kHz
 
 class OneTrackMVA:
     def __init__(self, alpha=0):
@@ -53,7 +51,7 @@ def tune_one_track(df, presel_effs):
     # get presel efficiency
     effs = defaultdict(list)
     tos_effs = defaultdict(list)
-    alphas = np.arange(-500, 500, 5)
+    alphas = np.arange(-1800, 500, 10)
     evttypeidxs = [0] + list(evttypes.keys())
 
     for alpha in alphas:
@@ -69,7 +67,7 @@ def tune_one_track(df, presel_effs):
     effs[0] = [x * input_rate for x in effs[0]]
 
     nominal_idx = [
-        idx for idx, eff in enumerate(effs[0]) if eff < target_rate
+        idx for idx, eff in enumerate(effs[0]) if eff < onetrack_target_rate
     ][0] # get the right rate
     target_effs = [effs[i][nominal_idx] for i in evttypeidxs]
     target_tos_effs = [tos_effs[i][nominal_idx] for i in evttypeidxs]

@@ -2,13 +2,10 @@ import numpy as np
 import json
 import pickle
 
-from hlt2trk.utils.config import get_config, Locations, format_location, evttypes
+from hlt2trk.utils.config import get_config, Locations, format_location, evttypes, twotrack_target_rate, input_rate
 from hlt2trk.utils.data import get_data, is_signal
 from hlt2trk.models import load_model, get_evaluator
 import pandas as pd
-
-input_rate = 30000  # kHz
-target_rate = 660  # kHz
 
 # Load configuration
 cfg = get_config()
@@ -41,9 +38,9 @@ def rates_vs_effs(data, presel_effs):
     presel_rate = presel_effs[0]  # minbias
     rates = [input_rate * presel_rate * (minbias_preds > i).mean() for i in cutrange]
 
-    target_rate_idx = [i for i, r in enumerate(rates) if r < target_rate][-1]
+    target_rate_idx = [i for i, r in enumerate(rates) if r < twotrack_target_rate][-1]
 
-    # save efficiencies at 660hz target rate for each mode
+    # save efficiencies at target rate for each mode
     target_effs = []
     target_tos_effs = []
     modes = []

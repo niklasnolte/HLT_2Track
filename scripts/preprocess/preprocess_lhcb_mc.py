@@ -87,16 +87,16 @@ sig_tupleTrees = [f"MagDown_{evttype}_MVATuple_IsLepton.root" for evttype in evt
 
 def presel(df: pd.DataFrame, evttuple: pd.DataFrame, kind: str) -> pd.DataFrame:
     evt_grp = ["EventInSequence", "eventtype"]
-    # only take the events that have a B candidate with more
+    # only take the events that have a B/C candidate with more
     # than 2 GeV PT and more than .2 ps flight distance
     signals = evttuple[evttuple.eventtype != 0]
     signals.set_index(evt_grp, inplace=True)
     signals = signals[signals.n_signals > 0]
-    hasbeauty = signals.signal_type.apply(max) > 0
+    hasheavyflavor = signals.signal_type.apply(max) > 0
     TRUEPT_cut = signals.signal_TRUEPT.apply(max) > 2000  # 2 GeV
     TRUETAU_cut = signals.signal_TRUETAU.apply(max) > 2e-4  # .2 ps
     evts_passing_truth_cut = signals[
-        (hasbeauty & TRUEPT_cut & TRUETAU_cut)
+        (hasheavyflavor & TRUEPT_cut & TRUETAU_cut)
     ].index
 
     df = df[df.set_index(evt_grp).index.isin(evts_passing_truth_cut) | (df.eventtype == 0)] # no truth cut on minbias
@@ -185,28 +185,18 @@ unprocessed_one += [from_root(x, columns_one, tuple="one", maxEvt=5000) for x in
 evttuples = [from_root(x, tuple="event") for x in mb_tupleTrees]
 evttuples += [from_root(x, tuple="event", maxEvt=5000) for x in sig_tupleTrees]
 
+n_mb_tuples = len(mb_tupleTrees)
 
-# CAREFUL: this assumes 3 mb files
-# TODO improve this wretched logic
-last_evt_mb2018 = evttuples[0].EventInSequence.max()
-evttuples[1]["EventInSequence"] += last_evt_mb2018 + 1
-unprocessed_two[1]["EventInSequence"] += last_evt_mb2018 + 1
-unprocessed_one[1]["EventInSequence"] += last_evt_mb2018 + 1
 
-last_evt_mbnew = evttuples[1].EventInSequence.max()
-evttuples[2]["EventInSequence"] += last_evt_mbnew + 1
-unprocessed_two[2]["EventInSequence"] += last_evt_mbnew + 1
-unprocessed_one[2]["EventInSequence"] += last_evt_mbnew + 1
+for i in range(1,n_mb_tuples):
+  last_evt = evttuples[i-1].EventInSequence.max()
+  evttuples[i]["EventInSequence"] += last_evt + 1
+  unprocessed_two[i]["EventInSequence"] += last_evt + 1
+  unprocessed_one[i]["EventInSequence"] += last_evt + 1
 
-merged_two = [
-    pd.concat([unprocessed_two[0], unprocessed_two[1], unprocessed_two[2]])
-] + unprocessed_two[3:]
-merged_one = [
-    pd.concat([unprocessed_one[0], unprocessed_one[1], unprocessed_one[2]])
-] + unprocessed_one[3:]
-merged_evttuples = [pd.concat([evttuples[0], evttuples[1], evttuples[2]])] + evttuples[
-    3:
-]
+merged_two = [pd.concat(unprocessed_two[:n_mb_tuples])] + unprocessed_two[n_mb_tuples:]
+merged_one = [pd.concat(unprocessed_one[:n_mb_tuples])] + unprocessed_one[n_mb_tuples:]
+merged_evttuples = [pd.concat(evttuples[:n_mb_tuples])] + evttuples[n_mb_tuples:]
 
 
 for i, df in enumerate(merged_two):

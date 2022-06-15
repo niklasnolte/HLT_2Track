@@ -481,3 +481,7 @@ evttypes = [
 #             27163003]
 
 evttypes = dict((i + 1, evttype) for i, evttype in enumerate(evttypes))
+
+input_rate = 30000 #kHz
+onetrack_target_rate = 660
+twotrack_target_rate = 660

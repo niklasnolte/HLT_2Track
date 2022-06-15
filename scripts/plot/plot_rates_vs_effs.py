@@ -1,7 +1,7 @@
 import pickle
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
-from hlt2trk.utils.config import Locations, format_location, get_config, evttypes, dirs
+from hlt2trk.utils.config import Locations, format_location, get_config, evttypes, dirs, onetrack_target_rate, twotrack_target_rate
 from os.path import join
 
 # Load configuration
@@ -41,9 +41,9 @@ with PdfPages(format_location(rate_vs_eff_loc, cfg)) as pdf:
         eff_keyword = "tos_eff" if tos else "eff"
 
         if cfg.onetrack:
-          target_rate = 330
+          target_rate = onetrack_target_rate
         else:
-          target_rate = 660
+          target_rate = twotrack_target_rate
 
         _, ax = plt.subplots()
 
@@ -61,7 +61,7 @@ with PdfPages(format_location(rate_vs_eff_loc, cfg)) as pdf:
         ax.axvline(x=target_rate, color="red")
         ax.grid(linestyle="--")
         ax.grid(linestyle=":", which="minor")
-        ax.set_title(cfg.model or "1-Track" + (" TOS" if tos else ""))
+        ax.set_title((cfg.model or "1-Track") + (" TOS" if tos else ""))
         ax.legend(loc="lower right", title=f"{' TOS' if tos else ''} eff at {target_rate}kHz")
         pdf.savefig()
         plt.close()
