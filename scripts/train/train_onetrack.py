@@ -51,7 +51,7 @@ def tune_one_track(df, presel_effs):
     # get presel efficiency
     effs = defaultdict(list)
     tos_effs = defaultdict(list)
-    alphas = np.arange(-1000, 1000, 5)
+    alphas = np.arange(-300, 500, 2)
     evttypeidxs = [0] + list(evttypes.keys())
 
     for alpha in alphas:

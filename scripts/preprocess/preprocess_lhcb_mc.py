@@ -3,88 +3,36 @@ import json
 import numpy as np
 import pandas as pd
 import uproot3 as u
+from collections.abc import Iterable
 from hlt2trk.utils.config import get_config, Locations, format_location, dirs, evttypes
 
 cfg = get_config()
 
 
-def from_root(path: str, columns="*", tuple="event", maxEvt=None) -> pd.DataFrame:
-    ttree = u.open(join(dirs.raw_data, path))
-    if tuple=="event":
-        df = ttree["EventTuple/Evt"].pandas.df(columns, flatten=False)
-    elif tuple=="two":
-        df = ttree["DecayTreeTuple#1/N2Trk"].pandas.df(columns)
-    elif tuple=="one":
-        df = ttree["DecayTreeTuple/N1Trk"].pandas.df(columns)
-    if maxEvt is None:
-        return df
-    else:
-        return df[df.EventInSequence < maxEvt].copy()
+def from_root(path, columns="*", tuple="event", maxEvt=None) -> pd.DataFrame:
+    if not isinstance(path, Iterable):
+      path = (path,)
 
+    dfs = []
+    for pathi in path:
+      ttree = u.open(join(dirs.raw_data, pathi))
+      if tuple=="event":
+          df = ttree["EventTuple/Evt"].pandas.df(columns, flatten=False)
+      elif tuple=="two":
+          df = ttree["DecayTreeTuple#1/N2Trk"].pandas.df(columns)
+      elif tuple=="one":
+          df = ttree["DecayTreeTuple/N1Trk"].pandas.df(columns)
+      if maxEvt is not None:
+          df = df[df.EventInSequence < maxEvt//len(path)].copy()
+      dfs.append(df)
 
-columns_two = [
-    "sv_MCORR",
-    "sv_IPCHI2_OWNPV",
-    "sv_FDCHI2_OWNPV",
-    "sv_DIRA_OWNPV",
-    "sv_PT",
-    "sv_P",
-    "sv_ENDVERTEX_CHI2",
-    "trk1_IPCHI2_OWNPV",
-    "trk1_PT",
-    "trk1_P",
-    "trk1_signal_type",
-    "trk1_fromHFPV",
-    "trk1_signal_TRUEENDVERTEX_X",
-    "trk1_signal_TRUEENDVERTEX_Y",
-    "trk1_signal_TRUEENDVERTEX_Z",
-    "trk1_signal_TRUEORIGINVERTEX_X",
-    "trk1_signal_TRUEORIGINVERTEX_Y",
-    "trk1_signal_TRUEORIGINVERTEX_Z",
-    "trk1_signal_TRUETAU",
-    "trk2_IPCHI2_OWNPV",
-    "trk2_PT",
-    "trk2_P",
-    "trk2_signal_type",
-    "trk2_fromHFPV",
-    "trk2_signal_TRUEENDVERTEX_X",
-    "trk2_signal_TRUEENDVERTEX_Y",
-    "trk2_signal_TRUEENDVERTEX_Z",
-    "trk2_signal_TRUEORIGINVERTEX_X",
-    "trk2_signal_TRUEORIGINVERTEX_Y",
-    "trk2_signal_TRUEORIGINVERTEX_Z",
-    "trk2_signal_TRUETAU",
-    "EventInSequence",
-]
+    for i in range(1, len(dfs)):
+      last_evt = dfs[i-1].EventInSequence.max()
+      dfs[i]["EventInSequence"] += last_evt
 
-columns_one = [
-    "trk_IPCHI2_OWNPV",
-    "trk_PT",
-    "trk_OWNPV_Z",
-    "trk_signal_type",
-    "trk_fromHFPV",
-    "trk_signal_TRUEENDVERTEX_X",
-    "trk_signal_TRUEENDVERTEX_Y",
-    "trk_signal_TRUEENDVERTEX_Z",
-    "trk_signal_TRUEORIGINVERTEX_X",
-    "trk_signal_TRUEORIGINVERTEX_Y",
-    "trk_signal_TRUEORIGINVERTEX_Z",
-    "trk_signal_TRUETAU",
-    "EventInSequence",
-]
+    df = pd.concat(dfs)
 
-mb_tupleTrees = [
-    "MagDown_aU1_30000000_MVATuple_IsLepton.root",
-    "../2018MinBias_MVATuple_IsLepton.root"    
-    #"MagDown_30000000_MVATuple_IsLepton.root",  # minbias
-    #"upgrade_magup_sim10_up08_30000000_digi_MVATuple.root",  # minbias
-    # "upgrade_magdown_sim10_up08_30000000_digi_MVATuple_IsLepton.root",
-    # "upgrade_magup_sim10_up08_30000000_digi_MVATuple_IsLepton.root"
-]
-
-sig_tupleTrees = [f"MagDown_aU1_{evttype}_MVATuple_IsLepton.root" for evttype in evttypes.values()]
-
-# sig_tupleTrees = [f"upgrade_magupdown_sim10_up08_{evttype}_digi_MVATuple_IsLepton.root" for evttype in evttypes.values()]
+    return df
 
 
 def presel(df: pd.DataFrame, evttuple: pd.DataFrame, kind: str) -> pd.DataFrame:
@@ -109,7 +57,10 @@ def presel(df: pd.DataFrame, evttuple: pd.DataFrame, kind: str) -> pd.DataFrame:
       sel &= df.trk1_PT > cfg.presel_conf["trkPT"]
       sel &= df.trk2_PT > cfg.presel_conf["trkPT"]
       sel &= df.sv_ENDVERTEX_CHI2 < cfg.presel_conf["svchi2"]
-      sel &= df.sv_MCORR > 1000
+      sel &= df.sv_MCORR > cfg.presel_conf["mcorr"]
+      df = df[sel]
+    else:
+      sel = df.trk_PT > cfg.presel_conf["trkPT"]
       df = df[sel]
     
     # for signal samples, the denominator for the efficiency
@@ -177,41 +128,97 @@ def preprocess(df: pd.DataFrame, evttuple: pd.DataFrame, kind: str) -> pd.DataFr
 
     return df
 
+
+columns_two = [
+    "sv_MCORR",
+    "sv_IPCHI2_OWNPV",
+    "sv_FDCHI2_OWNPV",
+    "sv_DIRA_OWNPV",
+    "sv_PT",
+    "sv_P",
+    "sv_ENDVERTEX_CHI2",
+    "trk1_IPCHI2_OWNPV",
+    "trk1_PT",
+    "trk1_P",
+    "trk1_signal_type",
+    "trk1_fromHFPV",
+    "trk1_signal_TRUEENDVERTEX_X",
+    "trk1_signal_TRUEENDVERTEX_Y",
+    "trk1_signal_TRUEENDVERTEX_Z",
+    "trk1_signal_TRUEORIGINVERTEX_X",
+    "trk1_signal_TRUEORIGINVERTEX_Y",
+    "trk1_signal_TRUEORIGINVERTEX_Z",
+    "trk1_signal_TRUETAU",
+    "trk2_IPCHI2_OWNPV",
+    "trk2_PT",
+    "trk2_P",
+    "trk2_signal_type",
+    "trk2_fromHFPV",
+    "trk2_signal_TRUEENDVERTEX_X",
+    "trk2_signal_TRUEENDVERTEX_Y",
+    "trk2_signal_TRUEENDVERTEX_Z",
+    "trk2_signal_TRUEORIGINVERTEX_X",
+    "trk2_signal_TRUEORIGINVERTEX_Y",
+    "trk2_signal_TRUEORIGINVERTEX_Z",
+    "trk2_signal_TRUETAU",
+    "EventInSequence",
+]
+
+columns_one = [
+    "trk_IPCHI2_OWNPV",
+    "trk_PT",
+    "trk_OWNPV_Z",
+    "trk_signal_type",
+    "trk_fromHFPV",
+    "trk_signal_TRUEENDVERTEX_X",
+    "trk_signal_TRUEENDVERTEX_Y",
+    "trk_signal_TRUEENDVERTEX_Z",
+    "trk_signal_TRUEORIGINVERTEX_X",
+    "trk_signal_TRUEORIGINVERTEX_Y",
+    "trk_signal_TRUEORIGINVERTEX_Z",
+    "trk_signal_TRUETAU",
+    "EventInSequence",
+]
+
+mb_tupleTrees = [
+    "MagDown_aU1_30000000_MVATuple_IsLepton.root",
+    "MagUp_aU1_30000000_MVATuple_IsLepton.root",
+    "../2018MinBias_MVATuple_IsLepton.root"    
+    #"MagDown_30000000_MVATuple_IsLepton.root",  # minbias
+    #"upgrade_magup_sim10_up08_30000000_digi_MVATuple.root",  # minbias
+    # "upgrade_magdown_sim10_up08_30000000_digi_MVATuple_IsLepton.root",
+    # "upgrade_magup_sim10_up08_30000000_digi_MVATuple_IsLepton.root"
+]
+
+sig_tupleTrees = [(f"MagDown_aU1_{evttype}_MVATuple_IsLepton.root",) for evttype in evttypes.values()]
+
+# sig_tupleTrees = [f"upgrade_magupdown_sim10_up08_{evttype}_digi_MVATuple_IsLepton.root" for evttype in evttypes.values()]
+
+
 n_sig_per_sample = 2000
 
-unprocessed_two = [from_root(x, columns_two, tuple="two") for x in mb_tupleTrees]
+unprocessed_two = [from_root(mb_tupleTrees, columns_two, tuple="two")]
 unprocessed_two += [from_root(x, columns_two, tuple="two", maxEvt=n_sig_per_sample) for x in sig_tupleTrees]
 
-unprocessed_one = [from_root(x, columns_one, tuple="one") for x in mb_tupleTrees]
+unprocessed_one = [from_root(mb_tupleTrees, columns_one, tuple="one")]
 unprocessed_one += [from_root(x, columns_one, tuple="one", maxEvt=n_sig_per_sample) for x in sig_tupleTrees]
 
-evttuples = [from_root(x, tuple="event") for x in mb_tupleTrees]
+evttuples = [from_root(mb_tupleTrees, tuple="event")]
 evttuples += [from_root(x, tuple="event", maxEvt=n_sig_per_sample) for x in sig_tupleTrees]
 
 n_mb_tuples = len(mb_tupleTrees)
 
 
-for i in range(1,n_mb_tuples):
-  last_evt = evttuples[i-1].EventInSequence.max()
-  evttuples[i]["EventInSequence"] += last_evt
-  unprocessed_two[i]["EventInSequence"] += last_evt
-  unprocessed_one[i]["EventInSequence"] += last_evt
-
-merged_two = [pd.concat(unprocessed_two[:n_mb_tuples])] + unprocessed_two[n_mb_tuples:]
-merged_one = [pd.concat(unprocessed_one[:n_mb_tuples])] + unprocessed_one[n_mb_tuples:]
-merged_evttuples = [pd.concat(evttuples[:n_mb_tuples])] + evttuples[n_mb_tuples:]
-
-
-for i, df in enumerate(merged_two):
+for i, df in enumerate(unprocessed_one):
     df["eventtype"] = i
-for i, df in enumerate(merged_one):
+for i, df in enumerate(unprocessed_two):
     df["eventtype"] = i
-for i, t in enumerate(merged_evttuples):
+for i, t in enumerate(evttuples):
     t["eventtype"] = i
 
-df_two = pd.concat(merged_two)
-df_one = pd.concat(merged_one)
-evttuple = pd.concat(merged_evttuples)
+df_two = pd.concat(unprocessed_two)
+df_one = pd.concat(unprocessed_one)
+evttuple = pd.concat(evttuples)
 
 df_two = preprocess(df_two, evttuple, "two")
 save_file_two = format_location(Locations.data_two, cfg)

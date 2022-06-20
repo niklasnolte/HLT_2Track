@@ -25,7 +25,7 @@ def train_torch_model(
     assert cfg.model.startswith("nn")
 
     BATCH_SIZE = 128
-    EPOCHS = 50
+    EPOCHS = 100
     if cfg.model == "nn-regular":
         LR = 1e-2
     else:

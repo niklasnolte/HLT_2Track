@@ -38,8 +38,7 @@ data_type:
   # - "standalone"
 
 features:
-  - ["minipchi2", "sumpt"]
-  # - ["fdchi2", "sumpt"]
+  # - ["minipchi2", "sumpt"]
   - ["fdchi2", "sumpt", "vchi2", "minipchi2"]
 
 signal_type:
@@ -57,17 +56,11 @@ lepton:
   - "any"
 
 presel_conf:
-  # - svPT : 2000 # [MeV]
-  #   trkPT : 500 # [MeV]
-  #   svchi2 : 10 # [unitless]
-  # - svPT : 1000 # [MeV]
-  #   trkPT : 500 # [MeV]
-  #   svchi2 : 10 # [unitless]
-  # - svPT : 1000 # [MeV]
-  #   trkPT : 200 # [MeV]
-  #   svchi2 : 20 # [unitless]
-  #   ipcuttrain : 6 # ip cut in for training
   - svPT : 1000 # [MeV]
     trkPT : 200 # [MeV]
     svchi2 : 20 # [unitless]
-    ipcuttrain : 10 # (effectively no cut)
+    mcorr : 1000 # [MeV]
+  - svPT : 1000 # [MeV]
+    trkPT : 200 # [MeV]
+    svchi2 : 20 # [unitless]
+    mcorr : 0 # [MeV]

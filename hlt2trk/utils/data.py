@@ -47,7 +47,6 @@ def get_data_onetrack(cfg : config.Configuration) -> pd.DataFrame:
 
 def get_data_for_training(cfg: config.Configuration) -> Tuple[np.ndarray]:
     df = get_data(cfg)
-    df = df[df["minipchi2"] < cfg.presel_conf["ipcuttrain"]]
     bkg = df[df.signal_type == 0]
     sig = df[is_signal(cfg, df)]
 
