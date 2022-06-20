@@ -74,14 +74,16 @@ columns_one = [
 ]
 
 mb_tupleTrees = [
-    #"2018MinBias_MVATuple.root",
-    "MagDown_30000000_MVATuple_IsLepton.root",  # minbias
+    "MagDown_aU1_30000000_MVATuple_IsLepton.root",
+    "../2018MinBias_MVATuple_IsLepton.root"    
+    #"MagDown_30000000_MVATuple_IsLepton.root",  # minbias
     #"upgrade_magup_sim10_up08_30000000_digi_MVATuple.root",  # minbias
-    "upgrade_magdown_sim10_up08_30000000_digi_MVATuple_IsLepton.root",
-    "upgrade_magup_sim10_up08_30000000_digi_MVATuple_IsLepton.root"
+    # "upgrade_magdown_sim10_up08_30000000_digi_MVATuple_IsLepton.root",
+    # "upgrade_magup_sim10_up08_30000000_digi_MVATuple_IsLepton.root"
 ]
 
-sig_tupleTrees = [f"MagDown_{evttype}_MVATuple_IsLepton.root" for evttype in evttypes.values()]
+sig_tupleTrees = [f"MagDown_aU1_{evttype}_MVATuple_IsLepton.root" for evttype in evttypes.values()]
+
 # sig_tupleTrees = [f"upgrade_magupdown_sim10_up08_{evttype}_digi_MVATuple_IsLepton.root" for evttype in evttypes.values()]
 
 
@@ -91,7 +93,7 @@ def presel(df: pd.DataFrame, evttuple: pd.DataFrame, kind: str) -> pd.DataFrame:
     # than 2 GeV PT and more than .2 ps flight distance
     signals = evttuple[evttuple.eventtype != 0]
     signals.set_index(evt_grp, inplace=True)
-    signals = signals[signals.n_signals > 0]
+    signals = signals[signals.n_signals > 0] #TODO look up n_signals
     hasheavyflavor = signals.signal_type.apply(max) > 0
     TRUEPT_cut = signals.signal_TRUEPT.apply(max) > 2000  # 2 GeV
     TRUETAU_cut = signals.signal_TRUETAU.apply(max) > 2e-4  # .2 ps
@@ -108,7 +110,7 @@ def presel(df: pd.DataFrame, evttuple: pd.DataFrame, kind: str) -> pd.DataFrame:
       sel &= df.trk2_PT > cfg.presel_conf["trkPT"]
       sel &= df.sv_ENDVERTEX_CHI2 < cfg.presel_conf["svchi2"]
       sel &= df.sv_MCORR > 1000
-      df = df[sel].copy()
+      df = df[sel]
     
     # for signal samples, the denominator for the efficiency
     # is defined with respect to the truth cut
@@ -116,7 +118,7 @@ def presel(df: pd.DataFrame, evttuple: pd.DataFrame, kind: str) -> pd.DataFrame:
         evts_passing_truth_cut.to_frame(index=False).groupby("eventtype").nunique()
     )
     # for the rate, we just look how many events we ran over.
-    n_events_before.loc[0] = evttuple[evttuple.eventtype == 0].EventInSequence.max()
+    n_events_before.loc[0] = (evttuple.eventtype == 0).sum()
 
     n_events_after = df.groupby("eventtype").EventInSequence.nunique()
 
@@ -130,7 +132,7 @@ def presel(df: pd.DataFrame, evttuple: pd.DataFrame, kind: str) -> pd.DataFrame:
     with open(format_location(loc, cfg), "w") as f:
         json.dump(effs.to_dict(), f)
 
-    return df
+    return df.copy()
     
 
 
@@ -175,24 +177,25 @@ def preprocess(df: pd.DataFrame, evttuple: pd.DataFrame, kind: str) -> pd.DataFr
 
     return df
 
+n_sig_per_sample = 2000
 
 unprocessed_two = [from_root(x, columns_two, tuple="two") for x in mb_tupleTrees]
-unprocessed_two += [from_root(x, columns_two, tuple="two", maxEvt=5000) for x in sig_tupleTrees]
+unprocessed_two += [from_root(x, columns_two, tuple="two", maxEvt=n_sig_per_sample) for x in sig_tupleTrees]
 
 unprocessed_one = [from_root(x, columns_one, tuple="one") for x in mb_tupleTrees]
-unprocessed_one += [from_root(x, columns_one, tuple="one", maxEvt=5000) for x in sig_tupleTrees]
+unprocessed_one += [from_root(x, columns_one, tuple="one", maxEvt=n_sig_per_sample) for x in sig_tupleTrees]
 
 evttuples = [from_root(x, tuple="event") for x in mb_tupleTrees]
-evttuples += [from_root(x, tuple="event", maxEvt=5000) for x in sig_tupleTrees]
+evttuples += [from_root(x, tuple="event", maxEvt=n_sig_per_sample) for x in sig_tupleTrees]
 
 n_mb_tuples = len(mb_tupleTrees)
 
 
 for i in range(1,n_mb_tuples):
   last_evt = evttuples[i-1].EventInSequence.max()
-  evttuples[i]["EventInSequence"] += last_evt + 1
-  unprocessed_two[i]["EventInSequence"] += last_evt + 1
-  unprocessed_one[i]["EventInSequence"] += last_evt + 1
+  evttuples[i]["EventInSequence"] += last_evt
+  unprocessed_two[i]["EventInSequence"] += last_evt
+  unprocessed_one[i]["EventInSequence"] += last_evt
 
 merged_two = [pd.concat(unprocessed_two[:n_mb_tuples])] + unprocessed_two[n_mb_tuples:]
 merged_one = [pd.concat(unprocessed_one[:n_mb_tuples])] + unprocessed_one[n_mb_tuples:]

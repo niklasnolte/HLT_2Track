@@ -51,7 +51,7 @@ def tune_one_track(df, presel_effs):
     # get presel efficiency
     effs = defaultdict(list)
     tos_effs = defaultdict(list)
-    alphas = np.arange(-1800, 500, 10)
+    alphas = np.arange(-1000, 1000, 5)
     evttypeidxs = [0] + list(evttypes.keys())
 
     for alpha in alphas:
@@ -63,7 +63,8 @@ def tune_one_track(df, presel_effs):
         for i in evttypeidxs:
           effs[i] += [presel_effs[i] * decs[i]]
           tos_effs[i] += [presel_effs[i] * tos_decs[i]]
-        #make rates out of "minbias efficiencies"
+
+    #make rates out of "minbias efficiencies"
     effs[0] = [x * input_rate for x in effs[0]]
 
     nominal_idx = [

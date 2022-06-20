@@ -29,9 +29,9 @@ data["tos_pred"] = data.pred * is_signal(cfg, data)
 
 # TODO this only works for heavy-flavor right now
 def rates_vs_effs(data, presel_effs):
-    cutrange = np.linspace(1, 0, 500)
-    tos_preds = data.groupby(evt_grp).tos_pred.agg(max).reset_index()
-    preds = data.groupby(evt_grp).pred.agg(max).reset_index()
+    cutrange = np.linspace(1, .5, 500)
+    tos_preds = data.groupby(evt_grp).tos_pred.max().reset_index()
+    preds = data.groupby(evt_grp).pred.max().reset_index()
 
     # minimum bias rates (per event)
     minbias_preds = preds[preds.eventtype == 0].pred.values
@@ -48,9 +48,9 @@ def rates_vs_effs(data, presel_effs):
     efficiencies = {0: rates}
 
     for mode in data.eventtype.unique():
-        tos_pred = tos_preds[tos_preds.eventtype == mode].tos_pred.values
-        pred = preds[preds.eventtype == mode].pred.values
         if mode != 0:
+            tos_pred = tos_preds[tos_preds.eventtype == mode].tos_pred.values
+            pred = preds[preds.eventtype == mode].pred.values
             eff = [presel_effs[mode] * (pred > i).mean() for i in cutrange]
             tos_eff = [presel_effs[mode] * (tos_pred > i).mean() for i in cutrange]
             # save all efficiencies

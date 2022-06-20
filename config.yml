@@ -51,6 +51,11 @@ normalize:
   - False
   # - True
 
+lepton:
+  # - "e"
+  # - "mu"
+  - "any"
+
 presel_conf:
   # - svPT : 2000 # [MeV]
   #   trkPT : 500 # [MeV]

@@ -21,6 +21,7 @@ rule all:
                max_norm=map(config.to_string_max_norm, Configs.max_norm),
                regularization=Configs.regularization,
                division=Configs.division,
+               lepton=Configs.lepton,
                seed=Configs.seed[:1],
                ),
         # feat_vs_output plots
@@ -35,6 +36,7 @@ rule all:
             max_norm=map(config.to_string_max_norm, Configs.max_norm),
             regularization=Configs.regularization,
             division=Configs.division,
+            lepton=Configs.lepton,
             seed=Configs.seed[:1], # not for all seeds pls
         ),
         # heatmap plots
@@ -52,6 +54,7 @@ rule all:
             max_norm=map(config.to_string_max_norm, Configs.max_norm),
             regularization=Configs.regularization,
             division=Configs.division,
+            lepton=Configs.lepton,
             seed=Configs.seed[:1], # not for all seeds pls
         ),
         # heatmap plots aggregated
@@ -68,6 +71,7 @@ rule all:
             max_norm=map(config.to_string_max_norm, Configs.max_norm),
             regularization=Configs.regularization,
             division=Configs.division,
+            lepton=Configs.lepton,
             seed=Configs.seed[:1], # not for all seeds pls
         ),
         # rates vs efficiencies, only for lhcb data
@@ -82,6 +86,7 @@ rule all:
             max_norm=map(config.to_string_max_norm, Configs.max_norm),
             regularization=Configs.regularization,
             division=Configs.division,
+            lepton=Configs.lepton,
             seed=Configs.seed[:1], # not for all seeds pls
         ),
         # efficiency vs hadron kinematics, only for lhcb data
@@ -96,6 +101,7 @@ rule all:
             max_norm=map(config.to_string_max_norm, Configs.max_norm),
             regularization=Configs.regularization,
             division=Configs.division,
+            lepton=Configs.lepton,
             seed=Configs.seed[:1], # not for all seeds pls
         ),
         # efficiency vs hadron kinematics for different models in one plot, only for lhcb data
@@ -109,6 +115,7 @@ rule all:
             max_norm=map(config.to_string_max_norm, Configs.max_norm),
             regularization=Configs.regularization,
             division=Configs.division,
+            lepton=Configs.lepton,
             seed=Configs.seed[:1], # not for all seeds pls
         ),
         # violin plots
@@ -122,6 +129,7 @@ rule all:
             max_norm=map(config.to_string_max_norm, Configs.max_norm),
             regularization=Configs.regularization,
             division=Configs.division,
+            lepton=Configs.lepton,
             seed=Configs.seed[:1], # not for all seeds pls
         ),
         # violin auc/acc with different seeds
@@ -148,6 +156,7 @@ rule all:
             max_norm=map(config.to_string_max_norm, Configs.max_norm),
             regularization=Configs.regularization,
             division=Configs.division,
+            lepton=Configs.lepton,
             seed=Configs.seed[:1], # not for all seeds pls
         ),
         # exported model
@@ -162,6 +171,7 @@ rule all:
             max_norm=map(config.to_string_max_norm, Configs.max_norm),
             regularization=Configs.regularization,
             division=Configs.division,
+            lepton=Configs.lepton,
             seed=Configs.seed[:1], # not for all seeds pls
         ),
         expand_with_rules(
